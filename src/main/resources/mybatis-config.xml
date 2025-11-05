@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+        <package name="com.ssg.wms.admin.domain"/>
+        <package name="com.ssg.wms.announcement.domain"/>
+        <package name="com.ssg.wms.global.domain"/>
+        <package name="com.ssg.wms.inbound.domain"/>
+        <package name="com.ssg.wms.inventory.domain"/>
+        <package name="com.ssg.wms.outbound.domain"/>
+        <package name="com.ssg.wms.user.domain"/>
+        <package name="com.ssg.wms.warehouse.domain"/>
+        <package name="com.ssg.wms.quotation.domain"/>
+        <package name="com.ssg.wms.vehicle.domain"/>
+    </typeAliases>
+</configuration>

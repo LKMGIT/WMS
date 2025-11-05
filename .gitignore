@@ -11,7 +11,7 @@ build/
 !gradlew.bat
 
 ### IntelliJ IDEA ###
-.idea/
+.idea/**
 # (아래 개별 파일 라인은 불필요하므로 제거)
 # *.iws
 # *.iml

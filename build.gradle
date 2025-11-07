@@ -69,6 +69,9 @@ dependencies {
     implementation 'org.springframework:spring-aop:5.3.27'
     implementation 'org.aspectj:aspectjrt:1.9.8'
     implementation 'org.aspectj:aspectjweaver:1.9.8'
+
+    implementation 'org.springframework.security:spring-security-crypto:5.8.12'
+
 }
 
 test {

@@ -2,6 +2,160 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.admin.mappers">
+<mapper namespace="com.ssg.wms.admin.mappers.AdminMapper">
+
+    <!-- ===== ResultMaps ===== -->
+    <resultMap id="AdminDtoMap" type="com.ssg.wms.admin.domain.AdminDTO">
+        <id     column="admin_index"     property="adminIndex"/>
+        <result column="admin_name"      property="adminName"/>
+        <result column="admin_id"        property="adminId"/>
+        <result column="admin_role"      property="adminRole"/>      <!-- 문자열/ENUM 핸들러 사용 가능 -->
+        <result column="admin_phone"     property="adminPhone"/>
+        <result column="admin_createdAt" property="adminCreatedAt"/>
+        <result column="admin_updateAt"  property="adminUpdateAt"/>
+        <result column="admin_status"    property="adminStatus"/>    <!-- 문자열/ENUM 핸들러 사용 가능 -->
+    </resultMap>
+
+    <resultMap id="UserDtoMap" type="com.ssg.wms.user.domain.UserDTO">
+        <id     column="user_index"      property="userIndex"/>
+        <result column="user_name"       property="userName"/>
+        <result column="user_id"         property="userId"/>
+        <result column="user_email"      property="userEmail"/>
+        <result column="user_phone"      property="userPhone"/>
+        <result column="user_createdAt"  property="userCreatedAt"/>
+        <result column="user_updateAt"   property="userUpdateAt"/>
+        <result column="user_status"     property="userStatus"/>     <!-- 문자열/ENUM 핸들러 사용 가능 -->
+    </resultMap>
+
+    <select id="getList" resultType="com.ssg.wms.user.domain.UserDTO">
+        SELECT
+        user_index     AS userIndex,
+        user_name      AS userName,
+        user_id        AS userId,
+        user_email     AS userEmail,
+        user_phone     AS userPhone,
+        user_createdAt AS userCreatedAt,
+        user_updateAt  AS userUpdateAt,
+        user_status    AS userStatus
+        FROM users
+        ORDER BY user_index DESC
+    </select>
+
+    <select id="getPage" resultType="com.ssg.wms.user.domain.UserDTO">
+        SELECT
+        user_index     AS userIndex,
+        user_name      AS userName,
+        user_id        AS userId,
+        user_email     AS userEmail,
+        user_phone     AS userPhone,
+        user_createdAt AS userCreatedAt,
+        user_updateAt  AS userUpdateAt,
+        user_status    AS userStatus
+        FROM users
+        <where>
+            user_index > 0
+            <if test="userId != null and userId != ''">
+                AND user_id LIKE CONCAT('%', #{userId}, '%')
+            </if>
+            <if test="status != null">
+                AND user_status = #{status}   <!-- DB가 영문 ENUM 컬럼이면 그대로 매칭 -->
+            </if>
+        </where>
+        ORDER BY user_index DESC
+        LIMIT #{skip}, #{amount}
+    </select>
+
+    <!-- 전체 개수 -->
+    <select id="getTotal" resultType="int">
+        SELECT COUNT(user_index)
+        FROM users
+        <where>
+            user_index > 0
+            <if test="userId != null and userId != ''">
+                AND user_id LIKE CONCAT('%', #{userId}, '%')
+            </if>
+            <if test="status != null">
+                AND user_status = #{status}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- ===== Inserts ===== -->
+    <insert id="insertAdmin" parameterType="com.ssg.wms.admin.domain.AdminDTO"
+            useGeneratedKeys="true" keyProperty="adminIndex" keyColumn="admin_index">
+        INSERT INTO admin
+        (admin_name, admin_id, admin_pw, admin_role, admin_phone, admin_status)
+        VALUES
+        (#{adminName}, #{adminId}, #{adminPw}, #{adminRole}, #{adminPhone}, #{adminStatus})
+    </insert>
+
+    <!-- ===== Selects ===== -->
+    <select id="findAdminById" parameterType="string" resultMap="AdminDtoMap">
+        SELECT
+        admin_index, admin_name, admin_id, admin_role, admin_phone,
+        admin_createdAt, admin_updateAt, admin_status
+        FROM admin
+        WHERE admin_id = #{adminId}
+        LIMIT 1
+    </select>
+
+    <select id="getPasswordHashByAdminId" parameterType="string" resultType="string">
+        SELECT admin_pw
+        FROM admin
+        WHERE admin_id = #{adminId}
+        LIMIT 1
+    </select>
+
+    <select id="findAdminId" resultType="string">
+        SELECT admin_id
+        FROM admin
+        WHERE admin_name = #{name}
+        AND admin_phone = #{adminPhone}
+        LIMIT 1
+    </select>
+
+    <select id="findUserByStatus" parameterType="string" resultMap="UserDtoMap">
+        SELECT
+        user_index, user_name, user_id, user_email, user_phone,
+        user_createdAt, user_updateAt, user_status
+        FROM users
+        WHERE user_status = #{status}
+        ORDER BY user_index DESC
+    </select>
+
+    <!-- ===== Updates ===== -->
+    <update id="updateAdmin" parameterType="com.ssg.wms.admin.domain.AdminDTO">
+        UPDATE admin
+        <set>
+            <if test="adminName != null">admin_name = #{adminName},</if>
+            <if test="adminPw != null">admin_pw = #{adminPw},</if>
+            <if test="adminRole != null">admin_role = #{adminRole},</if>
+            <if test="adminPhone != null">admin_phone = #{adminPhone},</if>
+            <if test="adminStatus != null">admin_status = #{adminStatus},</if>
+            admin_updateAt = CURRENT_TIMESTAMP
+        </set>
+        WHERE admin_id = #{adminId}
+    </update>
+
+    <update id="updateUserStatus" parameterType="com.ssg.wms.user.domain.UserDTO">
+        UPDATE users
+        SET user_status = #{userStatus},
+        user_updateAt = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="updateAdminStatus" parameterType="com.ssg.wms.admin.domain.AdminDTO">
+        UPDATE admin
+        SET admin_status = #{adminStatus},
+        admin_updateAt = CURRENT_TIMESTAMP
+        WHERE admin_id = #{adminId}
+    </update>
+
+    <!-- ===== Deletes ===== -->
+    <delete id="deleteAdmin" parameterType="string">
+        DELETE FROM admin
+        WHERE admin_id = #{adminId}
+    </delete>
 
 </mapper>

@@ -4,4 +4,106 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssg.wms.outbound.mappers">
 
+    <insert id="insertOutboundRequest" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO" >
+        insert into OutboundRequest (
+        user_index, item_index, or_quantity, or_name, or_phone, or_zip_code, or_street_address, or_detailed_address)
+        values(#{user_index}, #{item_index}, #{or_quantity}, #{or_name}, #{or_phone}, #{or_zip_code}, #{or_street_address}, #{or_detailed_address})
+    </insert>
+
+    <update id="updateOutboundRequest" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
+
+    </update>
+
+    <update id="deleteOutboundRequest" parameterType="Long">
+
+    </update>
+
+    <select id="selectOutboundRequest" parameterType="Long" resultType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
+
+    </select>
+
+    <update id="updateOutboundResponse" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
+
+    </update>
+
+    <select id="selectShippingInstructionList" resultType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+
+    </select>
+
+    <select id="selectOutboundRequestList" resultType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
+
+    </select>
+
+    <select id="selectShippingInstruction" parameterType="Long" resultType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+
+    </select>
+
+    <insert id="insertShippingInstruction" parameterType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+
+    </insert>
+
+    <update id="updateShippingInstruction" parameterType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+
+    </update>
+
+    <update id="deleteShippingInstruction" parameterType="Long">
+
+    </update>
+
+    <select id="selectVehicleList" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO" resultType="com.ssg.wms.outbound.domain.VehicleDTO">
+
+    </select>
+
+    <insert id="insertDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO">
+
+    </insert>
+
+    <update id="updateDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO">
+
+    </update>
+
+    <update id="deleteDispatch" parameterType="Long">
+
+    </update>
+
+    <select id="selectDispatch" parameterType="Long" resultType="com.ssg.wms.outbound.domain.DispatchDTO">
+
+    </select>
+
+    <insert id="insertWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO">
+
+    </insert>
+
+    <update id="updateWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO">
+
+    </update>
+
+    <select id="selectWaybill" parameterType="Long" resultType="com.ssg.wms.outbound.domain.WaybillDTO">
+
+    </select>
+
+    <insert id="insertVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO">
+
+    </insert>
+
+    <update id="updateVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO">
+
+    </update>
+
+    <update id="deleteVehicle" parameterType="Long">
+
+    </update>
+
+    <insert id="insertVehicleLocation" parameterType="com.ssg.wms.outbound.domain.VehicleLocationDTO">
+
+    </insert>
+
+    <update id="updateVehicleLocation" parameterType="com.ssg.wms.outbound.domain.VehicleLocationDTO">
+
+    </update>
+
+    <update id="deleteVehicleLocation" parameterType="Long">
+
+    </update>
+
 </mapper>

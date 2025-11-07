@@ -45,9 +45,6 @@
 <!-- Datatables (오타 수정됨) -->
 <script src="${CTX}/js/plugin/datatables/datatables.min.js"></script>
 
-<!-- Bootstrap Notify -->
-<script src="${CTX}/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
-
 <!-- jQuery Vector Maps -->
 <script src="${CTX}/js/plugin/jsvectormap/jsvectormap.min.js"></script>
 <script src="${CTX}/js/plugin/jsvectormap/world.js"></script>
@@ -77,3 +74,15 @@
     lineColor: "#ffa534", fillColor: "rgba(255,165,52,.14)"
   });
 </script>
+
+<style>
+  .placeholder, .placeholder-wave { display: none !important; }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#basic-datatables .placeholder, #basic-datatables .placeholder-wave')
+            .forEach(el => el.classList.remove('placeholder','placeholder-wave'));
+  });
+</script>
+
+

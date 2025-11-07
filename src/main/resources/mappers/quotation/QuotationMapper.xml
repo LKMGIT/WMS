@@ -4,4 +4,56 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssg.wms.quotation.mappers">
 
+    <insert id="insertQuotationRequest" parameterType="com.ssg.wms.quotation.domain.QuotationRequestDTO">
+
+    </insert>
+
+    <update id="updateQuotationRequest" parameterType="com.ssg.wms.quotation.domain.QuotationRequestDTO">
+
+    </update>
+
+    <update id="deleteQuotationRequest" parameterType="Long">
+
+    </update>
+
+    <select id="selectQuotationRequestList" resultType="com.ssg.wms.quotation.domain.QuotationRequestDTO">
+
+    </select>
+
+    <select id="selectQuotationResponse" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationResponseDTO">
+
+    </select>
+
+    <insert id="insertQuotationResponse" parameterType="com.ssg.wms.quotation.domain.QuotationResponseDTO">
+
+    </insert>
+
+    <update id="updateQuotationResponse" parameterType="com.ssg.wms.quotation.domain.QuotationResponseDTO">
+
+    </update>
+
+    <update id="deleteQuotationResponse" parameterType="Long">
+
+    </update>
+
+    <insert id="insertQuotationComment" parameterType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+
+    </insert>
+
+    <update id="updateQuotationComment" parameterType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+
+    </update>
+
+    <update id="deleteQuotationComment" parameterType="Long">
+
+    </update>
+
+    <select id="selectQuotationCommentList" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+
+    </select>
+
+    <select id="selectQuotationComment" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+
+    </select>
+
 </mapper>

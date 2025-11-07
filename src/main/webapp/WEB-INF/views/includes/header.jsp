@@ -82,6 +82,44 @@
                     </li>
 
                     <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#user">
+                            <i class="fas fa-pen-square"></i>
+                            <p>회원관리</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="user">
+                            <ul class="nav nav-collapse">
+                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                    <span class="sub-item">회원 정보 보기</span>
+                                </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#outbound">
+                            <i class="fas fa-pen-square"></i>
+                            <p>출고 관리</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="outbound">
+                            <ul class="nav nav-collapse">
+                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                    <span class="sub-item">출고 정보 조회</span>
+                                </a>
+                                </li>
+                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                    <span class="sub-item">출고 정보 조회</span>
+                                </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+
+
+                    <li class="nav-item">
                         <a data-bs-toggle="collapse" href="#base">
                             <i class="fas fa-layer-group"></i>
                             <p>Base</p>

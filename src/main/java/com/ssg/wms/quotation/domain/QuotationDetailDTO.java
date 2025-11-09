@@ -26,4 +26,7 @@ public class QuotationDetailDTO {
     private Long admin_index;
     private String qresponse_detail;
     private LocalDateTime responded_at;
+
+    private Long previousPostIndex;
+    private Long nextPostIndex;
 }

@@ -74,7 +74,7 @@
         </where>
     </sql>
 
-    <insert id="insertOutboundRequest" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO" >
+    <insert id="insertOutboundRequest" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO" useGeneratedKeys="true" keyProperty="or_index">
         INSERT INTO OutboundRequest
         (user_index, item_index, or_quantity, or_name, or_phone, or_zip_code, or_street_address, or_detailed_address)
         VALUES (#{user_index}, #{item_index}, #{or_quantity}, #{or_name}, #{or_phone}, #{or_zip_code}, #{or_street_address}, #{or_detailed_address})
@@ -138,7 +138,7 @@
         WHERE si_index=#{si_index}
     </select>
 
-    <insert id="insertShippingInstruction" parameterType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+    <insert id="insertShippingInstruction" parameterType="com.ssg.wms.outbound.domain.ShippingInstructionDTO" useGeneratedKeys="true" keyProperty="si_index">
         INSERT INTO ShippingInstruction
         (dispatch_index, admin_index, warehouse_index, section_index)
         VALUES (#{dispatch_index}, #{admin_index}, #{warehouse_index}, #{section_index})
@@ -204,7 +204,7 @@
         AND W.completed_at IS NULL
     </select>
 
-    <insert id="insertDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO">
+    <insert id="insertDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO" useGeneratedKeys="true" keyProperty="dispatch_index">
         INSERT INTO Dispatch
         (start_point, end_point, vehicle_index, or_index)
         VALUES (#{start_point), #{end_point}, #{vehicle_index}, #{or_index})
@@ -229,7 +229,7 @@
         AND or_index=#{or_index}
     </select>
 
-    <insert id="insertWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO">
+    <insert id="insertWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO" useGeneratedKeys="true" keyProperty="waybill_index">
         INSERT INTO Waybill
         (waybill_id, si_index)
         VALUES (#{waybill_id}, #{si_index})
@@ -247,13 +247,13 @@
         WHERE si_index=#{si_index}
     </select>
 
-    <insert id="insertVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO">
+    <insert id="insertVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO" useGeneratedKeys="true" keyProperty="vehicle_index">
         INSERT INTO Vehicle
         (vehicle_name, vehicle_id, vehicle_volume, driver_name, driver_phone)
-        VALUES ()
+        VALUES (#{vehicle_name}, #{vehicle_id}, #{vehicle_volume}, #{driver_name}, #{driver_phone})
     </insert>
 
-    <update id="updateVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO">
+    <update id="updateVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO" >
         UPDATE Vehicle
         SET vehicle_status=#{vehicle_status}
         WHERE vehicle_index=#{vehicle_index}
@@ -265,7 +265,7 @@
         WHERE vehicle_index=#{vehicle_index}
     </update>
 
-    <insert id="insertVehicleLocation" parameterType="com.ssg.wms.outbound.domain.VehicleLocationDTO">
+    <insert id="insertVehicleLocation" parameterType="com.ssg.wms.outbound.domain.VehicleLocationDTO" useGeneratedKeys="true" keyProperty="vl_index">
         INSERT INTO VehicleLocation
         (vehicle_index, vl_zip_code)
         VALUES (#{vehicle_index}, #{vl_zip_code})
@@ -358,7 +358,6 @@
         SELECT
         or_index,
         created_at,
-        -- 검색 조건(searchDTO)의 sort 값(ASC/DESC)에 따라 동적으로 정렬
         ROW_NUMBER() OVER (ORDER BY created_at ${search.sort}) as rn
         FROM OutboundRequest
         <include refid="outboundRequestSearch" />
@@ -370,7 +369,6 @@
         SELECT or_index
         FROM RankedRequests
         WHERE rn = (
-        -- 현재 글의 순위(rn)를 찾아서 - 1
         SELECT rn - 1
         FROM RankedRequests
         WHERE or_index = #{current_index}
@@ -382,7 +380,6 @@
         SELECT or_index
         FROM RankedRequests
         WHERE rn = (
-        -- 현재 글의 순위(rn)를 찾아서 + 1
         SELECT rn + 1
         FROM RankedRequests
         WHERE or_index = #{current_index}

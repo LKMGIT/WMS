@@ -170,6 +170,35 @@ public class OutboundServiceImpl implements OutboundService {
         return outboundMapper.selectOutboundRequest(or_index);
     }
 
+    @Override
+    @Transactional
+    public OutboundRequestDetailDTO getOutboundRequestDetailById(OutboundSearchDTO outboundSearchDTO, Long or_index) {
+        OutboundRequestDTO request = outboundMapper.selectOutboundRequest(or_index);
+        Long previous = getPreviousPostIndex(outboundSearchDTO, or_index);
+        Long next = getNextPostIndex(outboundSearchDTO, or_index);
+
+        return OutboundRequestDetailDTO.builder()
+                .or_index(or_index)
+                .user_index(request.getUser_index())
+                .item_index(request.getItem_index())
+                .or_quantity(request.getOr_quantity())
+                .or_name(request.getOr_name())
+                .or_phone(request.getOr_phone())
+                .or_zip_code(request.getOr_zip_code())
+                .or_street_address(request.getOr_street_address())
+                .or_detailed_address(request.getOr_detailed_address())
+                .or_approval(request.getOr_approval())
+                .created_at(request.getCreated_at())
+                .updated_at(request.getUpdated_at())
+                .status(request.getStatus())
+                .or_dispatch_status(request.getOr_dispatch_status())
+                .responded_at(request.getResponded_at())
+                .reject_detail(request.getReject_detail())
+                .previousPostIndex(previous)
+                .nextPostIndex(next)
+                .build();
+    }
+
     // 출고 요청 리스트 (페이징 + 검색)
     @Override
     @Transactional
@@ -190,7 +219,7 @@ public class OutboundServiceImpl implements OutboundService {
     @Transactional
     public List<AvailableDispatchDTO> getAvailableDispatch(Long or_index) {
         return outboundMapper.selectVehicleList(or_index).stream().map(vehicle -> {
-            int vehicle_volume = vehicle.getVehicle_volume() - outboundMapper.selectUsedVolumeOfVehicle(vehicle.getVehicle_index();
+            int vehicle_volume = vehicle.getVehicle_volume() - outboundMapper.selectUsedVolumeOfVehicle(vehicle.getVehicle_index());
             return AvailableDispatchDTO.builder()
                     .driver_name(vehicle.getDriver_name())
                     .vehicle_index(vehicle.getVehicle_index())
@@ -277,10 +306,10 @@ public class OutboundServiceImpl implements OutboundService {
     // 배차 상세 조회
     @Override
     @Transactional
-    public DispatchDetailDTO getDispatchById(Long dispatch_index) {
-        DispatchDTO dispatch = outboundMapper.selectDispatch(dispatch_index);
+    public DispatchDetailDTO getDispatchById(Long or_index) {
+        DispatchDTO dispatch = outboundMapper.selectDispatch(or_index);
         if (dispatch == null) return null;
-        OutboundRequestDTO request = outboundMapper.selectOutboundRequest(dispatch.getOr_index());
+        OutboundRequestDTO request = outboundMapper.selectOutboundRequest(or_index);
         VehicleDTO vehicle = outboundMapper.selectVehicle(dispatch.getVehicle_index());
 
         return DispatchDetailDTO.builder()
@@ -364,13 +393,21 @@ public class OutboundServiceImpl implements OutboundService {
         return outboundMapper.selectShippingInstructionTotalCount(outboundSearchDTO);
     }
 
+    @Override
+    @Transactional
+    public ShippingInstructionDTO getShippingInstructionById(Long si_index) {
+        return outboundMapper.selectShippingInstruction(si_index);
+    }
+
     // 출고 지시서 상세 조회 (DTO 조합)
     @Override
     @Transactional
-    public ShippingInstructionDetailDTO getShippingInstructionById(Long si_index) {
+    public ShippingInstructionDetailDTO getShippingInstructionDetailById(OutboundSearchDTO outboundSearchDTO, Long si_index) {
         ShippingInstructionDTO si = outboundMapper.selectShippingInstruction(si_index);
         DispatchDTO dispatch = outboundMapper.selectDispatch(si.getDispatch_index());
         OutboundRequestDTO request = outboundMapper.selectOutboundRequest(dispatch.getOr_index());
+        Long previous = getPreviousPostIndex(outboundSearchDTO, si_index);
+        Long next = getNextPostIndex(outboundSearchDTO, si_index);
 
         return ShippingInstructionDetailDTO.builder()
                 .si_index(si.getSi_index())
@@ -382,6 +419,8 @@ public class OutboundServiceImpl implements OutboundService {
                 .or_quantity(request.getOr_quantity())
                 .si_waybill_status(si.getSi_waybill_status())
                 .approved_at(si.getApproved_at())
+                .previousPostIndex(previous)
+                .nextPostIndex(next)
                 .build();
     }
 

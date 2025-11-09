@@ -23,4 +23,15 @@ public interface QuotationMapper {
     int deleteQuotationComment ( Long qcomment_index );
     List<QuotationCommentDTO> selectQuotationCommentList (@Param("cri") Criteria criteria, @Param("qrequest_index") Long qrequest_index );
     int selectQuotationCommentTotalCount( Long qrequest_index );
+
+    Long getPreviousQuotationPostIndex(
+            @Param("search") QuotationSearchDTO searchDTO, // OutboundSearchDTO 대신 QuotationSearchDTO 사용
+            @Param("current_index") Long current_index
+    );
+    Long getNextQuotationPostIndex(
+            @Param("search") QuotationSearchDTO searchDTO, // OutboundSearchDTO 대신 QuotationSearchDTO 사용
+            @Param("current_index") Long current_index
+    );
+
+    QuotationCommentDTO selectQuotationComment(Long qcomment_index);
 }

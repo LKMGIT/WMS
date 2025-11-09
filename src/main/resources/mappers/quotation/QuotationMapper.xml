@@ -19,7 +19,7 @@
 
             <!--            승인 완료 검색 조건-->
             <if test="search.qrequest_status != null and search.approval_status != ''">
-                AND qrequest_status = #{search.approval_status}
+                AND qrequest_status = #{search.qrequest_status}
             </if>
 
             <!--            조건별 키워드 검색 조건-->
@@ -36,7 +36,7 @@
         </where>
     </sql>
 
-    <insert id="insertQuotationRequest" parameterType="com.ssg.wms.quotation.domain.QuotationRequestDTO">
+    <insert id="insertQuotationRequest" parameterType="com.ssg.wms.quotation.domain.QuotationRequestDTO" useGeneratedKeys="true" keyProperty="qrequest_index">
         INSERT INTO QuotationRequest
         (user_index, qrequest_name, qrequest_email, qrequest_phone, qrequest_company, qrequest_detail)
         VALUES (#{user_index}, #{qrequest_name}, #{qrequest_email}, #{qrequest_phone}, #{qrequest_company}, #{qrequest_detail})
@@ -81,7 +81,7 @@
         AND status = 'EXIST'
     </select>
 
-    <insert id="insertQuotationResponse" parameterType="com.ssg.wms.quotation.domain.QuotationResponseDTO">
+    <insert id="insertQuotationResponse" parameterType="com.ssg.wms.quotation.domain.QuotationResponseDTO" useGeneratedKeys="true" keyProperty="qresponse_index">
         INSERT INTO QuotationResponse
         (qrequest_index, admin_index, qresponse_detail)
         VALUES (#{qrequest_index}, #{admin_index}, #{qresponse_detail})
@@ -99,7 +99,7 @@
         WHERE qresponse_index=#{qresponse_index}
     </update>
 
-    <insert id="insertQuotationComment" parameterType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+    <insert id="insertQuotationComment" parameterType="com.ssg.wms.quotation.domain.QuotationCommentDTO" useGeneratedKeys="true" keyProperty="qcomment_index">
         INSERT INTO QuotationComment
         (qrequest_index, qcomment_detail, writer_type, user_index, admin_index)
         VALUES (#{qrequest_index}, #{qcomment_detail}, #{writer_type}, #{user_index, jdbcType=BIGINT}, #{admin_index, jdbcType=BIGINT})
@@ -129,4 +129,37 @@
         FROM QuotationComment
         WHERE qrequest_index=#{qrequest_index}
     </select>
+
+    <sql id="WithRankedQuotationRequests">
+        WITH RankedRequests AS (
+        SELECT
+        qrequest_index,
+        updated_at, ROW_NUMBER() OVER (ORDER BY updated_at ${search.sort}) as rn
+        FROM QuotationRequest <include refid="quotationRequestSearch" /> )
+    </sql>
+
+    <select id="getPreviousQuotationPostIndex" resultType="long">
+        <include refid="WithRankedQuotationRequests" />
+        SELECT qrequest_index FROM RankedRequests
+        WHERE rn = (
+        SELECT rn - 1
+        FROM RankedRequests
+        WHERE qrequest_index = #{current_index} )
+    </select>
+
+    <select id="getNextQuotationPostIndex" resultType="long">
+        <include refid="WithRankedQuotationRequests" />
+        SELECT qrequest_index FROM RankedRequests
+        WHERE rn = (
+        SELECT rn + 1
+        FROM RankedRequests
+        WHERE qrequest_index = #{current_index} )
+    </select>
+
+    <select id="selectQuotationComment" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+        SELECT *
+        FROM QuotationComment
+        WHERE qcomment_index=#{qcomment_index}
+    </select>
+
 </mapper>

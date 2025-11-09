@@ -23,4 +23,7 @@ public class ShippingInstructionDetailDTO {
     private int or_quantity;
     private EnumStatus si_waybill_status;
     private LocalDateTime approved_at;
+
+    private Long previousPostIndex;
+    private Long nextPostIndex;
 }

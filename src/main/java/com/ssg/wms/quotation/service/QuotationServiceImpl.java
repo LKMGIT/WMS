@@ -2,11 +2,9 @@ package com.ssg.wms.quotation.service;
 
 import com.ssg.wms.global.Enum.EnumStatus;
 import com.ssg.wms.global.domain.Criteria;
-import com.ssg.wms.global.dto.PageResponseDTO;
 import com.ssg.wms.quotation.domain.*;
 import com.ssg.wms.quotation.mappers.QuotationMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,12 +63,20 @@ public class QuotationServiceImpl implements QuotationService {
         return quotationMapper.deleteQuotationRequest(qrequest_index) > 0;
     }
 
+    @Override
+    @Transactional
+    public QuotationRequestDTO getQuotationRequestById(Long qrequest_index) {
+        return quotationMapper.selectQuotationRequest(qrequest_index);
+    }
+
     // 견적 상세 조회 (요청 + 답변 DTO 조합)
     @Override
     @Transactional
-    public QuotationDetailDTO getQuotationRequestById(Long qrequest_index) {
+    public QuotationDetailDTO getQuotationRequestDetailById(QuotationSearchDTO quotationSearchDTO, Long qrequest_index) {
         // 건적 신청 단건 데이터 가져오기
         QuotationRequestDTO request = quotationMapper.selectQuotationRequest(qrequest_index);
+        Long previous = quotationMapper.getPreviousQuotationPostIndex(quotationSearchDTO, qrequest_index);
+        Long next = quotationMapper.getNextQuotationPostIndex(quotationSearchDTO, qrequest_index);
 
         if(request.getQrequest_status() == EnumStatus.PENDING) {
             return QuotationDetailDTO.builder()
@@ -82,6 +88,8 @@ public class QuotationServiceImpl implements QuotationService {
                     .qrequest_detail(request.getQrequest_detail())
                     .qrequest_status(request.getQrequest_status())
                     .updated_at(request.getUpdated_at())
+                    .previousPostIndex(previous)
+                    .nextPostIndex(next)
                     .build();
         } else {
             // 견적 답변 조회
@@ -102,6 +110,8 @@ public class QuotationServiceImpl implements QuotationService {
                     .qresponse_detail(response.getQresponse_detail())
                     .admin_index(response.getAdmin_index())
                     .responded_at(response.getUpdated_at())
+                    .previousPostIndex(previous)
+                    .nextPostIndex(next)
                     .build();
         }
     }
@@ -170,5 +180,11 @@ public class QuotationServiceImpl implements QuotationService {
     @Transactional
     public boolean removeQuotationComment(Long qcomment_index) {
         return quotationMapper.deleteQuotationComment(qcomment_index) > 0;
+    }
+
+    @Override
+    @Transactional
+    public QuotationCommentDTO getQuotationCommentById(Long qcomment_index) {
+        return quotationMapper.selectQuotationComment(qcomment_index);
     }
 }

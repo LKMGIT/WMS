@@ -1,5 +1,6 @@
 package com.ssg.wms.outbound.domain;
 
+import com.ssg.wms.global.Enum.EnumStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,8 +16,8 @@ import java.time.LocalDate;
 public class OutboundSearchDTO {
     private LocalDate start_date;
     private LocalDate end_date;
-    private String approval_status;
-    private String dispatch_status;
+    private EnumStatus approval_status;
+    private EnumStatus dispatch_status;
     private String sort;
     // keyword 2개가 타입과 keyword로 바뀜
     private String type;

@@ -79,6 +79,7 @@ public class QuotationMapperTest {
                 .qrequest_phone("010-1111-2222")
                 .qrequest_company("수정회사")
                 .qrequest_detail("수정 내용")
+                .qrequest_status(EnumStatus.PENDING)
                 .build();
 
         quotationMapper.updateQuotationRequest(dto);

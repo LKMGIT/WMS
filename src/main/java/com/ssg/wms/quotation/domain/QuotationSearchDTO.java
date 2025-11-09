@@ -1,5 +1,6 @@
 package com.ssg.wms.quotation.domain;
 
+import com.ssg.wms.global.Enum.EnumStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 public class QuotationSearchDTO {
     private LocalDate start_date;
     private LocalDate end_date;
-    private String qrequest_status;
+    private EnumStatus qrequest_status;
     private String sort;
     private String type;
     private String keyword;

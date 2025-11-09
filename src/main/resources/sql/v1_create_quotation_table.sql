@@ -35,7 +35,6 @@ CREATE TABLE QuotationComment (
                                   admin_index	BIGINT	NULL
 );
 
-
 -- PK 지정
 ALTER TABLE QuotationRequest ADD CONSTRAINT PK_QUOTATIONREQUEST PRIMARY KEY (qrequest_index);
 ALTER TABLE QuotationResponse ADD CONSTRAINT PK_QUOTATIONRESPONSE PRIMARY KEY (qresponse_index);

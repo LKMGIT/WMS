@@ -68,7 +68,7 @@ CREATE TABLE Vehicle (
                          driver_phone varchar(50) NOT NULL
 );
 
-
+use wms;
 -- PK 지정
 ALTER TABLE OutboundRequest ADD CONSTRAINT PK_OUTBOUNDREQUEST PRIMARY KEY (or_index);
 ALTER TABLE Dispatch ADD CONSTRAINT PK_DISPATCH PRIMARY KEY (dispatch_index);

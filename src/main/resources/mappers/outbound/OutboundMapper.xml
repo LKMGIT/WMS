@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.outbound.mappers">
+<mapper namespace="com.ssg.wms.outbound.mappers.OutboundMapper">
 
     <sql id="outboundRequestSearch">
         <where>
@@ -18,12 +18,12 @@
             </if>
 
 <!--            승인 완료 검색 조건-->
-            <if test="search.approval_status != null and search.approval_status != ''">
+            <if test="search.approval_status != null">
                 AND or_approval = #{search.approval_status}
             </if>
 
 <!--            출고 완료 검색 조건-->
-            <if test="search.dispatch_status != null and search.dispatch_status != ''">
+            <if test="search.dispatch_status != null">
                 AND or_dispatch_status = #{search.dispatch_status}
             </if>
 
@@ -56,7 +56,7 @@
             </if>
 
             <!--            승인 완료 검색 조건-->
-            <if test="search.approval_status != null and search.approval_status != ''">
+            <if test="search.approval_status != null">
                 AND si_waybill_status = #{search.approval_status}
             </if>
 
@@ -163,7 +163,7 @@
         ON V.vehicle_index = VL.vehicle_index
         JOIN ( SELECT  I.item_volume * O.or_quantity AS required_volume, SUBSTRING(O.or_zip_code, 1, 2) AS zip_prefix
         FROM OutboundRequest AS O
-        JOIN Item AS I
+        JOIN Items AS I
         ON O.item_index = I.item_index
         WHERE O.or_index = #{or_index}
         ) AS ReqInfo
@@ -172,7 +172,7 @@
         FROM Dispatch AS D
         JOIN OutboundRequest AS O
         ON D.or_index = O.or_index
-        JOIN Item AS I
+        JOIN Items AS I
         ON O.item_index = I.item_index
         LEFT JOIN ShippingInstruction AS SI
         ON D.dispatch_index = SI.dispatch_index AND SI.status = 'EXIST'
@@ -192,7 +192,7 @@
         FROM Dispatch AS D
         JOIN OutboundRequest AS O
         ON D.or_index = O.or_index
-        JOIN Item AS I
+        JOIN Items AS I
         ON O.item_index = I.item_index
         LEFT JOIN ShippingInstruction AS SI
         ON D.dispatch_index = SI.dispatch_index AND SI.status = 'EXIST'
@@ -225,8 +225,7 @@
     <select id="selectDispatch" parameterType="Long" resultType="com.ssg.wms.outbound.domain.DispatchDTO">
         SELECT *
         FROM Dispatch
-        WHERE status='EXIST'
-        AND or_index=#{or_index}
+        WHERE or_index=#{or_index}
     </select>
 
     <insert id="insertWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO" useGeneratedKeys="true" keyProperty="waybill_index">
@@ -285,12 +284,11 @@
 
 
     <select id="checkWaybillExistsByOrIndex" parameterType="long" resultType="int">
-        SELECT 1
+        SELECT COUNT(*)
         FROM Dispatch D
         JOIN ShippingInstruction SI ON D.dispatch_index = SI.dispatch_index
         JOIN Waybill W ON SI.si_index = W.si_index
         WHERE D.or_index = #{or_index}
-        LIMIT 1
     </select>
 
     <select id="selectVehicle" parameterType="long" resultType="com.ssg.wms.outbound.domain.VehicleDTO">

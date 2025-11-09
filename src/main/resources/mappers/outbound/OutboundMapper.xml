@@ -212,7 +212,7 @@
 
     <update id="updateDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO">
         UPDATE Dispatch
-        SET start_point=#{start_point}, end_point=#{end_point}, vehicle_index=#{vehicle_index}
+        vehicle_index=#{vehicle_index}
         WHERE dispatch_index=#{dispatch_index}
     </update>
 
@@ -284,6 +284,29 @@
     </update>
 
 
+    <select id="checkWaybillExistsByOrIndex" parameterType="long" resultType="int">
+        SELECT 1
+        FROM Dispatch D
+        JOIN ShippingInstruction SI ON D.dispatch_index = SI.dispatch_index
+        JOIN Waybill W ON SI.si_index = W.si_index
+        WHERE D.or_index = #{or_index}
+        LIMIT 1
+    </select>
+
+    <select id="selectVehicle" parameterType="long" resultType="com.ssg.wms.outbound.domain.VehicleDTO">
+        SELECT * FROM Vehicle WHERE vehicle_index = #{vehicle_index} AND status = 'EXIST'
+    </select>
+
+    <select id="selectWaybillByWaybillIndex" parameterType="long" resultType="com.ssg.wms.outbound.domain.WaybillDTO">
+        SELECT * FROM Waybill WHERE waybill_index = #{waybill_index}
+    </select>
+
+    <select id="selectShippingInstructionByDispatchIndex" parameterType="long" resultType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+        SELECT * FROM ShippingInstruction
+        WHERE dispatch_index = #{dispatch_index} AND status = 'EXIST'
+        LIMIT 1
+    </select>
+
 <!--    <select id="selectTotalStockByUserAndItem" resultType="int">-->
 <!--        SELECT COALESCE(SUM(I.inven_quantity), 0)-->
 <!--        FROM inventory AS I-->
@@ -293,5 +316,77 @@
 <!--        AND I.item_index = #{item_index}-->
 <!--    </select>-->
 
+
+    <select id="selectStockByLocation" resultType="com.ssg.wms.inventory.domain.InvenDTO">
+        SELECT
+        SUM(I.inven_quantity) AS inven_quantity,
+        MAX(I.warehouse_index) AS warehouse_index,
+        MAX(I.section_id) AS section_id
+        FROM inventory AS I
+        JOIN inboundDetail AS ID ON I.detail_index = ID.detail_index
+        JOIN inboundRequest AS IR ON ID.inbound_index = IR.inbound_index
+        JOIN warehouse AS W ON I.warehouse_index = W.warehouse_index
+
+        WHERE IR.user_index = #{user_index}
+        AND I.item_index = #{item_index}
+        AND W.warehouse_location = #{location_name}
+        AND I.inven_quantity > 0
+        GROUP BY
+        W.warehouse_location
+    </select>
+
+    <select id="selectWarehouseAddress" parameterType="Long" resultType="String">
+        SELECT warehouse_address
+        FROM Warehouse
+        WHERE warehouse_index=#{warehouse_index}
+    </select>
+
+    <select id="selectItemName" parameterType="Long" resultType="String">
+        SELECT item_name
+        FROM Items
+        WHERE item_index=#{item_index}
+    </select>
+
+    <select id="selectWarehouseZipCode" parameterType="Long" resultType="String">
+        SELECT warehouse_zipcode
+        FROM Warehouse
+        WHERE warehouse_index=#{warehouse_index}
+    </select>
+
+    <sql id="WithRankedRequests">
+        WITH RankedRequests AS (
+        SELECT
+        or_index,
+        created_at,
+        -- 검색 조건(searchDTO)의 sort 값(ASC/DESC)에 따라 동적으로 정렬
+        ROW_NUMBER() OVER (ORDER BY created_at ${search.sort}) as rn
+        FROM OutboundRequest
+        <include refid="outboundRequestSearch" />
+        )
+    </sql>
+
+    <select id="getPreviousPostIndex" resultType="long">
+        <include refid="WithRankedRequests" />
+        SELECT or_index
+        FROM RankedRequests
+        WHERE rn = (
+        -- 현재 글의 순위(rn)를 찾아서 - 1
+        SELECT rn - 1
+        FROM RankedRequests
+        WHERE or_index = #{current_index}
+        )
+    </select>
+
+    <select id="getNextPostIndex" resultType="long">
+        <include refid="WithRankedRequests" />
+        SELECT or_index
+        FROM RankedRequests
+        WHERE rn = (
+        -- 현재 글의 순위(rn)를 찾아서 + 1
+        SELECT rn + 1
+        FROM RankedRequests
+        WHERE or_index = #{current_index}
+        )
+    </select>
 
 </mapper>

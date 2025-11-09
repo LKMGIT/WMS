@@ -1,6 +1,5 @@
 package com.ssg.wms.outbound.mappers;
 
-import com.ssg.wms.admin.domain.AdminDTO;
 import com.ssg.wms.global.domain.Criteria;
 import com.ssg.wms.outbound.domain.*;
 import org.apache.ibatis.annotations.Param;
@@ -51,6 +50,10 @@ public interface OutboundMapper {
     int deleteVehicleLocation( Long vl_index );
 
 
+    int checkWaybillExistsByOrIndex( Long or_index );
+    VehicleDTO selectVehicle(Long vehicle_index);
+    WaybillDTO selectWaybillByWaybillIndex(Long waybill_index);
+    ShippingInstructionDTO selectShippingInstructionByDispatchIndex(Long dispatch_index);
     /*
     * 타 기능에서 필요한 mapper 들
     *
@@ -59,4 +62,42 @@ public interface OutboundMapper {
     * int selectTotalStockByUserAndItem(@Param("user_index") Long user_index, @Param("item_index") Long item_index);
     *
     * */
+
+
+    /**
+     * [출고지시서 생성용] 특정 창고 위치(예: "충남")에서 해당 아이템의 재고 위치(창고, 섹션)를 조회
+     *
+     * @param user_index 사용자 ID
+     * @param item_index 아이템 ID
+     * @param location_name 창고 위치명 (예: "서울", "충남")
+     * @return 재고 위치 정보 (warehouse_index, section_id 포함)
+     */
+    TestInvenDTO selectStockByLocation(
+            @Param("user_index") Long user_index,
+            @Param("item_index") Long item_index,
+            @Param("location_name") String location_name
+    );
+
+    String selectWarehouseAddress( Long warehouse_index );
+
+    String selectItemName ( Long item_index );
+
+    String selectWarehouseZipCode( Long warehouse_index );
+
+    /**
+     * 현재 검색 조건에서 '이전 글' (더 최신 글)의 or_index를 조회
+     */
+    Long getPreviousPostIndex(
+            @Param("search") OutboundSearchDTO searchDTO,
+            @Param("current_index") Long current_index
+    );
+
+    /**
+     * 현재 검색 조건에서 '다음 글' (더 오래된 글)의 or_index를 조회
+     */
+    Long getNextPostIndex(
+            @Param("search") OutboundSearchDTO searchDTO,
+            @Param("current_index") Long current_index
+    );
+
 }

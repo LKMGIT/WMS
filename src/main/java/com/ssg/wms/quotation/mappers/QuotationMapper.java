@@ -11,7 +11,7 @@ public interface QuotationMapper {
     int insertQuotationRequest (QuotationRequestDTO quotationRequestDTO );
     int updateQuotationRequest ( QuotationRequestDTO quotationRequestDTO );
     int deleteQuotationRequest ( Long qrequest_index );
-    QuotationRequestDTO selectQuotationRequest ( QuotationRequestDTO quotationRequestDTO );
+    QuotationRequestDTO selectQuotationRequest ( Long qrequest_index );
     List<QuotationRequestDTO> selectQuotationRequestList (@Param("cri") Criteria criteria, @Param("search") QuotationSearchDTO quotationSearchDTO );
     int selectQuotationRequestTotalCount( @Param("search") QuotationSearchDTO quotationSearchDTO );
     QuotationResponseDTO selectQuotationResponse ( Long qrequest_index );

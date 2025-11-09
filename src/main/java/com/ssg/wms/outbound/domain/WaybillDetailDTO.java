@@ -17,15 +17,14 @@ public class WaybillDetailDTO {
     private String waybill_id;
     private Long user_index;
     private Long warehouse_index;
-    private String road_address;
-    private String detail_address;
+    private String warehouse_zip_code;
+    private String warehouse_address;
     private String or_zip_code;
     private String or_street_address;
     private String or_detailed_address;
     private Long item_index;
-    private String or_quantity;
+    private int or_quantity;
     private String item_name;
-    private int item_volume;
     private Long vehicle_index;
     private String vehicle_id;
     private String vehicle_type;

@@ -24,4 +24,11 @@
         </Root>
     </Loggers>
 
+    <Logger name="org.apache.ibatis" level="debug" additivity="false">
+        <AppenderRef ref="Console"/><AppenderRef ref="File"/>
+    </Logger>
+    <Logger name="com.zaxxer.hikari" level="info" additivity="false">
+        <AppenderRef ref="Console"/><AppenderRef ref="File"/>
+    </Logger>
+
 </Configuration>

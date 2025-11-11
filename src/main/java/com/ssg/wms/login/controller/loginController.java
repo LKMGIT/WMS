@@ -1,6 +1,8 @@
 package com.ssg.wms.login.controller;
 
+import com.ssg.wms.admin.domain.AdminDTO;
 import com.ssg.wms.admin.service.AdminService;
+import com.ssg.wms.login.LoginResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
@@ -28,13 +30,31 @@ public class loginController {
                           @RequestParam String adminPw,
                           HttpSession session,
                           RedirectAttributes rttr) {
-        boolean ok = adminService.authenticate(adminId, adminPw);
-        if (!ok) {
-            rttr.addFlashAttribute("loginError", "아이디 또는 비밀번호가 올바르지 않습니다.");
-            return "redirect:/admin/user_list";
+        LoginResult res = adminService.authenticate(adminId, adminPw);
+        switch (res) {
+
+            case SUCCESS:
+                // 필요한 세션 정보 세팅
+                AdminDTO admin = adminService.getByAdminId(adminId).get();
+                session.setAttribute("loginAdminId", admin.getAdminId());
+                session.setAttribute("loginAdminName", admin.getAdminName());
+                session.setAttribute("loginAdminStatus", admin.getAdminStatus());
+                return "redirect:/admin/user_list";
+
+            case NOT_FOUND:
+                rttr.addFlashAttribute("loginError", "존재하지 않는 아이디입니다.");
+                break;
+
+            case NOT_APPROVED:
+                rttr.addFlashAttribute("loginError", "승인되지 않은 계정입니다.");
+                break;
+
+            case BAD_CREDENTIALS:
+                rttr.addFlashAttribute("loginError", "아이디 또는 비밀번호가 올바르지 않습니다.");
+                break;
+
         }
-        session.setAttribute("loginAdminId", adminId);
-        return "redirect:/admin/user_list";
+        return "redirect:/login/loginForm";
     }
 
     /** 로그아웃 */

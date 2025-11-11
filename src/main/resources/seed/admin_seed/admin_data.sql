@@ -1,5 +1,6 @@
 use wms;
 
+
 -- 마스터 1명 생성
 INSERT INTO admin
 (admin_name, admin_id, admin_pw, admin_role, admin_phone, admin_status)
@@ -10,3 +11,8 @@ VALUES
 
 
 select * from admin;
+
+UPDATE admin
+SET admin_status = 'APPROVED',
+    admin_updateAt = CURRENT_TIMESTAMP
+WHERE admin_id = 'master';

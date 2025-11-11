@@ -17,6 +17,7 @@ public class Criteria {
   private String userId;          // 부분일치
   private EnumStatus status;
   private Integer company_code;
+  private EnumStatus role;
 
   private String typeStr;
 

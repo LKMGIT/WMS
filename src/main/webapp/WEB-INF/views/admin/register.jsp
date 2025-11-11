@@ -1,73 +1,89 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
 <%@ include file="../includes/header.jsp" %>
 
-<c:url var="loginAction" value="/login/loginForm"/>
+<c:url var="registerAction" value="/admin/register"/>
 
-<!-- ===== Login Card (scoped) ===== -->
+<!-- ===== Register Card (scoped) ===== -->
 <div class="auth-wrap"><!-- 변수/스타일 스코프 컨테이너 -->
     <div class="auth-card">
         <!-- Left -->
         <section class="auth-left">
             <div>
                 <div class="auth-brand">
-                    <div class="auth-brand-badge">🚛</div>
+                    <div class="auth-brand-badge">🧴</div>
                     <span>WMS Admin</span>
                 </div>
-                <div class="auth-slogan">Smart & Simple Warehouse for Beauty/Health</div>
+                <div class="auth-slogan">Create your admin account</div>
             </div>
         </section>
 
         <!-- Right -->
         <section class="auth-right">
             <div class="auth-illus"></div>
-            <h1 class="auth-title">Sign in</h1>
+            <h1 class="auth-title">Register</h1>
 
-            <c:if test="${not empty loginError}">
-                <div class="auth-alert">${loginError}</div>
+            <!-- 플래시 메시지 영역 -->
+            <c:if test="${not empty registerError}">
+                <div class="auth-alert">${registerError}</div>
+            </c:if>
+            <c:if test="${not empty registerOk}">
+                <div class="auth-alert" style="background:#e6f9ed; border-color:#b5ebc7; color:#137a3a;">
+                        ${registerOk}
+                </div>
             </c:if>
 
-            <form method="post" action="${loginAction}">
+            <form method="post" action="${registerAction}" >
+                <!-- 이름 -->
                 <div class="auth-form-group">
-                    <label class="auth-label">ID</label>
-                    <input class="auth-input" type="text" name="adminId" placeholder="아이디" required autofocus/>
+                    <label class="auth-label">Name</label>
+                    <input class="auth-input" type="text" name="adminName" placeholder="이름" required/>
                 </div>
 
+                <!-- 아이디 -->
+                <div class="auth-form-group">
+                    <label class="auth-label">ID</label>
+                    <input class="auth-input" type="text" name="adminId" placeholder="아이디" required/>
+                </div>
+
+                <!-- 비밀번호 -->
                 <div class="auth-form-group">
                     <label class="auth-label">Password</label>
                     <input class="auth-input" type="password" name="adminPw" placeholder="비밀번호" required/>
                 </div>
 
-                <div class="auth-actions">
-                    <div class="auth-links">
-                        <a class="auth-link" href="<c:url value='/admin/forgot_id'/>">아이디를 잊어버렸나요?</a>
-                        <a class="auth-link" href="<c:url value='/admin/forgot_password'/>">비밀번호를 잊어버렸나요?</a>
-                    </div>
-                    <button type="submit" class="auth-btn">Sign in</button>
+                <!-- 역할 -->
+                <div class="auth-form-group">
+                    <label class="auth-label">Role</label>
+                    <select class="auth-input" name="adminRole" required>
+                        <option value="" disabled selected>Select role</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="MASTER">MASTER</option>
+                    </select>
                 </div>
 
-                <!-- (선택) CSRF 사용 시 -->
-                <c:if test="${not empty _csrf}">
-                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                </c:if>
-            </form>
+                <!-- 전화번호 -->
+                <div class="auth-form-group">
+                    <label class="auth-label">Phone</label>
+                    <input class="auth-input" type="tel" name="adminPhone" placeholder="010-1234-5678" />
+                </div>
 
-            <div class="auth-footer">
-                <a class="auth-link" href="<c:url value='/admin/register'/>">Create account</a>
-            </div>
+                <div class="auth-actions" style="margin-top:12px">
+                    <a class="auth-link" href="<c:url value='/login/loginForm'/>">Back to Sign in</a>
+                    <button type="submit" class="auth-btn">Create account</button>
+                </div>
+
+            </form>
         </section>
     </div>
 </div>
 
-<!-- ===== Scoped Styles (충돌 방지: .auth-wrap 하위에만 적용) ===== -->
+<!-- ===== Scoped Styles (로그인과 동일 스코프/클래스명 재사용) ===== -->
 <style>
     .auth-wrap{
-        /* 테마 색상(여기만 바꾸면 됨) */
-        --accent: #210a42;         /* 메인 색 */
-        --accent-ink:#ffffff;     /* 좌패널 글자색 */
+        --accent: #0b6b65;         /* 메인 색 (회원가입은 톤만 다르게) */
+        --accent-ink:#ffffff;
         --ink:#222;
         --muted:#6b7280;
         --card:#ffffff;
@@ -100,8 +116,8 @@
     .auth-illus{
         width:170px; height:110px; margin:0 auto 18px; opacity:.9;
         background:
-                radial-gradient(120px 60px at 60% 40%, rgba(36,8,83,.12), transparent 60%),
-                radial-gradient(120px 60px at 40% 60%, rgba(36,8,83,.12), transparent 60%);
+                radial-gradient(120px 60px at 60% 40%, rgba(11,107,101,.12), transparent 60%),
+                radial-gradient(120px 60px at 40% 60%, rgba(11,107,101,.12), transparent 60%);
         border-radius:16px;
     }
     .auth-title{font-size:22px; margin:6px 0 18px}
@@ -111,7 +127,7 @@
         width:100%; padding:12px 14px; border-radius:10px; border:1px solid #e5e7eb;
         outline:none; transition:.15s; background:#fff;
     }
-    .auth-input:focus{border-color:var(--accent); box-shadow:0 0 0 4px rgba(36,8,83,.15)}
+    .auth-input:focus{border-color:var(--accent); box-shadow:0 0 0 4px rgba(11,107,101,.15)}
     .auth-actions{display:flex; align-items:center; justify-content:space-between; margin-top:6px}
     .auth-link{font-size:13px; color:var(--accent); text-decoration:none}
     .auth-btn{
@@ -125,29 +141,6 @@
         background:#ffe3e3; color:#b42318; border:1px solid #ffb4b4;
         padding:10px 12px; border-radius:10px; margin-bottom:12px; font-size:14px;
     }
-
-    .auth-actions {
-        display: flex;
-        flex-direction: column;    /* 세로 배치 */
-        gap: 12px;
-        align-items: stretch;
-    }
-
-    .auth-links {
-        display: flex;
-        flex-direction: column;    /* 링크를 세로로 */
-        gap: 4px;                  /* 링크 간 간격 */
-    }
-
-    .auth-link {
-        display: inline-block;     /* 줄바꿈 유지 + 클릭영역 조금 더 넓게 */
-        font-size: 0.9rem;
-    }
-
-    .auth-btn {
-        width: 100%;
-    }
-
 
     @media (max-width:880px){
         .auth-card{grid-template-columns:1fr}

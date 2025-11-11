@@ -4,6 +4,7 @@ import com.ssg.wms.admin.domain.AdminDTO;
 import com.ssg.wms.admin.mappers.AdminMapper;
 import com.ssg.wms.global.Enum.EnumStatus;
 import com.ssg.wms.global.domain.Criteria;
+import com.ssg.wms.login.LoginResult;
 import com.ssg.wms.user.domain.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -44,6 +45,16 @@ public class AdminServiceImpl implements AdminService {
     public int getTotal(Criteria criteria){
 
         return adminMapper.getTotal(criteria);
+    }
+
+    @Override
+    public List<AdminDTO> getAdminList(Criteria criteria) {
+        return adminMapper.selectAdminList(criteria);
+    }
+
+    @Override
+    public int getAdminTotal(Criteria criteria) {
+        return adminMapper.countAdminList(criteria);
     }
 
     @Override
@@ -120,30 +131,43 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Optional<String> findAdminId(String name, String adminPhone) {
+    public String findAdminId(String name, String adminPhone) {
         // Mapper: String findAdminId(@Param("name"), @Param("adminPhone"))
-        return Optional.ofNullable(adminMapper.findAdminId(name, adminPhone));
+        return adminMapper.findAdminId(name, adminPhone);
     }
 
     @Override
-    public boolean authenticate(String adminId, String rawPassword) {
+    public LoginResult authenticate(String adminId, String rawPassword) {
+
+        AdminDTO admin = adminMapper.findAdminById(adminId);
+        if (admin == null) return LoginResult.NOT_FOUND;
+
+        // 상태 먼저 확인
+        if (!admin.getAdminStatus().equals(String.valueOf(EnumStatus.APPROVED))) {
+            return LoginResult.NOT_APPROVED;
+        }
+
         // Mapper: String getPasswordHashByAdminId(String adminId)
         String encoded = adminMapper.getPasswordHashByAdminId(adminId);
-        if (encoded == null) return false;
-        return passwordEncoder.matches(rawPassword, encoded);
+        if (encoded == null) return LoginResult.BAD_CREDENTIALS;
+
+        boolean ok = passwordEncoder.matches(rawPassword, encoded);
+        return ok ? LoginResult.SUCCESS : LoginResult.BAD_CREDENTIALS;
     }
 
     @Override
     @Transactional
     public boolean changePassword(String adminId, String rawNewPassword) {
+        // 1) 필수 검증
+        if (adminId == null || adminId.isBlank() || rawNewPassword == null || rawNewPassword.length() < 6) {
+            return false;
+        }
+
+        // 3) 해시 후 저장 (BCrypt)
         String encoded = passwordEncoder.encode(rawNewPassword);
 
-        // Mapper에 전용 메서드가 없으면 updateAdmin 재사용
-        AdminDTO dto = new AdminDTO();
-        dto.setAdminId(adminId);
-        dto.setAdminPw(encoded);
-
-        return adminMapper.updateAdmin(dto) == 1;
+        int updated = adminMapper.updatePassword(adminId, encoded);
+        return updated == 1;
     }
 
     @Override

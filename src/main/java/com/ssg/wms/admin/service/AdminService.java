@@ -2,7 +2,7 @@ package com.ssg.wms.admin.service;
 
 import com.ssg.wms.admin.domain.AdminDTO;
 import com.ssg.wms.global.domain.Criteria;
-import com.ssg.wms.global.domain.PageDTO;
+import com.ssg.wms.login.LoginResult;
 import com.ssg.wms.user.domain.UserDTO;
  import com.ssg.wms.global.Enum.EnumStatus;
 
@@ -18,6 +18,9 @@ public interface AdminService {
     int getTotal(Criteria criteria);
 
     java.util.List<UserDTO> getList();
+
+    List<AdminDTO> getAdminList(Criteria criteria);
+    int getAdminTotal(Criteria criteria);
 
     /**
      * 관리자 등록 (비밀번호 인코딩 포함 권장)
@@ -51,12 +54,12 @@ public interface AdminService {
     /**
      * 관리자 ID 찾기 (이름+전화번호)
      */
-    Optional<String> findAdminId(String name, String adminPhone);
+    String findAdminId(String name, String adminPhone);
 
     /**
      * 로그인 검증 (raw 비밀번호를 받아 해시 매칭)
      */
-    boolean authenticate(String adminId, String rawPassword);
+    LoginResult authenticate(String adminId, String rawPassword);
 
     /**
      * 관리자 비밀번호 변경 (raw → encode 후 저장)

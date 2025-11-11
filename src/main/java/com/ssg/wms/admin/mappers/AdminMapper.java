@@ -23,6 +23,9 @@ public interface AdminMapper {
     /** 관리자 정보 DB 저장 (useGeneratedKeys 로 adminIndex 세팅 가정) */
     int insertAdmin(AdminDTO adminDTO);
 
+    List<AdminDTO> selectAdminList(@Param("cri") Criteria cri);
+    int countAdminList(@Param("cri") Criteria cri);
+
     /** 관리자 정보 ID로 찾기 */
     AdminDTO findAdminById(@Param("adminId") String adminId);
 
@@ -41,6 +44,9 @@ public interface AdminMapper {
 
     /** 관리자 ID의 비밀번호 해시 값 조회 */
     String getPasswordHashByAdminId(@Param("adminId") String adminId);
+
+    int updatePassword(@Param("adminId") String adminId,
+                       @Param("newPw")   String newPw);
 
 
     /* ---------- Users (by Admin) ---------- */

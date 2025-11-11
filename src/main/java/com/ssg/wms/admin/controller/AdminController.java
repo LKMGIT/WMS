@@ -8,6 +8,8 @@ import com.ssg.wms.global.domain.PageDTO;
 import com.ssg.wms.user.domain.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -32,6 +35,11 @@ public class AdminController {
      * - /admin/userList
      * - /admin/userList?status=APPROVED|PENDING|REJECTED
      */
+    @GetMapping()
+    public String dasboard(Model model) {
+        return "admin/dashboard";
+    }
+
     @GetMapping("/user_list")
     public String userList(@ModelAttribute("cri") Criteria criteria,
                            @RequestParam(value = "status", required = false) EnumStatus status,
@@ -52,6 +60,34 @@ public class AdminController {
         return "admin/user_list";
     }
 
+    @GetMapping("/admin_list")
+    public String adminList(@ModelAttribute("cri") Criteria criteria,
+                            @RequestParam(value = "status", required = false) EnumStatus status,
+                            @RequestParam(value = "role",   required = false) EnumStatus role,
+                            @RequestParam(value = "type",   required = false) String type, // ★ 단일 선택
+                            Model model) {
+
+        criteria.setStatus(status);
+        criteria.setRole(role);
+
+        // 단일 선택 → 기존 구조(배열)로 매핑
+        if (type != null && !type.isBlank()) {
+            criteria.setTypes(new String[]{ type }); // typeStr = "T" / "I" / "P"
+        } else {
+            criteria.setTypes(null); // 전체로 처리
+        }
+
+        List<AdminDTO> admins = adminService.getAdminList(criteria);
+        PageDTO pageDTO = new PageDTO(criteria, adminService.getAdminTotal(criteria));
+
+        model.addAttribute("admins", admins);
+        model.addAttribute("pageMaker", pageDTO);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedRole", role);
+        model.addAttribute("selectedType", type); // 필요시 뷰에서 활용
+
+        return "admin/admin_list";
+    }
 
     /* =================== API: Users =================== */
 
@@ -63,15 +99,32 @@ public class AdminController {
         return adminService.updateUserStatus(userId, status);
     }
 
-
-
     /* =================== Admin 관리 (옵션) =================== */
 
+    // 폼 화면
+    @GetMapping("/register")
+    public String showRegisterForm() {
+        return "admin/register"; // /WEB-INF/views/admin/register.jsp
+    }
+
     /** 관리자 등록 */
-    @PostMapping("/api/admins")
+    @PostMapping("/api/register")
     @ResponseBody
     public Long registerAdmin(@RequestBody AdminDTO adminDTO) {
         return adminService.register(adminDTO);
+    }
+
+    @PostMapping("/register")
+    public String submitRegister(@ModelAttribute AdminDTO adminDTO,
+                                 RedirectAttributes rttr) {
+        try {
+            adminService.register(adminDTO);
+            rttr.addFlashAttribute("registerOk", "계정이 생성되었습니다.");
+            return "redirect:/login/loginForm";
+        } catch (Exception e) {
+            rttr.addFlashAttribute("registerError", "회원가입 실패");
+            return "redirect:/admin/register";
+        }
     }
 
     /** 관리자 단건 조회 */
@@ -80,6 +133,38 @@ public class AdminController {
     public AdminDTO getAdmin(@PathVariable String adminId) {
         Optional<AdminDTO> dto = adminService.getByAdminId(adminId);
         return dto.orElse(null);
+    }
+
+    // 수정 폼 진입 (세션 로그인 기준)
+    @GetMapping("/admin/myinfo/edit")
+    public String editMyInfo(HttpSession session, Model model){
+        String adminId = (String) session.getAttribute("loginAdminId");
+        if (adminId == null) return "redirect:/login/loginForm";
+
+        Optional<AdminDTO> admin = adminService.getByAdminId(adminId);
+        model.addAttribute("admin", admin);
+        return "admin/myinfo_edit"; // 아래 JSP
+    }
+
+    //정보 확인 폼
+    @GetMapping("/myinfo")
+    public String myinfo(HttpSession session, Model model) {
+        String adminId = (String) session.getAttribute("loginAdminId");
+        if (adminId == null) {
+            return "redirect:/login/loginForm";
+        }
+
+        Optional<AdminDTO> opt = adminService.getByAdminId(adminId);
+
+        if (opt.isEmpty()) {
+            model.addAttribute("errorMsg", "관리자 정보를 찾을 수 없습니다.");
+            // 에러 페이지로 보내고 싶으면: return "admin/myinfo";
+            // 또는: return "redirect:/login/loginForm";
+            return "admin/myinfo";
+        }
+
+        model.addAttribute("admin", opt.get()); // <-- DTO 자체를 넣기
+        return "admin/myinfo"; // /WEB-INF/views/admin/myinfo.jsp
     }
 
     /** 관리자 정보 수정 */
@@ -107,6 +192,13 @@ public class AdminController {
         return adminService.updateAdminRole(adminId, role);
     }
 
+    /** 비밀번호 재설정 화면 */
+    @GetMapping("/forgot_password")
+    public String forgotPasswordView(){
+        log.info("HIT GET /admin/forgot_password"); // ← 반드시 찍히는지 확인
+        return "admin/forgot_password";
+    }
+
     /** 관리자 비밀번호 변경 */
     @PostMapping("/api/admins/{adminId}/password")
     @ResponseBody
@@ -120,5 +212,37 @@ public class AdminController {
     @ResponseBody
     public boolean deleteAdmin(@PathVariable String adminId) {
         return adminService.deleteByAdminId(adminId);
+    }
+
+    /** 아이디 찾기 폼 (이름+전화) */
+    @GetMapping("/forgot_id")
+    public String forgotIdForm() {
+        return "admin/forgot_id"; // JSP 뷰
+    }
+
+    @PostMapping(
+            value = "/api/forgot-id",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.TEXT_PLAIN_VALUE
+    )
+    @ResponseBody
+    public String forgotIdByPhone(@RequestBody AdminDTO dto) {
+        log.info("[forgot-id] name={}, phone={}", dto.getAdminName(), dto.getAdminPhone());
+        String id = adminService.findAdminId(dto.getAdminName(), dto.getAdminPhone());
+        String masked = (id != null) ? maskId(id) : "";
+        log.info("[forgot-id] result={}", masked);
+        return masked;
+    }
+
+    private String maskId(String id) {
+        if (id == null || id.length() <= 2) return "**";
+        int front = Math.min(2, id.length());
+        int back  = Math.min(2, id.length() - front);
+        int hide  = Math.max(0, id.length() - (front + back));
+        StringBuilder sb = new StringBuilder();
+        sb.append(id, 0, front);
+        for (int i = 0; i < hide; i++) sb.append('*');
+        if (back > 0) sb.append(id.substring(id.length() - back));
+        return sb.toString();
     }
 }

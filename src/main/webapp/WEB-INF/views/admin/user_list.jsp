@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@ include file="../includes/header.jsp" %>
@@ -55,11 +55,12 @@
                             <th>회원가입일</th>
                             <th>정보수정일</th>
                             <th>회원상태</th>
+                            <th style="width:130px;">액션</th>
                         </tr>
                         </thead>
                         <tbody>
                         <c:forEach var="user" items="${users}">
-                            <tr>
+                            <tr data-user-id="${user.userId}">
                                 <td><c:out value="${user.userIndex}"/></td>
                                 <td><c:out value="${user.userName}"/></td>
                                 <td><c:out value="${user.userId}"/></td>
@@ -67,12 +68,8 @@
                                 <td><c:out value="${user.userPhone}"/></td>
                                 <td><c:out value="${user.companyName}"/></td>
                                 <td><c:out value="${user.companyCode}"/></td>
-
-                                <!-- 일단 문자열로 안전 출력 (문자열이면 그대로, Date면 fmt로 교체 가능) -->
                                 <td><c:out value="${user.userCreatedAt}"/></td>
                                 <td><c:out value="${user.userUpdateAt}"/></td>
-
-                                <!-- 상태: 영문 → 한글 매핑 -->
                                 <td>
                                     <c:choose>
                                         <c:when test="${user.userStatus == 'APPROVED'}">승인</c:when>
@@ -81,30 +78,92 @@
                                         <c:otherwise><c:out value="${user.userStatus}"/></c:otherwise>
                                     </c:choose>
                                 </td>
+                                <!-- ★ 액션 -->
+                                <td class="text-nowrap">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit">수정
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete">삭제</button>
+                                </td>
                             </tr>
                         </c:forEach>
                         </tbody>
                     </table>
                 </div>
 
+                <!-- 수정 모달 -->
+                <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="userEditForm" onsubmit="return false;">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editUserModalLabel">회원정보 수정</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="닫기"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" id="editUserId"/>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editUserName">이름</label>
+                                        <input id="editUserName" type="text" class="form-control" maxlength="50">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editUserEmail">이메일</label>
+                                        <input id="editUserEmail" type="email" class="form-control" maxlength="100">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editUserPhone">전화번호</label>
+                                        <input id="editUserPhone" type="text" class="form-control" maxlength="20"
+                                               placeholder="예) 010-1234-5678">
+                                    </div>
+
+                                    <div class="mb-0">
+                                        <label class="form-label" for="editUserStatus">상태</label>
+                                        <select id="editUserStatus" class="form-select">
+                                            <option value="APPROVED">APPROVED</option>
+                                            <option value="PENDING">PENDING</option>
+                                            <option value="REJECTED">REJECTED</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기
+                                    </button>
+                                    <button type="submit" id="btnSaveUser" class="btn btn-primary">저장</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
                 <!-- 페이지네이션(필요 시 조건부로 노출) -->
                 <c:if test="${not empty pageMaker}">
                     <ul class="pagination justify-content-center mt-3">
                         <c:if test="${pageMaker.prev}">
                             <li class="page-item">
-                                <a class="page-link" href="?pageNum=${pageMaker.startPage - 1}&amount=${cri.amount}&status=${selectedStatus}">Previous</a>
+                                <a class="page-link"
+                                   href="?pageNum=${pageMaker.startPage - 1}&amount=${cri.amount}&status=${selectedStatus}">Previous</a>
                             </li>
                         </c:if>
 
                         <c:forEach begin="${pageMaker.startPage}" end="${pageMaker.endPage}" var="num">
                             <li class="page-item ${cri.pageNum == num ? 'active':''}">
-                                <a class="page-link" href="?pageNum=${num}&amount=${cri.amount}&status=${selectedStatus}">${num}</a>
+                                <a class="page-link" href="?pageNum=${num}
+  &amount=${cri.amount}
+  &status=${selectedStatus}
+  &company_code=${fn:escapeXml(param.company_code)}">${num}</a>
+
                             </li>
                         </c:forEach>
 
                         <c:if test="${pageMaker.next}">
                             <li class="page-item">
-                                <a class="page-link" href="?pageNum=${pageMaker.endPage + 1}&amount=${cri.amount}&status=${selectedStatus}">Next</a>
+                                <a class="page-link"
+                                   href="?pageNum=${pageMaker.endPage + 1}&amount=${cri.amount}&status=${selectedStatus}">Next</a>
                             </li>
                         </c:if>
                     </ul>
@@ -114,6 +173,114 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        var ctx = '${pageContext.request.contextPath}';
+
+        function getCsrf() {
+            var h = document.querySelector('meta[name="_csrf_header"]') && document.querySelector('meta[name="_csrf_header"]').content;
+            var t = document.querySelector('meta[name="_csrf"]') && document.querySelector('meta[name="_csrf"]').content;
+            return {h: h, t: t};
+        }
+
+        // n번째 셀 텍스트
+        function cellText(tr, nth) {
+            return (tr.children[nth].textContent || '').trim();
+        }
+
+        // 상태 한글→영문
+        function statusToCode(txt) {
+            if (txt === '승인') return 'APPROVED';
+            if (txt === '거절') return 'REJECTED';
+            return 'PENDING';
+        }
+
+        // 수정 버튼 → 모달 열고 값 주입
+        document.addEventListener('click', function (e) {
+            if (!e.target.classList.contains('btn-edit')) return;
+            var tr = e.target.closest('tr');
+            var userId = tr.getAttribute('data-user-id');
+
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUserName').value = cellText(tr, 1); // 이름
+            document.getElementById('editUserEmail').value = cellText(tr, 3); // 이메일
+            document.getElementById('editUserPhone').value = cellText(tr, 4); // 전화
+            document.getElementById('editUserStatus').value = statusToCode(cellText(tr, 9)); // 상태
+
+            if (window.bootstrap && bootstrap.Modal) {
+                new bootstrap.Modal(document.getElementById('editUserModal')).show();
+            } else {
+                document.getElementById('editUserModal').style.display = 'block';
+            }
+        });
+
+        // 저장 → PATCH /admin/api/users/{userId}
+        document.getElementById('btnSaveUser').addEventListener('click', async function () {
+            var userId = document.getElementById('editUserId').value;
+            var body = {
+                userName: document.getElementById('editUserName').value.trim(),
+                userEmail: document.getElementById('editUserEmail').value.trim(),
+                userPhone: document.getElementById('editUserPhone').value.trim(),
+                userStatus: document.getElementById('editUserStatus').value
+            };
+            if (!body.userName) {
+                alert('이름을 입력하세요.');
+                return;
+            }
+
+            var csrf = getCsrf();
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = '저장 중...';
+            try {
+                var url = ctx + '/users/' + encodeURIComponent(userId);
+                var res = await fetch(url, {
+                    method: 'PATCH',
+                    headers: Object.assign({'Content-Type': 'application/json'}, (csrf.h && csrf.t) ? {[csrf.h]: csrf.t} : {}),
+                    body: JSON.stringify(body),
+                    credentials: 'same-origin'
+                });
+                if (!res.ok) throw new Error('수정 실패 (' + res.status + ')');
+                location.reload();
+            } catch (err) {
+                alert(err.message || '요청 오류');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '저장';
+            }
+        });
+
+        // 삭제 → DELETE /admin/api/users/{userId}
+        document.addEventListener('click', async function (e) {
+            if (!e.target.classList.contains('btn-delete')) return;
+            var tr = e.target.closest('tr');
+            var userId = tr.getAttribute('data-user-id');
+            var name = cellText(tr, 1);
+
+            if (!confirm('회원 [' + name + ']을(를) 삭제하시겠습니까?')) return;
+
+            var csrf = getCsrf();
+            e.target.disabled = true;
+            try {
+                var url = ctx + '/users/' + encodeURIComponent(userId);
+                var res = await fetch(url, {
+                    method: 'DELETE',
+                    headers: (csrf.h && csrf.t) ? {[csrf.h]: csrf.t} : {},
+                    credentials: 'same-origin'
+                });
+                if (!res.ok) throw new Error('삭제 실패 (' + res.status + ')');
+                tr.remove();
+            } catch (err) {
+                alert(err.message || '요청 오류');
+            } finally {
+                e.target.disabled = false;
+            }
+        });
+
+    })();
+</script>
+
 
 <%@ include file="../includes/footer.jsp" %>
 <%@ include file="../includes/end.jsp" %>

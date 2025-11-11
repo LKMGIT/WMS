@@ -2,6 +2,43 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.user.mappers">
+<mapper namespace="com.ssg.wms.user.mappers.UserMapper">
+
+    <!-- 동적 수정: null/빈값은 SET에 포함하지 않음 -->
+    <update id="updateUserSelective" parameterType="map">
+        UPDATE users
+        <set>
+            <if test="req.userName != null and req.userName != ''">
+                user_name = #{req.userName},
+            </if>
+            <if test="req.userEmail != null and req.userEmail != ''">
+                user_email = #{req.userEmail},
+            </if>
+            <if test="req.userPhone != null and req.userPhone != ''">
+                user_phone = #{req.userPhone},
+            </if>
+            <if test="req.userStatus != null and req.userStatus != ''">
+                user_status = #{req.userStatus},
+            </if>
+            user_updateAt = NOW()
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+
+    <!-- 하드 삭제 (소프트 삭제 원하면 아래 주석 참고)
+    <delete id="deleteUserById" parameterType="string">
+        DELETE FROM users
+        WHERE user_id = #{userId}
+    </delete>
+    -->
+
+
+    <update id="deleteUserById" parameterType="string">
+      UPDATE users
+      SET user_status = 'REJECTED', user_updateAt = NOW()
+      WHERE user_id = #{userId}
+    </update>
+
 
 </mapper>

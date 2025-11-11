@@ -2,108 +2,426 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.outbound.mappers">
+<mapper namespace="com.ssg.wms.outbound.mappers.OutboundMapper">
 
-    <insert id="insertOutboundRequest" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO" >
-        insert into OutboundRequest (
-        user_index, item_index, or_quantity, or_name, or_phone, or_zip_code, or_street_address, or_detailed_address)
-        values(#{user_index}, #{item_index}, #{or_quantity}, #{or_name}, #{or_phone}, #{or_zip_code}, #{or_street_address}, #{or_detailed_address})
+    <sql id="outboundRequestSearch">
+        <where>
+            status = 'EXIST'
+<!--            날짜 검색 조건-->
+            <if test="search != null and search.start_date != null">
+                AND updated_at >= #{search.start_date}
+            </if>
+            <if test="search != null and search.end_date != null">
+                <![CDATA[
+                    AND updated_at < DATE_ADD(#{search.end_date}, INTERVAL 1 DAY)
+                ]]>
+            </if>
+
+<!--            승인 완료 검색 조건-->
+            <if test="search.approval_status != null">
+                AND or_approval = #{search.approval_status}
+            </if>
+
+<!--            출고 완료 검색 조건-->
+            <if test="search.dispatch_status != null">
+                AND or_dispatch_status = #{search.dispatch_status}
+            </if>
+
+<!--            조건별 키워드 검색 조건-->
+            <if test="search.keyword != null and search.keyword != ''">
+                <choose>
+                    <when test="search.type == 'I'.toString()">
+                        AND item_index = #{search.keyword}
+                    </when>
+                    <when test="search.type == 'U'.toString()">
+                        AND user_index = #{search.keyword}
+                    </when>
+                </choose>
+            </if>
+        </where>
+    </sql>
+
+
+    <sql id="shippingInstructionSearch">
+        <where>
+            status = 'EXIST'
+            <!--            날짜 검색 조건-->
+            <if test="search != null and search.start_date != null">
+                AND approved_at >= #{search.start_date}
+            </if>
+            <if test="search != null and search.end_date != null">
+                <![CDATA[
+                    AND approved_at < DATE_ADD(#{search.end_date}, INTERVAL 1 DAY)
+                ]]>
+            </if>
+
+            <!--            승인 완료 검색 조건-->
+            <if test="search.approval_status != null">
+                AND si_waybill_status = #{search.approval_status}
+            </if>
+
+            <!--            조건별 키워드 검색 조건-->
+            <if test="search.keyword != null and search.keyword != ''">
+                <choose>
+                    <when test="search.type == 'A'.toString()">
+                        AND admin_index = #{search.keyword}
+                    </when>
+                    <when test="search.type == 'W'.toString()">
+                        AND warehouse_index = #{search.keyword}
+                    </when>
+                </choose>
+            </if>
+        </where>
+    </sql>
+
+    <insert id="insertOutboundRequest" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO" useGeneratedKeys="true" keyProperty="or_index">
+        INSERT INTO OutboundRequest
+        (user_index, item_index, or_quantity, or_name, or_phone, or_zip_code, or_street_address, or_detailed_address)
+        VALUES (#{user_index}, #{item_index}, #{or_quantity}, #{or_name}, #{or_phone}, #{or_zip_code}, #{or_street_address}, #{or_detailed_address})
     </insert>
 
     <update id="updateOutboundRequest" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
-
+        UPDATE OutboundRequest
+        SET item_index=#{item_index}, or_quantity=#{or_quantity}, or_name=#{or_name}, or_phone=#{or_phone}, or_zip_code=#{or_zip_code}, or_street_address=#{or_street_address}, or_detailed_address=#{or_detailed_address}, or_dispatch_status=#{or_dispatch_status}, or_approval=#{or_approval}
+        WHERE or_index=#{or_index}
     </update>
 
     <update id="deleteOutboundRequest" parameterType="Long">
-
+        UPDATE OutboundRequest
+        SET status='DELETED'
+        WHERE or_index=#{or_index}
     </update>
 
     <select id="selectOutboundRequest" parameterType="Long" resultType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
-
+        SELECT *
+        FROM OutboundRequest
+        WHERE or_index=#{or_index}
     </select>
 
     <update id="updateOutboundResponse" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
-
+        UPDATE OutboundRequest
+        SET or_approval=#{or_approval}, updated_at=#{updated_at}, reject_detail=#{reject_detail} , responded_at=now()
+        WHERE or_index=#{or_index}
     </update>
 
     <select id="selectShippingInstructionList" resultType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+        SELECT *
+        FROM ShippingInstruction
+        <include refid="shippingInstructionSearch"/>
+        ORDER BY approved_at ${search.sort}
+        LIMIT #{cri.skip}, #{cri.amount}
+    </select>
 
+    <select id="selectShippingInstructionTotalCount" resultType="int">
+        SELECT count(*)
+        FROM ShippingInstruction
+        <include refid="shippingInstructionSearch"/>
     </select>
 
     <select id="selectOutboundRequestList" resultType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
+        SELECT *
+        FROM OutboundRequest
+        <include refid="outboundRequestSearch"/>
+        ORDER BY updated_at ${search.sort}
+        LIMIT #{cri.skip}, #{cri.amount}
+    </select>
 
+    <select id="selectOutboundRequestTotalCount" resultType="int">
+        SELECT count(*)
+        FROM OutboundRequest
+        <include refid="outboundRequestSearch"/>
     </select>
 
     <select id="selectShippingInstruction" parameterType="Long" resultType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
-
+        SELECT *
+        FROM ShippingInstruction
+        WHERE si_index=#{si_index}
     </select>
 
-    <insert id="insertShippingInstruction" parameterType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
-
+    <insert id="insertShippingInstruction" parameterType="com.ssg.wms.outbound.domain.ShippingInstructionDTO" useGeneratedKeys="true" keyProperty="si_index">
+        INSERT INTO ShippingInstruction
+        (dispatch_index, admin_index, warehouse_index, section_index)
+        VALUES (#{dispatch_index}, #{admin_index}, #{warehouse_index}, #{section_index})
     </insert>
 
     <update id="updateShippingInstruction" parameterType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
-
+        UPDATE ShippingInstruction
+        SET si_waybill_status=#{si_waybill_status}
+        WHERE si_index=#{si_index}
     </update>
 
     <update id="deleteShippingInstruction" parameterType="Long">
-
+        UPDATE ShippingInstruction
+        SET status='DELETED'
+        WHERE si_index=#{si_index}
     </update>
 
-    <select id="selectVehicleList" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO" resultType="com.ssg.wms.outbound.domain.VehicleDTO">
-
+    <select id="selectVehicleList" parameterType="Long" resultType="com.ssg.wms.outbound.domain.VehicleDTO">
+        SELECT V.*
+        FROM Vehicle AS V
+        JOIN VehicleLocation AS VL
+        ON V.vehicle_index = VL.vehicle_index
+        JOIN ( SELECT  I.item_volume * O.or_quantity AS required_volume, SUBSTRING(O.or_zip_code, 1, 2) AS zip_prefix
+        FROM OutboundRequest AS O
+        JOIN Items AS I
+        ON O.item_index = I.item_index
+        WHERE O.or_index = #{or_index}
+        ) AS ReqInfo
+        ON VL.vl_zip_code = ReqInfo.zip_prefix
+        LEFT JOIN ( SELECT D.vehicle_index, SUM(I.item_volume * O.or_quantity) AS used_volume
+        FROM Dispatch AS D
+        JOIN OutboundRequest AS O
+        ON D.or_index = O.or_index
+        JOIN Items AS I
+        ON O.item_index = I.item_index
+        LEFT JOIN ShippingInstruction AS SI
+        ON D.dispatch_index = SI.dispatch_index AND SI.status = 'EXIST'
+        LEFT JOIN Waybill AS W
+        ON SI.si_index = W.si_index
+        WHERE D.status = 'EXIST'
+        AND O.status = 'EXIST'
+        AND W.completed_at IS NULL
+        GROUP BY D.vehicle_index
+        ) AS UsedVol ON V.vehicle_index = UsedVol.vehicle_index
+        WHERE V.vehicle_status = 'PENDING'
+        AND (V.vehicle_volume - COALESCE(UsedVol.used_volume, 0)) >= ReqInfo.required_volume;
     </select>
 
-    <insert id="insertDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO">
+    <select id="selectUsedVolumeOfVehicle" parameterType="Long" resultType="int">
+        SELECT COALESCE(SUM(I.item_volume * O.or_quantity), 0)
+        FROM Dispatch AS D
+        JOIN OutboundRequest AS O
+        ON D.or_index = O.or_index
+        JOIN Items AS I
+        ON O.item_index = I.item_index
+        LEFT JOIN ShippingInstruction AS SI
+        ON D.dispatch_index = SI.dispatch_index AND SI.status = 'EXIST'
+        LEFT JOIN Waybill AS W
+        ON SI.si_index = W.si_index
+        WHERE D.status = 'EXIST'
+        AND O.status = 'EXIST'
+        AND D.vehicle_index = #{vehicle_index}
+        AND W.completed_at IS NULL
+    </select>
 
+    <insert id="insertDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO" useGeneratedKeys="true" keyProperty="dispatch_index">
+        INSERT INTO Dispatch
+        (start_point, end_point, vehicle_index, or_index)
+        VALUES (#{start_point}, #{end_point}, #{vehicle_index}, #{or_index})
     </insert>
 
     <update id="updateDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO">
-
+        UPDATE Dispatch
+        SET vehicle_index=#{vehicle_index}
+        WHERE dispatch_index=#{dispatch_index}
     </update>
 
     <update id="deleteDispatch" parameterType="Long">
-
+        UPDATE Dispatch
+        SET status='DELETED'
+        WHERE dispatch_index=#{dispatch_index}
     </update>
 
     <select id="selectDispatch" parameterType="Long" resultType="com.ssg.wms.outbound.domain.DispatchDTO">
-
+        SELECT *
+        FROM Dispatch
+        WHERE status = 'EXIST'
+        AND or_index=#{or_index}
     </select>
 
-    <insert id="insertWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO">
+    <select id="selectDispatchByIndex" parameterType="Long" resultType="com.ssg.wms.outbound.domain.DispatchDTO">
+        SELECT *
+        FROM Dispatch
+        WHERE dispatch_index=#{dispatch_index}
+    </select>
 
+    <insert id="insertWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO" useGeneratedKeys="true" keyProperty="waybill_index">
+        INSERT INTO Waybill
+        (waybill_id, si_index)
+        VALUES (#{waybill_id}, #{si_index})
     </insert>
 
     <update id="updateWaybill" parameterType="com.ssg.wms.outbound.domain.WaybillDTO">
-
+        UPDATE Waybill
+        SET waybill_status='DELIVERED', completed_at=now()
+        WHERE waybill_index=#{waybill_index}
     </update>
 
     <select id="selectWaybill" parameterType="Long" resultType="com.ssg.wms.outbound.domain.WaybillDTO">
-
+        SELECT *
+        FROM Waybill
+        WHERE si_index=#{si_index}
     </select>
 
-    <insert id="insertVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO">
-
+    <insert id="insertVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO" useGeneratedKeys="true" keyProperty="vehicle_index">
+        INSERT INTO Vehicle
+        (vehicle_name, vehicle_id, vehicle_volume, driver_name, driver_phone)
+        VALUES (#{vehicle_name}, #{vehicle_id}, #{vehicle_volume}, #{driver_name}, #{driver_phone})
     </insert>
 
-    <update id="updateVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO">
-
+    <update id="updateVehicle" parameterType="com.ssg.wms.outbound.domain.VehicleDTO" >
+        UPDATE Vehicle
+        SET vehicle_status=#{vehicle_status}
+        WHERE vehicle_index=#{vehicle_index}
     </update>
 
     <update id="deleteVehicle" parameterType="Long">
-
+        UPDATE Vehicle
+        SET status='DELETED'
+        WHERE vehicle_index=#{vehicle_index}
     </update>
 
-    <insert id="insertVehicleLocation" parameterType="com.ssg.wms.outbound.domain.VehicleLocationDTO">
-
+    <insert id="insertVehicleLocation" parameterType="com.ssg.wms.outbound.domain.VehicleLocationDTO" useGeneratedKeys="true" keyProperty="vl_index">
+        INSERT INTO VehicleLocation
+        (vehicle_index, vl_zip_code)
+        VALUES (#{vehicle_index}, #{vl_zip_code})
     </insert>
 
     <update id="updateVehicleLocation" parameterType="com.ssg.wms.outbound.domain.VehicleLocationDTO">
-
+        UPDATE VehicleLocation
+        SET vehicle_index=#{vehicle_index}, vl_zip_code=#{vl_zip_code}
+        WHERE vl_index=#{vl_index}
     </update>
 
     <update id="deleteVehicleLocation" parameterType="Long">
-
+        UPDATE VehicleLocation
+        SET status='DELETED'
+        WHERE vl_index=#{vl_index}
     </update>
+
+
+    <select id="checkWaybillExistsByOrIndex" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM Dispatch D
+        JOIN ShippingInstruction SI ON D.dispatch_index = SI.dispatch_index
+        JOIN Waybill W ON SI.si_index = W.si_index
+        WHERE D.or_index = #{or_index}
+    </select>
+
+    <select id="selectVehicle" parameterType="long" resultType="com.ssg.wms.outbound.domain.VehicleDTO">
+        SELECT * FROM Vehicle WHERE vehicle_index = #{vehicle_index} AND status = 'EXIST'
+    </select>
+
+    <select id="selectWaybillByWaybillIndex" parameterType="long" resultType="com.ssg.wms.outbound.domain.WaybillDTO">
+        SELECT * FROM Waybill WHERE waybill_index = #{waybill_index}
+    </select>
+
+    <select id="selectShippingInstructionByDispatchIndex" parameterType="long" resultType="com.ssg.wms.outbound.domain.ShippingInstructionDTO">
+        SELECT * FROM ShippingInstruction
+        WHERE dispatch_index = #{dispatch_index} AND status = 'EXIST'
+        LIMIT 1
+    </select>
+
+<!--    <select id="selectTotalStockByUserAndItem" resultType="int">-->
+<!--        SELECT COALESCE(SUM(I.inven_quantity), 0)-->
+<!--        FROM inventory AS I-->
+<!--        JOIN inboundDetail AS ID ON I.detail_index = ID.detail_index-->
+<!--        JOIN inboundRequest AS IR ON ID.inbound_index = IR.inbound_index-->
+<!--        WHERE IR.user_index = #{user_index}-->
+<!--        AND I.item_index = #{item_index}-->
+<!--    </select>-->
+
+
+    <select id="selectStockByLocation" resultType="com.ssg.wms.outbound.domain.TestInvenDTO">
+        SELECT
+        SUM(I.inven_quantity) AS inven_quantity,
+        MAX(I.warehouse_index) AS warehouse_index,
+        MAX(I.section_id) AS section_index
+        FROM inventory AS I
+        JOIN inboundDetail AS ID ON I.detail_index = ID.detail_index
+        JOIN inboundRequest AS IR ON ID.inbound_index = IR.inbound_index
+        JOIN warehouse AS W ON I.warehouse_index = W.warehouse_index
+
+        WHERE IR.user_index = #{user_index}
+        AND I.item_index = #{item_index}
+        AND W.warehouse_location = #{location_name}
+        AND I.inven_quantity > 0
+        GROUP BY
+        W.warehouse_location
+    </select>
+
+    <select id="selectWarehouseAddress" parameterType="Long" resultType="String">
+        SELECT warehouse_address
+        FROM Warehouse
+        WHERE warehouse_index=#{warehouse_index}
+    </select>
+
+    <select id="selectItemName" parameterType="Long" resultType="String">
+        SELECT item_name
+        FROM Items
+        WHERE item_index=#{item_index}
+    </select>
+
+    <select id="selectWarehouseZipCode" parameterType="Long" resultType="String">
+        SELECT warehouse_zipcode
+        FROM Warehouse
+        WHERE warehouse_index=#{warehouse_index}
+    </select>
+
+    <sql id="WithORRankedRequests">
+        WITH ORRankedRequests AS (
+        SELECT
+        or_index,
+        updated_at,
+        ROW_NUMBER() OVER (ORDER BY updated_at ${search.sort}) as rn
+        FROM OutboundRequest
+        <include refid="outboundRequestSearch" />
+        )
+    </sql>
+
+    <select id="getORPreviousPostIndex" resultType="long">
+        <include refid="WithORRankedRequests" />
+        SELECT or_index
+        FROM ORRankedRequests
+        WHERE rn = (
+        SELECT rn - 1
+        FROM ORRankedRequests
+        WHERE or_index = #{current_index}
+        )
+    </select>
+
+    <select id="getORNextPostIndex" resultType="long">
+        <include refid="WithORRankedRequests" />
+        SELECT or_index
+        FROM ORRankedRequests
+        WHERE rn = (
+        SELECT rn + 1
+        FROM ORRankedRequests
+        WHERE or_index = #{current_index}
+        )
+    </select>
+
+    <sql id="WithSIRankedRequests">
+        WITH SIRankedRequests AS (
+        SELECT
+        si_index,
+        approved_at,
+        ROW_NUMBER() OVER (ORDER BY approved_at ${search.sort}) as rn
+        FROM ShippingInstruction
+        <include refid="shippingInstructionSearch" />
+        )
+    </sql>
+
+    <select id="getSIPreviousPostIndex" resultType="long">
+        <include refid="WithSIRankedRequests" />
+        SELECT si_index
+        FROM SIRankedRequests
+        WHERE rn = (
+        SELECT rn - 1
+        FROM SIRankedRequests
+        WHERE si_index = #{current_index}
+        )
+    </select>
+
+    <select id="getSINextPostIndex" resultType="long">
+        <include refid="WithSIRankedRequests" />
+        SELECT si_index
+        FROM SIRankedRequests
+        WHERE rn = (
+        SELECT rn + 1
+        FROM SIRankedRequests
+        WHERE si_index = #{current_index}
+        )
+    </select>
 
 </mapper>

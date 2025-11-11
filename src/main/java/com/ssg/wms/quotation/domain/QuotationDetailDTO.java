@@ -1,9 +1,18 @@
 package com.ssg.wms.quotation.domain;
 
 import com.ssg.wms.global.Enum.EnumStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class QuotationDetailDTO {
     private Long qrequest_index;
     private Long user_index;
@@ -17,4 +26,7 @@ public class QuotationDetailDTO {
     private Long admin_index;
     private String qresponse_detail;
     private LocalDateTime responded_at;
+
+    private Long previousPostIndex;
+    private Long nextPostIndex;
 }

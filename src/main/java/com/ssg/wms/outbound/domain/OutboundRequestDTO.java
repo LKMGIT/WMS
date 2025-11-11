@@ -27,5 +27,6 @@ public class OutboundRequestDTO {
     private LocalDateTime updated_at;
     private EnumStatus status;
     private EnumStatus or_dispatch_status;
+    private LocalDateTime responded_at;
     private String reject_detail;
 }

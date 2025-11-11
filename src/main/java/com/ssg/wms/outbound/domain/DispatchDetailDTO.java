@@ -19,4 +19,6 @@ public class DispatchDetailDTO {
     private String vehicle_id;
     private String driver_name;
     private String vehicle_type;
+    private String start_point;
+    private String end_point;
 }

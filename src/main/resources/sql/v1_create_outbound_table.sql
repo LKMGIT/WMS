@@ -14,12 +14,13 @@ CREATE TABLE OutboundRequest (
                                  updated_at DATETIME	NOT NULL DEFAULT current_timestamp on update current_timestamp(),
                                  status	ENUM('EXIST', 'DELETED')	NOT NULL	DEFAULT 'EXIST',
                                  or_dispatch_status Enum('PENDING', 'APPROVED') NOT NULL DEFAULT 'PENDING',
+                                 responded_at DATETIME NULL,
                                  reject_detail	TEXT NULL
 );
 
 CREATE TABLE Dispatch (
                           dispatch_index BIGINT NOT NULL,
-                          dispatch_date DATETIME NOT NULL DEFAULT current_timestamp(),
+                          dispatch_date DATETIME NOT NULL DEFAULT current_timestamp() on update current_timestamp(),
                           start_point	varchar(200)	NOT NULL,
                           end_point	varchar(200)	NOT NULL,
                           vehicle_index BIGINT	NOT NULL,
@@ -51,19 +52,7 @@ CREATE TABLE Waybill (
                          si_index BIGINT	NOT NULL,
                          created_at	DATETIME	NOT NULL DEFAULT current_timestamp(),
                          completed_at	DATETIME	NULL,
-                         waybill_status	ENUM('IN_TRANSIT', 'DELIVERED')	NOT NULL DEFAULT 'DELIVERED'
-);
-
-CREATE TABLE QuotationComment (
-                                  qcomment_index	BIGINT	NOT NULL,
-                                  qrequest_index BIGINT	NOT NULL,
-                                  qcomment_detail	TEXT	NOT NULL,
-                                  created_at	DATETIME	NOT NULL DEFAULT current_timestamp(),
-                                  updated_at	DATETIME	NOT NULL DEFAULT current_timestamp on update current_timestamp(),
-                                  status	ENUM('EXIST', 'DELETED')	NOT NULL	DEFAULT 'EXIST',
-                                  writer_type	ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
-                                  user_index	BIGINT	NULL,
-                                  admin_index	BIGINT	NULL
+                         waybill_status	ENUM('IN_TRANSIT', 'DELIVERED')	NOT NULL DEFAULT 'IN_TRANSIT'
 );
 
 CREATE TABLE Vehicle (
@@ -79,14 +68,13 @@ CREATE TABLE Vehicle (
                          driver_phone varchar(50) NOT NULL
 );
 
-
+use wms;
 -- PK 지정
 ALTER TABLE OutboundRequest ADD CONSTRAINT PK_OUTBOUNDREQUEST PRIMARY KEY (or_index);
 ALTER TABLE Dispatch ADD CONSTRAINT PK_DISPATCH PRIMARY KEY (dispatch_index);
 ALTER TABLE VehicleLocation ADD CONSTRAINT PK_VEHICLELOCATION PRIMARY KEY (vl_index);
 ALTER TABLE ShippingInstruction ADD CONSTRAINT PK_SHIPPINGINSTRUCTION PRIMARY KEY (si_index);
 ALTER TABLE Waybill ADD CONSTRAINT PK_WAYBILL PRIMARY KEY (waybill_index);
-ALTER TABLE QuotationComment ADD CONSTRAINT PK_QUOTATIONCOMMENT PRIMARY KEY (qcomment_index);
 ALTER TABLE Vehicle ADD CONSTRAINT PK_VEHICLE PRIMARY KEY (vehicle_index);
 
 
@@ -97,7 +85,6 @@ ALTER TABLE Dispatch MODIFY COLUMN dispatch_index BIGINT NOT NULL AUTO_INCREMENT
 ALTER TABLE VehicleLocation MODIFY COLUMN vl_index BIGINT NOT NULL AUTO_INCREMENT;
 ALTER TABLE ShippingInstruction MODIFY COLUMN si_index BIGINT NOT NULL AUTO_INCREMENT;
 ALTER TABLE Waybill MODIFY COLUMN waybill_index BIGINT NOT NULL AUTO_INCREMENT;
-ALTER TABLE QuotationComment MODIFY COLUMN qcomment_index BIGINT NOT NULL AUTO_INCREMENT;
 ALTER TABLE Vehicle MODIFY COLUMN vehicle_index BIGINT NOT NULL AUTO_INCREMENT;
 
 
@@ -113,6 +100,3 @@ ALTER TABLE ShippingInstruction ADD CONSTRAINT FK_Admin_TO_ShippingInstruction_1
 ALTER TABLE ShippingInstruction ADD CONSTRAINT FK_Warehouse_TO_ShippingInstruction_1 FOREIGN KEY (warehouse_index) REFERENCES Warehouse (warehouse_index);
 ALTER TABLE ShippingInstruction ADD CONSTRAINT FK_Section_TO_ShippingInstruction_1 FOREIGN KEY (section_index) REFERENCES Section (section_index);
 ALTER TABLE Waybill ADD CONSTRAINT FK_ShippingInstruction_TO_Waybill_1 FOREIGN KEY (si_index) REFERENCES ShippingInstruction (si_index);
-ALTER TABLE QuotationComment ADD CONSTRAINT FK_QuotationRequest_TO_QuotationComment_1 FOREIGN KEY (qrequest_index) REFERENCES QuotationRequest (qrequest_index);
-ALTER TABLE QuotationComment ADD CONSTRAINT FK_User_TO_QuotationComment_1 FOREIGN KEY (user_index) REFERENCES User (user_index);
-ALTER TABLE QuotationComment ADD CONSTRAINT FK_Admin_TO_QuotationComment_1 FOREIGN KEY (admin_index) REFERENCES Admin (admin_index);

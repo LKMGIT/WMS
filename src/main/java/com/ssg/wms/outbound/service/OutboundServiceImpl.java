@@ -478,6 +478,7 @@ public class OutboundServiceImpl implements OutboundService {
 
         boolean result = outboundMapper.insertWaybill(waybillDTO) > 0;
 
+
         if(result) {
             si.setSi_waybill_status(EnumStatus.APPROVED);
             outboundMapper.updateShippingInstruction(si);

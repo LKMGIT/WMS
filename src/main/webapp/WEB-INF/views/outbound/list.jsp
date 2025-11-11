@@ -217,15 +217,29 @@
                 console.log('statusBadge:', statusBadge);
 
                 // [DTO 반영] DTO 속성: or_index, item_index, user_index, or_name, or_quantity, created_at, or_approval
-                tr.innerHTML = `
-                    <td>${or_index}</td>
-                    <td>${item_index}</td>
-                    <td>${user_index}</td>
-                    <td>${or_name}</td>
-                    <td>${or_quantity}</td>
-                    <td>${regDate}</td>
-                    <td>${statusBadge}</td>
-                `;
+
+                const td1 = document.createElement('td');
+                td1.innerText = `\${or_index}`;
+                tr.appendChild(td1);
+                const td2 = document.createElement('td');
+                td2.innerText = `\${item_index}`;
+                tr.appendChild(td2);
+                const td3 = document.createElement('td');
+                td3.innerText = `\${user_index}`;
+                tr.appendChild(td3);
+                const td4 = document.createElement('td');
+                td4.innerText = `\${or_name}`;
+                tr.appendChild(td4);
+                const td5 = document.createElement('td');
+                td5.innerText = `\${or_quantity}`;
+                tr.appendChild(td5);
+                const td6 = document.createElement('td');
+                td6.innerText = `\${regDate}`;
+                tr.appendChild(td6);
+                const td7 = document.createElement('td');
+                td7.innerText = `\${statusBadge}`;
+                tr.appendChild(td7);
+
                 tbody.appendChild(tr);
             });
 
@@ -255,21 +269,21 @@
 
         // '이전' 버튼
         if (prev) {
-            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${startPage - 1}">Previous</a></li>`;
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="\${startPage - 1}">Previous</a></li>`;
         }
 
         // 페이지 번호
         for (let i = startPage; i <= endPage; i++) {
             paginationHtml += `
-                <li class="page-item ${criteria.pageNum == i ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                <li class="page-item \${criteria.pageNum == i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="\${i}">\${i}</a>
                 </li>
             `;
         }
 
         // '다음' 버튼
         if (next) {
-            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${endPage + 1}">Next</a></li>`;
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="\${endPage + 1}">Next</a></li>`;
         }
         paginationHtml += '</ul>';
         paginationUl.innerHTML = paginationHtml;

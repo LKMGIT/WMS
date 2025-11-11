@@ -46,12 +46,12 @@ public class OutboundViewController {
 
     @GetMapping("/instructions")
     public String showShippingInstructionListForm() {
-        return "instruction/list";
+        return "outbound/instructionList";
     }
 
     @GetMapping("/instruction/{si_index}") // 명세서의 {qrequest_index} 오타 수정
     public String showShippingInstructionDetailForm(@PathVariable("si_index") Long si_index) {
-        return "instruction/detail";
+        return "outbound/instructionDetail";
     }
 
     // [참고] 명세서의 'showRegisterShippingInstructionForm'은(는)

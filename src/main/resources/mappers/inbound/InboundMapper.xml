@@ -1,7 +1,202 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.inbound.mappers">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssg.wms.inbound.mappers.InboundMapper">
+
+    <!-- InboundRequestDTO ResultMap -->
+    <resultMap id="InboundRequestResultMap" type="com.ssg.wms.inbound.domain.InboundRequestDTO">
+        <id property="inboundIndex" column="inbound_index"/>
+        <result property="inboundRequestQuantity" column="inbound_request_quantity"/>
+        <result property="inboundRequestDate" column="inbound_request_date"/>
+        <result property="plannedReceiveDate" column="planned_receive_date"/>
+        <result property="approvalStatus" column="approval_status"/>
+        <result property="approveDate" column="approve_date"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="updatedDate" column="updated_date"/>
+        <result property="userIndex" column="user_index"/>
+        <result property="warehouseIndex" column="warehouse_index"/>
+        <!-- 통계용 필드 -->
+        <result property="detailCount" column="detail_count"/>
+        <result property="totalReceivedQuantity" column="total_received_quantity"/>
+    </resultMap>
+
+    <!-- InboundDetailDTO ResultMap -->
+    <resultMap id="InboundDetailResultMap" type="com.ssg.wms.inbound.domain.InboundDetailDTO">
+        <id property="detailIndex" column="detail_index"/>
+        <result property="requestIndex" column="request_index"/>
+        <result property="qrCode" column="qr_code"/>
+        <result property="receivedQuantity" column="received_quantity"/>
+        <result property="completeDate" column="complete_date"/>
+        <result property="inboundIndex" column="inbound_index"/>
+        <result property="location" column="location"/>
+    </resultMap>
+
+    <!-- ============================================ -->
+    <!-- 입고 요청 관련 쿼리 -->
+    <!-- ============================================ -->
+
+    <!-- 입고 요청 등록 -->
+    <insert id="insertRequest" parameterType="com.ssg.wms.inbound.domain.InboundRequestDTO"
+            useGeneratedKeys="true" keyProperty="inboundIndex">
+        INSERT INTO inbound_request (
+            inbound_request_quantity,
+            inbound_request_date,
+            planned_receive_date,
+            approval_status,
+            user_index,
+            warehouse_index
+        ) VALUES (
+                     #{inboundRequestQuantity},
+                     NOW(),
+                     #{plannedReceiveDate},
+                     'PENDING',
+                     #{userIndex},
+                     #{warehouseIndex}
+                 )
+    </insert>
+
+    <!-- 입고 요청 단건 조회 -->
+    <select id="selectRequestById" resultMap="InboundRequestResultMap">
+        SELECT * FROM inbound_request
+        WHERE inbound_index = #{inbound_index}
+    </select>
+
+    <!-- 입고 요청 목록 조회 (검색 조건 포함) -->
+    <select id="selectRequests" parameterType="map" resultMap="InboundRequestResultMap">
+        SELECT * FROM inbound_request
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND inbound_index LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND approval_status = #{status}
+        </if>
+        <if test="userId != null">
+            AND user_index = #{userId}
+        </if>
+        ORDER BY inbound_request_date DESC
+    </select>
+
+    <!-- 입고 요청 수정 -->
+    <update id="updateRequest" parameterType="com.ssg.wms.inbound.domain.InboundRequestDTO">
+        UPDATE inbound_request
+        SET inbound_request_quantity = #{inboundRequestQuantity},
+            planned_receive_date = #{plannedReceiveDate},
+            updated_date = NOW()
+        WHERE inbound_index = #{inboundIndex}
+    </update>
+
+    <!-- 입고 요청 삭제 -->
+    <delete id="deleteRequest">
+        DELETE FROM inbound_request
+        WHERE inbound_index = #{request_index}
+    </delete>
+
+    <!-- 입고 요청 취소 -->
+    <update id="updateCancel" parameterType="com.ssg.wms.inbound.domain.InboundRequestDTO">
+        UPDATE inbound_request
+        SET approval_status = 'CANCELED',
+            cancel_reason = #{cancelReason},
+            updated_date = NOW()
+        WHERE inbound_index = #{inboundIndex}
+    </update>
+
+    <!-- 입고 요청 승인 -->
+    <update id="updateApproval">
+        UPDATE inbound_request
+        SET approval_status = 'APPROVED',
+            approve_date = NOW(),
+            updated_date = NOW()
+        WHERE inbound_index = #{request_index}
+    </update>
+
+    <!-- 기간별 입고 현황 조회 -->
+    <select id="selectInboundStatusByPeriod" parameterType="map" resultMap="InboundRequestResultMap">
+        SELECT
+        ir.*,
+        COUNT(id.detail_index) as detail_count,
+        SUM(id.received_quantity) as total_received_quantity
+        FROM inbound_request ir
+        LEFT JOIN inbound_detail id ON ir.inbound_index = id.request_index
+        WHERE ir.inbound_request_date BETWEEN #{startDate} AND #{endDate}
+        <if test="userId != null">
+            AND ir.user_index = #{userId}
+        </if>
+        GROUP BY ir.inbound_index
+
+    </select>
+
+    <!-- 월별 입고 현황 조회 -->
+    <select id="selectInboundStatusByMonth" resultMap="InboundRequestResultMap">
+        SELECT
+            ir.*,
+            COUNT(id.detail_index) as detail_count,
+            SUM(id.received_quantity) as total_received_quantity
+        FROM inbound_request ir
+                 LEFT JOIN inbound_detail id ON ir.inbound_index = id.request_index
+        WHERE YEAR(ir.inbound_request_date) = #{year}
+          AND MONTH(ir.inbound_request_date) = #{month}
+        GROUP BY ir.inbound_index
+
+    </select>
+
+
+    <!-- ============================================ -->
+    <!-- 입고 상세 관련 쿼리 -->
+    <!-- ============================================ -->
+
+    <!-- 입고 상세 추가 -->
+    <insert id="insertDetail" parameterType="com.ssg.wms.inbound.domain.InboundDetailDTO"
+            useGeneratedKeys="true" keyProperty="detailIndex">
+        INSERT INTO inbound_detail (
+            request_index,
+            qr_code,
+            received_quantity,
+            complete_date,
+            location
+        ) VALUES (
+                     #{requestIndex},
+                     #{qrCode},
+                     #{receivedQuantity},
+                     NOW(),
+                     #{location}
+                 )
+    </insert>
+
+    <!-- 요청번호로 입고 상세 목록 조회 -->
+    <select id="selectDetailsByRequestId" resultMap="InboundDetailResultMap">
+        SELECT * FROM inbound_detail
+        WHERE request_index = #{request_index}
+        ORDER BY detail_index DESC
+    </select>
+
+    <!-- QR코드로 입고 상세 조회 -->
+    <select id="selectDetailByQr" resultMap="InboundDetailResultMap">
+        SELECT * FROM inbound_detail
+        WHERE qr_code = #{qr_code}
+    </select>
+
+    <!-- 입고 상세 수정 -->
+    <update id="updateDetail" parameterType="com.ssg.wms.inbound.domain.InboundDetailDTO">
+        UPDATE inbound_detail
+        SET received_quantity = #{receivedQuantity},
+            location = #{location}
+        WHERE detail_index = #{detailIndex}
+    </update>
+
+    <!-- 입고 상세 완료 처리 -->
+    <update id="updateComplete" parameterType="com.ssg.wms.inbound.domain.InboundDetailDTO">
+        UPDATE inbound_detail
+        SET received_quantity = #{receivedQuantity},
+            complete_date = NOW()
+        WHERE detail_index = #{detailIndex}
+    </update>
+
+    <!-- 입고 상세 삭제 -->
+    <delete id="deleteDetail">
+        DELETE FROM inbound_detail
+        WHERE detail_index = #{detail_index}
+    </delete>
 
 </mapper>

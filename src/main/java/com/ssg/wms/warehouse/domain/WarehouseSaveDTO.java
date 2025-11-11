@@ -1,33 +1,21 @@
 package com.ssg.wms.warehouse.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ssg.wms.global.Enum.EnumStatus;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WarehouseDTO {
-    @JsonProperty("wIndex")
-    private Long wIndex;
-
-    @JsonProperty("wCode")
-    private String wCode;
-
+public class WarehouseSaveDTO {
     @JsonProperty("wName")
     private String wName;
 
     @JsonProperty("wSize")
     private int wSize;
-
-    @JsonProperty("wCreatedAt")
-    private LocalDateTime wCreatedAt;
-
-    @JsonProperty("wUpdatedAt")
-    private LocalDateTime wUpdatedAt;
 
     @JsonProperty("wLocation")
     private String wLocation;
@@ -37,7 +25,4 @@ public class WarehouseDTO {
 
     @JsonProperty("wZipcode")
     private String wZipcode;
-
-    @JsonProperty("wStatus")
-    private EnumStatus wStatus;
 }

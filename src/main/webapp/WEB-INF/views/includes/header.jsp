@@ -12,6 +12,9 @@
     <!-- Favicon -->
     <link rel="icon" href="${CTX}/img/kaiadmin/favicon.ico" type="image/x-icon"/>
 
+    <!-- KaKaoMap api -->
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2879f57d00d7fd3009336abf35aad5e6&libraries=services"></script>
+
     <!-- Fonts and icons -->
     <script src="${CTX}/js/plugin/webfont/webfont.min.js"></script>
     <script>

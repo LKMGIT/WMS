@@ -304,7 +304,7 @@ public class AnnouncementController {
     }
 
     /** 관리자용 1:1 문의 목록 조회 */
-    @GetMapping("/admin/one-to-one")
+    @GetMapping("/admin/one-to-one/list")
     @ResponseBody
     public ResponseEntity<List<OneToOneRequestDTO>> getAdminOneToOneRequests(
             @RequestParam(required = false) String keyword,

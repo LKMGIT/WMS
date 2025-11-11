@@ -326,7 +326,7 @@
         SELECT
         SUM(I.inven_quantity) AS inven_quantity,
         MAX(I.warehouse_index) AS warehouse_index,
-        MAX(I.section_id) AS section_index
+        MAX(I.section_index) AS section_index
         FROM inventory AS I
         JOIN inboundDetail AS ID ON I.detail_index = ID.detail_index
         JOIN inboundRequest AS IR ON ID.inbound_index = IR.inbound_index

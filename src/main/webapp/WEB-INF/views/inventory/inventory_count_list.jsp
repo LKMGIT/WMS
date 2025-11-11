@@ -37,7 +37,7 @@
       <!-- 본문: 테이블 -->
       <div class="card-body">
         <div class="table-responsive">
-          <table class="display table table-striped table-hover">
+          <table id="inventoryCountTable" class="display table table-striped table-hover">
             <thead>
             <tr>
               <th>실사번호</th>
@@ -101,111 +101,271 @@
 
 <script>
   (function () {
-    // 1) DOM 준비 후 실행
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
 
     function init() {
       try {
-        const ctxMetaH = document.querySelector('meta[name="_csrf_header"]');
-        const ctxMetaT = document.querySelector('meta[name="_csrf"]');
-        const CSRF = { h: ctxMetaH && ctxMetaH.content, t: ctxMetaT && ctxMetaT.content };
-
-        // 2) 컨텍스트 경로 (EL 사용은 여기까지만)
         var ctx = '${pageContext.request.contextPath}';
 
-        // 3) 테이블/버튼 등 요소 안전 접근
-        var table = document.getElementById('inventoryCountTable'); // 예: <table id="inventoryCountTable">
-        if (!table) {
-          console.warn('inventoryCountTable not found. Skip JS.');
-          return; // 요소 없으면 조용히 종료
+        // CSRF (있으면 자동 첨부)
+        var CSRF = (function () {
+          var h = document.querySelector('meta[name="_csrf_header"]');
+          var t = document.querySelector('meta[name="_csrf"]');
+          return { h: h && h.content, t: t && t.content };
+        })();
+        function withCsrf(headers) {
+          if (CSRF.h && CSRF.t) headers[CSRF.h] = CSRF.t;
+          return headers;
         }
 
-        // 4) JSON 호출은 반드시 format=json + Accept 헤더
-        var params = new URLSearchParams(window.location.search);
-        var pageNum = params.get('pageNum') || '${cri.pageNum}';
-        var amount  = params.get('amount')  || '${cri.amount}';
+        var table = document.getElementById('inventoryCountTable');
+        var tbody = document.getElementById('tbodyCounts');
+        if (!table || !tbody) return;
 
-        fetch(ctx + '/inventory/inventory_count_list?format=json'
-                + '&pageNum=' + encodeURIComponent(pageNum)
-                + '&amount='  + encodeURIComponent(amount),
-                {
-                  method: 'GET',
-                  headers: { 'Accept': 'application/json' }, // 중요!
-                  credentials: 'same-origin'
-                })
-                .then(function (res) {
-                  if (!res.ok) throw new Error('HTTP ' + res.status);
-                  return res.json();
-                })
-                .then(function (data) {
-                  // data = { list: [...], page: {...} }
-                  renderRows(table, data.list || []);
-                  // 필요 시 페이지네이션도 여기서 그림
-                })
-                .catch(function (err) {
-                  console.error('load error:', err);
-                });
+        // 모달 & 폼 요소
+        var countModalEl = document.getElementById('countModal');
+        var countModal = countModalEl ? new bootstrap.Modal(countModalEl) : null;
+        var $countIndex = document.getElementById('countIndex');
+        var $invenIndex = document.getElementById('invenIndexInput');
+        var $invenQty   = document.getElementById('invenQtyInput');
+        var $actualQty  = document.getElementById('actualQtyInput');
+        var $updateAt   = document.getElementById('updateAtInput');
+        var $btnSave    = document.getElementById('btnSave');
+        var $countForm  = document.getElementById('countForm');
+        var $btnOpenCreate = document.getElementById('btnOpenCreate');
 
-        // 5) 렌더 함수는 DOM 조작만
-        function renderRows(tbl, rows) {
-          var tbody = tbl.tBodies[0] || tbl.createTBody();
+        // 쿼리 파라미터 기본값
+        var urlq   = new URLSearchParams(location.search);
+        var pageNum = urlq.get('pageNum') || '${cri.pageNum}';
+        var amount  = urlq.get('amount')  || '${cri.amount}';
+
+        // 최초 로드
+        load(pageNum, amount);
+
+        // 조회 버튼
+        var btnSearch = document.getElementById('btnSearch');
+        if (btnSearch) {
+          btnSearch.addEventListener('click', function () {
+            var sel = document.querySelector('select[name="amount"]');
+            load(1, sel ? sel.value : 20);
+          });
+        }
+
+        // 초기화 버튼
+        var btnReset = document.getElementById('btnReset');
+        if (btnReset) {
+          btnReset.addEventListener('click', function () {
+            history.replaceState(null, '', location.pathname);
+            var sel = document.querySelector('select[name="amount"]');
+            load(1, sel ? sel.value : 20);
+          });
+        }
+
+        // 신규 등록 버튼
+        $btnOpenCreate && $btnOpenCreate.addEventListener('click', function () {
+          $countIndex.value = '';
+          $invenIndex.value = '';
+          $invenQty.value   = '';
+          $actualQty.value  = '';
+          $updateAt.value   = '';
+          $btnSave.textContent = '신규 저장';
+          $btnSave.dataset.mode = 'create';
+          countModal && countModal.show();
+        });
+
+        function load(pn, am) {
+          fetch(ctx + '/inventory/inventory_count_list?format=json'
+                  + '&pageNum=' + encodeURIComponent(pn)
+                  + '&amount='  + encodeURIComponent(am)
+                  + '&_ts=' + Date.now(), // 캐시 무효화
+                  { headers: { 'Accept': 'application/json' }, cache: 'no-store', credentials: 'same-origin' })
+                  .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+                  .then(function (data) {
+                    renderRows((data && data.list) ? data.list : []);
+                    renderPagination((data && data.page) ? data.page : {startPage:1,endPage:1,prev:false,next:false});
+                  })
+                  .catch(function (err) {
+                    console.error('[InvenCount] load error:', err);
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">데이터 로드 실패</td></tr>';
+                  });
+        }
+
+        function renderRows(rows) {
           tbody.innerHTML = '';
+          if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">조회 결과가 없습니다.</td></tr>';
+            return;
+          }
           rows.forEach(function (r) {
+            var variance = toInt(r.actualQuantity) - toInt(r.invenQuantity);
             var tr = document.createElement('tr');
             tr.innerHTML =
-                    '<td>' + (r.countIndex || '')      + '</td>' +
-                    '<td>' + (r.invenIndex || '')      + '</td>' +
-                    '<td>' + (r.invenQuantity || '')   + '</td>' +
-                    '<td>' + (r.actualQuantity || '')  + '</td>' +
-                    '<td>' + (r.updateAt || '')        + '</td>';
+                    '<td>' + safe(r.countIndex)     + '</td>' +
+                    '<td>' + safe(r.invenIndex)     + '</td>' +
+                    '<td>' + safe(r.invenQuantity)  + '</td>' +
+                    '<td>' + safe(r.actualQuantity) + '</td>' +
+                    '<td>' + variance               + '</td>' +
+                    '<td>' + fmtDate(safe(r.updateAt)) + '</td>' +
+                    '<td class="text-nowrap">' +
+                    '<button type="button" class="btn btn-sm btn-outline-primary btn-edit" data-id="' + safe(r.countIndex) + '">수정</button> ' +
+                    '<button type="button" class="btn btn-sm btn-outline-danger btn-delete-count" data-id="' + safe(r.countIndex) + '">삭제</button>' +
+                    '</td>';
             tbody.appendChild(tr);
           });
         }
 
-        // 6) CSRF 필요한 POST/PUT/DELETE 예시 (널일 수 있어서 조건부)
-        function csrfHeaders(base) {
-          if (CSRF.h && CSRF.t) {
-            base[CSRF.h] = CSRF.t;
+        function renderPagination(p) {
+          var ul = document.getElementById('pagination');
+          if (!ul) return;
+          ul.innerHTML = '';
+
+          function makeLi(label, targetPage, disabled, active) {
+            var li = document.createElement('li');
+            li.className = 'page-item ' + (disabled ? 'disabled ' : '') + (active ? 'active' : '');
+            var a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = 'javascript:void(0)';
+            a.textContent = label;
+            if (!disabled) a.addEventListener('click', function () {
+              var sel = document.querySelector('select[name="amount"]');
+              load(targetPage, sel ? sel.value : 20);
+            });
+            li.appendChild(a);
+            return li;
           }
-          return base;
+
+          if (p.prev) ul.appendChild(makeLi('Previous', p.startPage - 1, false, false));
+          for (var n = p.startPage; n <= p.endPage; n++) {
+            ul.appendChild(makeLi(String(n), n, false, Number(n) === Number('${cri.pageNum}')));
+          }
+          if (p.next) ul.appendChild(makeLi('Next', p.endPage + 1, false, false));
         }
 
-        // 예: 삭제 버튼 위임 (버튼 없으면 자동 skip)
+        function toInt(v) { return (v == null ? 0 : parseInt(v, 10) || 0); }
+        function safe(v)  { return (v == null ? '' : v); }
+        function fmtDate(v){ return v ? String(v).replace('T',' ') : ''; }
+
+        // ----- 삭제 -----
         document.addEventListener('click', function (e) {
           var btn = e.target.closest('.btn-delete-count');
           if (!btn) return;
           var id = btn.getAttribute('data-id');
-          if (!id) return;
-
-          if (!confirm('삭제할까요?')) return;
+          if (!id || !confirm('삭제할까요?')) return;
 
           fetch(ctx + '/inventory/inventory_count_list/' + encodeURIComponent(id), {
             method: 'DELETE',
-            headers: csrfHeaders({}),
+            headers: withCsrf({}),
             credentials: 'same-origin'
-          })
-                  .then(function (res) {
-                    if (!res.ok) throw new Error('삭제 실패 ' + res.status);
-                    // UI 갱신
-                    btn.closest('tr') && btn.closest('tr').remove();
-                  })
-                  .catch(function (err) {
-                    alert(err.message || '삭제 중 오류');
-                  });
+          }).then(function (res) {
+            if (!res.ok) throw new Error('삭제 실패 ' + res.status);
+            btn.closest('tr') && btn.closest('tr').remove();
+          }).catch(function (err) {
+            alert(err.message || '삭제 중 오류');
+          });
+        });
+
+        // ----- 수정: 행에서 값 읽어 모달로 -----
+        function openEditModal(row) {
+          var cells = row.children; // 실사번호 | 재고번호 | 장부수량 | 실사수량 | 차이 | 일자 | 액션
+          var countIndex  = cells[0].textContent.trim();
+          var invenIndex  = cells[1].textContent.trim();
+          var invenQty    = cells[2].textContent.trim();
+          var actualQty   = cells[3].textContent.trim();
+          var updateAtTxt = cells[5].textContent.trim(); // YYYY-MM-DD...
+
+          var dateOnly = updateAtTxt ? updateAtTxt.substring(0, 10) : '';
+
+          $countIndex.value = countIndex;
+          $invenIndex.value = invenIndex || '';
+          $invenQty.value   = invenQty || 0;
+          $actualQty.value  = actualQty || 0;
+          $updateAt.value   = dateOnly || '';
+
+          $btnSave.textContent = '수정 저장';
+          $btnSave.dataset.mode = 'edit';
+
+          countModal && countModal.show();
+        }
+
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest('.btn-edit');
+          if (!btn) return;
+          var row = btn.closest('tr');
+          if (!row) return;
+          openEditModal(row);
+        });
+
+        // ----- 저장(신규/수정) -----
+        $countForm && $countForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          var mode = $btnSave.dataset.mode || 'edit';
+          var payload = {
+            invenIndex:      Number($invenIndex.value),
+            invenQuantity:   Number($invenQty.value),
+            actualQuantity:  Number($actualQty.value),
+            updateAt:        $updateAt.value // YYYY-MM-DD
+          };
+
+          if (!payload.invenIndex || payload.invenIndex < 1) { alert('재고번호를 확인하세요.'); return; }
+          if (payload.invenQuantity < 0 || payload.actualQuantity < 0) { alert('수량은 0 이상이어야 합니다.'); return; }
+          if (!payload.updateAt) { alert('실사일자를 선택하세요.'); return; }
+
+          // 수정
+          if (mode === 'edit') {
+            var id = $countIndex.value;
+            if (!id) { alert('countIndex가 없습니다.'); return; }
+
+            fetch(ctx + '/inventory/inventory_count_list/' + encodeURIComponent(id), {
+              method: 'PUT',
+              headers: withCsrf({ 'Content-Type': 'application/json', 'Accept': 'application/json' }),
+              credentials: 'same-origin',
+              body: JSON.stringify(payload)
+            })
+                    .then(function (res) {
+                      if (!res.ok) throw new Error('수정 실패 ' + res.status);
+                      return res.json ? res.json() : true;
+                    })
+                    .then(function () {
+                      countModal && countModal.hide();
+                      var sel = document.querySelector('select[name="amount"]');
+                      load(Number(new URLSearchParams(location.search).get('pageNum') || 1),
+                              sel ? sel.value : 20);
+                    })
+                    .catch(function (err) {
+                      alert(err.message || '수정 중 오류');
+                    });
+
+            // 신규
+          } else if (mode === 'create') {
+            fetch(ctx + '/inventory/inventory_count_list', {
+              method: 'POST',
+              headers: withCsrf({ 'Content-Type': 'application/json', 'Accept': 'application/json' }),
+              credentials: 'same-origin',
+              body: JSON.stringify(payload)
+            })
+                    .then(function (res) {
+                      if (!res.ok) throw new Error('등록 실패 ' + res.status);
+                      return res.json();
+                    })
+                    .then(function () {
+                      countModal && countModal.hide();
+                      var sel = document.querySelector('select[name="amount"]');
+                      load(1, sel ? sel.value : 20);
+                    })
+                    .catch(function (err) {
+                      alert(err.message || '등록 중 오류');
+                    });
+          }
         });
 
       } catch (e) {
-        console.error('init error:', e);
+        console.error('[InvenCount] init fatal:', e);
       }
     }
   })();
 </script>
-
-
 
 <%@ include file="../includes/footer.jsp" %>
 <%@ include file="../includes/end.jsp" %>

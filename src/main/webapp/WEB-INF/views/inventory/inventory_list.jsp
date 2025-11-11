@@ -5,6 +5,8 @@
 
 <%@ include file="../includes/header.jsp" %>
 
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
 <div class="row">
   <div class="col-md-12">
     <div class="card">
@@ -13,9 +15,8 @@
       <div class="card-header d-flex align-items-center justify-content-between">
         <h4 class="card-title mb-0">재고 조회</h4>
 
-        <!-- GET /admin/inventory_list (컨트롤러: InventoryViewController.inventoryList) -->
-        <form method="get" action="${pageContext.request.contextPath}/admin/inventory_list" class="d-flex gap-2">
-
+        <!-- GET /inventory/inventory_list -->
+        <form method="get" action="${ctx}/inventory/inventory_list" class="d-flex gap-2">
           <!-- 카테고리 -->
           <select class="form-select" name="category" style="width:180px">
             <option value="" ${empty selectedCategory ? 'selected' : ''}>카테고리(전체)</option>
@@ -34,12 +35,12 @@
                  value="${fn:escapeXml(selectedWarehouseIndex)}"
                  style="width:140px"/>
 
-          <!-- 구역 -->
+          <!-- 구역 (필드명: sectionIndex 로 통일) -->
           <input type="number"
                  class="form-control"
-                 name="sectionId"
+                 name="sectionIndex"
                  placeholder="구역번호"
-                 value="${fn:escapeXml(selectedSectionId)}"
+                 value="${fn:escapeXml(selectedSectionIndex)}"
                  style="width:140px"/>
 
           <!-- 품명 부분검색 -->
@@ -53,8 +54,7 @@
           <button type="submit" class="btn btn-primary">적용</button>
 
           <!-- 초기화 -->
-          <a class="btn btn-outline-secondary"
-             href="${pageContext.request.contextPath}/admin/inventory_list">초기화</a>
+          <a class="btn btn-outline-secondary" href="${ctx}/inventory/inventory_list">초기화</a>
 
           <!-- 페이지 크기 유지 -->
           <input type="hidden" name="amount" value="${cri.amount}"/>
@@ -88,11 +88,13 @@
                     <td><c:out value="${inv.itemName}"/></td>
                     <td><c:out value="${inv.itemCategory}"/></td>
                     <td><c:out value="${inv.invenQuantity}"/></td>
-                    <!-- LocalDateTime은 fmt:formatDate가 바로 안 먹을 수 있어 raw 출력 -->
-                    <td><c:out value="${inv.inboundDate}"/></td>
-                    <td><c:out value="${inv.shippingDate}"/></td>
+
+                    <!-- LocalDateTime은 raw 출력 또는 substring -->
+                    <td><c:out value="${fn:substring(inv.inboundDate,0,19)}"/></td>
+                    <td><c:out value="${fn:substring(inv.shippingDate,0,19)}"/></td>
+
                     <td><c:out value="${inv.warehouseIndex}"/></td>
-                    <td><c:out value="${inv.sectionId}"/></td>
+                    <td><c:out value="${inv.sectionIndex}"/></td>
                   </tr>
                 </c:forEach>
               </c:when>
@@ -116,7 +118,7 @@
                            &amount=${cri.amount}
                            &category=${fn:escapeXml(selectedCategory)}
                            &warehouseIndex=${fn:escapeXml(selectedWarehouseIndex)}
-                           &sectionId=${fn:escapeXml(selectedSectionId)}
+                           &sectionIndex=${fn:escapeXml(selectedSectionIndex)}
                            &itemName=${fn:escapeXml(searchedItemName)}">Previous</a>
               </li>
             </c:if>
@@ -128,7 +130,7 @@
                            &amount=${cri.amount}
                            &category=${fn:escapeXml(selectedCategory)}
                            &warehouseIndex=${fn:escapeXml(selectedWarehouseIndex)}
-                           &sectionId=${fn:escapeXml(selectedSectionId)}
+                           &sectionIndex=${fn:escapeXml(selectedSectionIndex)}
                            &itemName=${fn:escapeXml(searchedItemName)}">${num}</a>
               </li>
             </c:forEach>
@@ -140,7 +142,7 @@
                            &amount=${cri.amount}
                            &category=${fn:escapeXml(selectedCategory)}
                            &warehouseIndex=${fn:escapeXml(selectedWarehouseIndex)}
-                           &sectionId=${fn:escapeXml(selectedSectionId)}
+                           &sectionIndex=${fn:escapeXml(selectedSectionIndex)}
                            &itemName=${fn:escapeXml(searchedItemName)}">Next</a>
               </li>
             </c:if>

@@ -13,5 +13,5 @@ public class InvenItemViewDTO {
     private java.time.LocalDateTime inboundDate;
     private java.time.LocalDateTime shippingDate;
     private Long warehouseIndex;
-    private Long sectionId;
+    private Long sectionIndex;
 }

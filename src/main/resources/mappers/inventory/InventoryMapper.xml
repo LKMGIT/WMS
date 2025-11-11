@@ -28,7 +28,7 @@
                 AND inv.warehouse_index = #{cri.warehouseIndex}
             </if>
             <if test="cri.sectionIndex != null">
-                AND inv.section_id = #{cri.sectionId}
+                AND inv.section_index = #{cri.sectionIndex}
             </if>
         </where>
     </sql>
@@ -83,18 +83,24 @@
         FROM inventory
         WHERE item_index = #{itemIndex}
         AND warehouse_index = #{warehouseIndex}
-        AND section_id = #{sectionId}
+        AND section_index = #{sectionIndex}
         LIMIT 1
     </select>
 
-    <!-- 실재고 스냅샷: 재고 → 실재고(예시) -->
+    <!-- 재고 스냅샷: 장부는 최신, 실사는 "직전 실사값" 유지(없으면 NULL) -->
     <insert id="insertInvenCountSnapshot">
         INSERT INTO inven_count
         (inven_index, inven_quantity, actual_quantity, count_updateAt)
         SELECT
         inv.inven_index,
         inv.inven_quantity,
-        inv.inven_quantity,           -- 초기에는 실재고 = 재고
+        (
+        SELECT ic.actual_quantity
+        FROM inven_count ic
+        WHERE ic.inven_index = inv.inven_index
+        ORDER BY ic.count_index DESC
+        LIMIT 1
+        ) AS actual_quantity,
         NOW()
         FROM inventory inv
         WHERE inv.inven_index = #{invenIndex}
@@ -119,7 +125,7 @@
         LIMIT 1
     </select>
 
-    <!-- requestIndex -> section_id -->
+    <!-- requestIndex -> section_index -->
     <select id="selectSectionByRequest" parameterType="long" resultType="long">
         SELECT r.section_index
         FROM inbound_request r

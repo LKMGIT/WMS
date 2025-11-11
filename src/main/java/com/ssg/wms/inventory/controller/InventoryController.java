@@ -28,13 +28,13 @@ public class InventoryController {
     public String inventoryList(@ModelAttribute("cri") Criteria criteria,
                                 @RequestParam(value = "category",       required = false) String category,
                                 @RequestParam(value = "warehouseIndex", required = false) Long warehouseIndex,
-                                @RequestParam(value = "sectionId",      required = false) Long sectionId,
+                                @RequestParam(value = "sectionIndex",      required = false) Long sectionIndex,
                                 @RequestParam(value = "itemName",       required = false) String itemName,
                                 Model model) {
 
         criteria.setCategory(category);
         criteria.setWarehouseIndex(warehouseIndex);
-        criteria.setSectionId(sectionId);
+        criteria.setSectionIndex(sectionIndex);
         criteria.setItemName(itemName);
 
         List<InvenItemViewDTO> list = inventoryService.getInventoryPage(criteria);
@@ -44,7 +44,7 @@ public class InventoryController {
         model.addAttribute("pageMaker", pageDTO);
         model.addAttribute("selectedCategory", criteria.getCategory());
         model.addAttribute("selectedWarehouseIndex", criteria.getWarehouseIndex());
-        model.addAttribute("selectedSectionId", criteria.getSectionId());
+        model.addAttribute("selectedsectionIndex", criteria.getSectionIndex());
         model.addAttribute("searchedItemName", criteria.getItemName());
 
         return "inventory/inventory_list"; // /WEB-INF/views/inventory/inventory_list.jsp

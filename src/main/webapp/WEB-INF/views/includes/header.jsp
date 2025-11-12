@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <title>Kaiadmin - Bootstrap 5 Admin Dashboard</title>
+    <title>바름생각</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport"/>
 
     <!-- Favicon -->
@@ -50,8 +50,8 @@
         <div class="sidebar-logo">
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
-                <a href="${CTX}/index.html" class="logo">
-                    <img src="${CTX}/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand" height="20"/>
+                <a href="<c:url value='/admin/dashbaord'/>">
+                    <img src="${CTX}/img/kaiadmin/logo_background.png" alt="navbar brand" class="navbar-brand" height="20"/>
                 </a>
                 <div class="nav-toggle">
                     <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -68,14 +68,14 @@
                     <li class="nav-item active">
                         <a data-bs-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
                             <i class="fas fa-home"></i>
-                            <p>Dashboard</p>
+                            <p>대시보드</p>
                             <span class="caret"></span>
                         </a>
                         <div class="collapse" id="dashboard">
                             <ul class="nav nav-collapse">
                                 <li>
-                                    <a href="${CTX}/index.html">
-                                        <span class="sub-item">Dashboard 1</span>
+                                    <a href="<c:url value='/admin/dashbaord'/>">
+                                        <span class="sub-item">대시보드 확인</span>
                                     </a>
                                 </li>
                             </ul>
@@ -84,7 +84,7 @@
 
                     <li class="nav-section">
                         <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
-                        <h4 class="text-section">Components</h4>
+                        <h4 class="text-section">목록</h4>
                     </li>
 
                     <li class="nav-item">
@@ -114,12 +114,12 @@
                         </a>
                         <div class="collapse" id="outbound">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">출고 요청 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/outbound/requests'/>">
+                                    <span class="sub-item">출고요청 목록 조회</span>
                                 </a>
                                 </li>
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">출고 지시서 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/outbound/instructions'/>">
+                                    <span class="sub-item">출고 지시서 목록 조회</span>
                                 </a>
                                 </li>
                             </ul>
@@ -134,8 +134,8 @@
                         </a>
                         <div class="collapse" id="quotation">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">견적 신청 목록 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/quotation/requests'/>">
+                                    <span class="sub-item">견적신청 목록 조회</span>
                                 </a>
                                 </li>
                             </ul>
@@ -172,10 +172,10 @@
                         </a>
                         <div class="collapse" id="inven">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                <li><a class="nav-link" href="<c:url value='/inventory/inventory_list'/>">
                                     <span class="sub-item">재고 조회</span>
                                 </a>
-                                    <a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                    <a class="nav-link" href="<c:url value='/inventory/inventory_count_list'/>">
                                         <span class="sub-item">실 재고 조회</span>
                                     </a>
                                 </li>
@@ -217,152 +217,6 @@
 <%--                            </ul>--%>
 <%--                        </div>--%>
 <%--                    </li>--%>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#base">
-                            <i class="fas fa-layer-group"></i>
-                            <p>Base</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="base">
-                            <ul class="nav nav-collapse">
-                                <li><a href="${CTX}/avatars.html"><span class="sub-item">Avatars</span></a></li>
-                                <li><a href="${CTX}/buttons.html"><span class="sub-item">Buttons</span></a></li>
-                                <li><a href="${CTX}/gridsystem.html"><span class="sub-item">Grid System</span></a></li>
-                                <li><a href="${CTX}/panels.html"><span class="sub-item">Panels</span></a></li>
-                                <li><a href="${CTX}/notifications.html"><span class="sub-item">Notifications</span></a>
-                                </li>
-                                <li><a href="${CTX}/sweetalert.html"><span class="sub-item">Sweet Alert</span></a></li>
-                                <li><a href="${CTX}/font-awesome-icons.html"><span
-                                        class="sub-item">Font Awesome Icons</span></a></li>
-                                <li><a href="${CTX}/simple-line-icons.html"><span
-                                        class="sub-item">Simple Line Icons</span></a></li>
-                                <li><a href="${CTX}/typography.html"><span class="sub-item">Typography</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarLayouts">
-                            <i class="fas fa-th-list"></i>
-                            <p>Sidebar Layouts</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="sidebarLayouts">
-                            <ul class="nav nav-collapse">
-                                <li><a href="${CTX}/sidebar-style-2.html"><span class="sub-item">Sidebar Style 2</span></a>
-                                </li>
-                                <li><a href="${CTX}/icon-menu.html"><span class="sub-item">Icon Menu</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#forms">
-                            <i class="fas fa-pen-square"></i>
-                            <p>Forms</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="forms">
-                            <ul class="nav nav-collapse">
-                                <li><a href="${CTX}/forms.html"><span class="sub-item">Basic Form</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#tables">
-                            <i class="fas fa-table"></i>
-                            <p>Tables</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="tables">
-                            <ul class="nav nav-collapse">
-                                <li><a href="${CTX}/tables.html"><span class="sub-item">Basic Table</span></a></li>
-                                <li><a href="${CTX}/datatables.html"><span class="sub-item">Datatables</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#maps">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <p>Maps</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="maps">
-                            <ul class="nav nav-collapse">
-                                <li><a href="${CTX}/googlemaps.html"><span class="sub-item">Google Maps</span></a></li>
-                                <li><a href="${CTX}/jsvectormap.html"><span class="sub-item">Jsvectormap</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#charts">
-                            <i class="far fa-chart-bar"></i>
-                            <p>Charts</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="charts">
-                            <ul class="nav nav-collapse">
-                                <li><a href="${CTX}/charts.html"><span class="sub-item">Chart Js</span></a></li>
-                                <li><a href="${CTX}/sparkline.html"><span class="sub-item">Sparkline</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="${CTX}/widgets.html">
-                            <i class="fas fa-desktop"></i>
-                            <p>Widgets</p>
-                            <span class="badge badge-success">4</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="${CTX}/documentation/index.html">
-                            <i class="fas fa-file"></i>
-                            <p>Documentation</p>
-                            <span class="badge badge-secondary">1</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#submenu">
-                            <i class="fas fa-bars"></i>
-                            <p>Menu Levels</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="submenu">
-                            <ul class="nav nav-collapse">
-                                <li>
-                                    <a data-bs-toggle="collapse" href="#subnav1">
-                                        <span class="sub-item">Level 1</span>
-                                        <span class="caret"></span>
-                                    </a>
-                                    <div class="collapse" id="subnav1">
-                                        <ul class="nav nav-collapse subnav">
-                                            <li><a href="#"><span class="sub-item">Level 2</span></a></li>
-                                            <li><a href="#"><span class="sub-item">Level 2</span></a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li>
-                                    <a data-bs-toggle="collapse" href="#subnav2">
-                                        <span class="sub-item">Level 1</span>
-                                        <span class="caret"></span>
-                                    </a>
-                                    <div class="collapse" id="subnav2">
-                                        <ul class="nav nav-collapse subnav">
-                                            <li><a href="#"><span class="sub-item">Level 2</span></a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li><a href="#"><span class="sub-item">Level 1</span></a></li>
-                            </ul>
-                        </div>
-                    </li>
 
                 </ul>
             </div>

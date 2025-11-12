@@ -1,6 +1,7 @@
 package com.ssg.wms.outbound.mappers;
 
 import com.ssg.wms.global.domain.Criteria;
+import com.ssg.wms.inventory.domain.InvenDTO;
 import com.ssg.wms.outbound.domain.*;
 import org.apache.ibatis.annotations.Param;
 
@@ -71,9 +72,9 @@ public interface OutboundMapper {
      * @param user_index 사용자 ID
      * @param item_index 아이템 ID
      * @param location_name 창고 위치명 (예: "서울", "충남")
-     * @return 재고 위치 정보 (warehouse_index, section_id 포함)
+     * @return 재고 위치 정보 (warehouse_index, section_index 포함)
      */
-    TestInvenDTO selectStockByLocation(
+    InvenDTO selectStockByLocation(
             @Param("user_index") Long user_index,
             @Param("item_index") Long item_index,
             @Param("location_name") String location_name

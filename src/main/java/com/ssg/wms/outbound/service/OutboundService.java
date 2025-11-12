@@ -103,7 +103,7 @@ public interface OutboundService {
     /**
      * 출고 지시서 삭제 (운송장 등록 전)
      */
-    boolean removeShippingInstruction(Long si_index);
+//    boolean removeShippingInstruction(Long si_index);
 
     /**
      * 운송장 등록 (운송장 번호 생성 및 트랜잭션)

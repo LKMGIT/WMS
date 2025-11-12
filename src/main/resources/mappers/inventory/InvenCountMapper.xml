@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssg.wms.inventory.mappers.InvenCountMapper">
+
+    <resultMap id="InvenCountMap" type="com.ssg.wms.inventory.domain.InvenCountDTO">
+        <id     property="countIndex"     column="count_index"/>
+        <result property="invenIndex"     column="inven_index"/>
+        <result property="invenQuantity"  column="inven_quantity"/>
+        <result property="actualQuantity" column="actual_quantity"/>
+        <result property="updateAt"       column="count_updateAt"/>
+    </resultMap>
+
+    <!-- 동적 WHERE -->
+    <sql id="InvenCountWhere">
+        <where>
+            <if test="cri.invenIndex != null">
+                AND c.inven_index = #{cri.invenIndex}
+            </if>
+            <if test="cri.fromDate != null and cri.fromDate != ''">
+                AND c.count_updateAt &gt;= #{cri.fromDate}
+            </if>
+            <if test="cri.toDate != null and cri.toDate != ''">
+                AND c.count_updateAt &lt;= #{cri.toDate}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 페이징 목록 -->
+    <select id="selectInvenCountPage" resultMap="InvenCountMap">
+        SELECT
+        c.count_index,
+        c.inven_index,
+        c.inven_quantity,
+        c.actual_quantity,
+        c.count_updateAt
+        FROM inven_count c
+        <include refid="InvenCountWhere"/>
+        ORDER BY c.count_index DESC
+        LIMIT #{cri.amount}
+        OFFSET #{cri.skip}
+    </select>
+
+    <!-- 총 개수 -->
+    <select id="selectInvenCountTotal" resultType="int">
+        SELECT COUNT(1)
+        FROM inven_count c
+        <include refid="InvenCountWhere"/>
+    </select>
+
+    <!-- 단건 -->
+    <select id="selectInvenCountById" resultMap="InvenCountMap">
+        SELECT
+        c.count_index,
+        c.inven_index,
+        c.inven_quantity,
+        c.actual_quantity,
+        c.count_updateAt
+        FROM inven_count c
+        WHERE c.count_index = #{countIndex}
+        LIMIT 1
+    </select>
+
+    <!-- INSERT (재고 실사 저장 쿼리문) -->
+    <insert id="insertInvenCount" parameterType="com.ssg.wms.inventory.domain.InvenCountDTO"
+            useGeneratedKeys="true" keyProperty="countIndex" keyColumn="count_index">
+        INSERT INTO inven_count
+        (inven_index, inven_quantity, actual_quantity, count_updateAt)
+        VALUES
+        (#{invenIndex}, #{invenQuantity}, #{actualQuantity}, #{updateAt})
+    </insert>
+
+    <!-- UPDATE -->
+    <update id="updateInvenCount" parameterType="com.ssg.wms.inventory.domain.InvenCountDTO">
+        UPDATE inven_count
+        SET
+        inven_index     = #{invenIndex},
+        inven_quantity  = #{invenQuantity},
+        actual_quantity = #{actualQuantity},
+        count_updateAt       = #{updateAt}
+        WHERE count_index = #{countIndex}
+    </update>
+
+    <!-- DELETE -->
+    <delete id="deleteInvenCount">
+        DELETE FROM inven_count
+        WHERE count_index = #{countIndex}
+    </delete>
+
+</mapper>

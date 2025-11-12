@@ -21,7 +21,7 @@
     <linearGradient id="linear-gradient" x1="0" y1="39.99" x2="153.12" y2="39.99" gradientUnits="userSpaceOnUse">
       <stop offset=".13" stop-color="#6a0cf8"/>
       <stop offset=".56" stop-color="#fd16b8"/>
-      <stop offset=".97" stop-color="#fdba7f"/>
+      <stop offset=".97" stop-color="#fdba7f                                            "/>
     </linearGradient>
   </defs>
   <g id="Layer_1-2" data-name="Layer 1">

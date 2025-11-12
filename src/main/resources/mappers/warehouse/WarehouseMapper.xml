@@ -100,4 +100,12 @@
         select coalesce(max(warehouse_index), 0) + 1
         from warehouse
     </select>
+
+    <select id="isDuplicate" resultType="int">
+        SELECT COUNT(*)
+        FROM warehouse
+        WHERE warehouse_name = #{wName}
+        OR warehouse_address = #{wAddress}
+    </select>
+
 </mapper>

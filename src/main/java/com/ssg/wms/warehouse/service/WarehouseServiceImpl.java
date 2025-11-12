@@ -32,6 +32,17 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     @Override
     public boolean registerWarehouse(WarehouseSaveDTO warehouseSaveDTO) {
+
+        // 중복 검사 (이름 or 주소)
+        int duplicateCount = warehouseMapper.isDuplicate(
+                warehouseSaveDTO.getWName(),
+                warehouseSaveDTO.getWAddress()
+        );
+
+        if (duplicateCount > 0) {
+            throw new IllegalArgumentException("동일한 이름 또는 주소의 창고가 이미 존재합니다.");
+        }
+
         // 창고 code 생성 -> 1부터시작
         int warehouseCodeNum =  warehouseMapper.getNextCode();
         WarehouseDTO warehouseDTO = WarehouseDTO.builder()

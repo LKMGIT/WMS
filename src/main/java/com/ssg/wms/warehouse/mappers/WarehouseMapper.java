@@ -3,6 +3,7 @@ package com.ssg.wms.warehouse.mappers;
 import com.ssg.wms.global.domain.Criteria;
 import com.ssg.wms.warehouse.domain.WarehouseDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,4 +17,5 @@ public interface WarehouseMapper {
     int updateWarehouse(WarehouseDTO warehouseDTO); // 창고 수정
     int deactiveWarehouse(Long wIndex); // 창고 폐쇄(논리적 폐쇄)
     int getNextCode();
+    int isDuplicate(@Param("wName") String wName, @Param("wAddress") String wAddress);
 }

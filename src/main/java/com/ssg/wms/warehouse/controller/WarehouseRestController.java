@@ -20,10 +20,22 @@ public class WarehouseRestController {
     @PostMapping(produces = "text/plain; charset=UTF-8")
     public ResponseEntity<String> registerWarehouse(@RequestBody WarehouseSaveDTO warehouseSaveDTO) {
         log.info("warehouseSaveDTO : " + warehouseSaveDTO);
-        boolean result = warehouseService.registerWarehouse(warehouseSaveDTO);
-        return result ? ResponseEntity.ok("창고 등록 완료")
-                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body("창고 등록 실패");
+
+        try {
+            boolean result = warehouseService.registerWarehouse(warehouseSaveDTO);
+            return result
+                    ? ResponseEntity.ok("창고 등록 완료")
+                    : ResponseEntity.status(HttpStatus.BAD_REQUEST).body("창고 등록 실패");
+        } catch (IllegalArgumentException e) {
+            // 중복 검사
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            // 서버 내부 예외
+            log.error("창고 등록 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+        }
     }
+
 
     // 창고 수정
     @PutMapping(value = "/{id}", produces = "text/plain; charset=UTF-8")

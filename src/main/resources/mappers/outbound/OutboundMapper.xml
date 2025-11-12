@@ -250,7 +250,7 @@
 
     <update id="updateDispatch" parameterType="com.ssg.wms.outbound.domain.DispatchDTO">
         UPDATE Dispatch
-        SET vehicle_index=#{vehicle_index}
+        SET vehicle_index=#{vehicle_index}, dispatch_date=now()
         WHERE dispatch_index=#{dispatch_index}
     </update>
 

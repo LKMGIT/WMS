@@ -39,22 +39,37 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3 justify-content-center mb-3">
-                        <form id="searchForm" class="input-group">
-                            <%-- [수정] 검색 UI를 input-group 내부에 배치 --%>
-                            <div class="col-auto">
-                                <select class="form-select" name="type">
-                                    <option value="I">상품명 (item_name)</option>
-                                    <option value="W">창고ID (warehouse_index)</option>
-                                    <option value="S">운송장상태 (si_waybill_status)</option>
+                    <div id="searchGroup" class="row g-3 mb-3 align-items-center">
+                        <form id="searchForm" class="col-12 d-flex flex-wrap p-0">
+
+                            <%-- 1. 타입/키워드 통합 (col-md-5) --%>
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <select class="form-select" name="type" style="flex-grow: 0.6;">
+                                        <option value="W">창고 ID</option>
+                                        <option value="A">관리자 ID</option>
+                                        <option value="I">아이템 ID</option>
+                                    </select>
+                                    <input type="text" class="form-control" name="keyword" placeholder="검색어 입력">
+                                </div>
+                            </div>
+
+                            <%-- 2. 운송장 상태 (col-md-2) --%>
+                            <div class="col-md-2 me-2">
+                                <select class="form-select" name="si_waybill_status">
+                                    <option value="">-- 운송장 상태 (전체) --</option>
+                                    <option value="PENDING">등록 대기</option>
+                                    <option value="APPROVED">등록 완료</option>
                                 </select>
                             </div>
-                            <div class="col-5">
-                                <input type="text" class="form-control" name="keyword" placeholder="검색어 입력">
+
+                            <%-- 3. 빈 칸 (col-md-2에 해당하지만, 목록에는 없으므로 생략) --%>
+
+                            <%-- 4. 검색 버튼 (col-md-1) --%>
+                            <div class="col-md-1">
+                                <button class="btn btn-outline-secondary" type="button" id="searchBtn">검색</button>
                             </div>
-                            <div class="col-auto">
-                                <button class="btn btn-default" type="button" id="searchBtn">검색</button>
-                            </div>
+
                         </form>
                     </div>
 
@@ -62,18 +77,16 @@
                         <table class="display table table-striped table-hover">
                             <thead>
                             <tr>
-                                <%-- [신규] 체크박스 헤더 --%>
                                 <th><input class="form-check-input" type="checkbox" id="checkAll"></th>
-                                <th>지시서 ID (si_index)</th>
-                                <th>상품명 (item_name)</th>
-                                <th>수량 (or_quantity)</th>
-                                <th>창고 ID (warehouse_index)</th>
-                                <th>승인일 (approved_at)</th>
-                                <th>운송장 상태 (si_waybill_status)</th>
+                                <th>지시서 ID</th>
+                                <th>상품ID (상품명)</th>
+                                <th>수량</th>
+                                <th>창고 ID</th>
+                                <th>승인일</th>
+                                <th>운송장 상태</th>
                             </tr>
                             </thead>
                             <tbody id="instructionTbody">
-                            <%-- [수정] colspan="7" --%>
                             <tr><td colspan="7" class="text-center">데이터를 불러오는 중입니다...</td></tr>
                             </tbody>
                         </table>
@@ -119,15 +132,27 @@
 
     /**
      * 지시서 목록 로드 함수
+     * @param {number} page - 페이지 번호
+     * @param {string} type - 검색 타입 (W, A)
+     * @param {string} keyword - 검색어
+     * @param {string} status - 운송장 상태 (PENDING, APPROVED)
      */
-    async function loadInstructionList(page = 1, type = '', keyword = '') {
+    async function loadInstructionList(page = 1, type = '', keyword = '', status = '') {
         const tbody = document.getElementById("instructionTbody");
         tbody.innerHTML = '<tr><td colspan="7" class="text-center">데이터를 불러오는 중입니다...</td></tr>';
 
         try {
-            const params = new URLSearchParams({ page, amount: 10, type, keyword });
+            // [수정] params에 status 추가
+            const params = new URLSearchParams({
+                page,
+                amount: 10,
+                type,
+                keyword,
+                approval_status: status // XML의 search.approval_status로 매핑됨
+            });
             const response = await axios.get(API_BASE + "/instruction", { params });
 
+            // 🚨 Service에서 ShippingInstructionDetailDTO List를 반환하므로 DTO 필드명이 달라집니다.
             const { list, pageDTO } = response.data;
             const listContextQuery = params.toString();
 
@@ -135,54 +160,52 @@
 
             if (!list || list.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center">출고 지시 내역이 없습니다.</td></tr>';
-                renderPagination(pageDTO, loadInstructionList, { type, keyword });
+                renderPagination(pageDTO, loadInstructionList, { type, keyword, status });
                 return;
             }
 
+            // 🚨 [수정] list는 이제 ShippingInstructionDetailDTO 목록입니다.
             list.forEach(item => {
                 const tr = document.createElement("tr");
                 tr.style.cursor = "pointer";
 
-                // 목록 행 클릭 이벤트 바인딩
                 tr.onclick = (e) => {
                     // 체크박스 클릭 시 상세페이지 이동 방지
                     if (e.target.type === 'checkbox') {
                         e.stopPropagation();
                         return;
                     }
-
                     // 현재 검색 조건이 담긴 listContextQuery를 URL에 추가하여 상세 페이지로 이동
-                    // 예: /outbound/instruction/1?page=1&amount=10&type=T&keyword=test
                     location.href = contextPath + "/outbound/instruction/" + item.si_index + '?' + listContextQuery;
                 };
 
                 // 날짜 포맷팅
                 const approvedDateStr = formatDateTime(item.approved_at);
 
-                const status = item.si_waybill_status;
-                let statusBadge = status;
-                if (status === 'APPROVED') {
+                const statusValue = item.si_waybill_status;
+                let statusBadge = statusValue;
+                if (statusValue === 'APPROVED') {
                     statusBadge = '<span class="badge bg-primary">등록 완료</span>';
-                } else if (status === 'PENDING') {
+                } else if (statusValue === 'PENDING') {
                     statusBadge = '<span class="badge bg-warning text-dark">대기중</span>';
                 }
 
-                // [수정] 문자열 연결(+)을 사용하여 tr.innerHTML 생성
+                // 🚨 [수정] ShippingInstructionDetailDTO의 필드를 사용하여 행을 구성
                 tr.innerHTML =
                     '<td><input class="form-check-input check-item" type="checkbox" ' +
                     'data-id="' + item.si_index + '" ' +
-                    'data-status="' + status + '"></td>' +
+                    'data-status="' + statusValue + '"></td>' +
                     '<td>' + item.si_index + '</td>' +
-                    '<td>' + item.item_name + '</td>' +
-                    '<td>' + item.or_quantity + '</td>' +
-                    '<td>' + item.warehouse_index + '</td>' +
+                    '<td>' + item.item_index + ' (' + item.item_name + ' )</td>' + // ShippingInstructionDetailDTO 필드
+                    '<td>' + item.or_quantity + '</td>' + // ShippingInstructionDetailDTO 필드
+                    '<td>' + item.warehouse_index + '</td>' + // ShippingInstructionDetailDTO 필드
                     '<td>' + approvedDateStr + '</td>' +
                     '<td>' + statusBadge + '</td>';
                 tbody.appendChild(tr);
             });
 
             // 페이지네이션 생성
-            renderPagination(pageDTO, loadInstructionList, { type, keyword });
+            renderPagination(pageDTO, loadInstructionList, { type, keyword, status });
 
         } catch (error) {
             console.error("Instruction List loading failed:", error);
@@ -228,7 +251,8 @@
             link.addEventListener("click", function(e) {
                 e.preventDefault();
                 const pageNum = this.dataset.page;
-                loadFn(pageNum, searchParams.type, searchParams.keyword);
+                // [수정] loadFn 호출 시 searchParams의 모든 값을 전달
+                loadFn(pageNum, searchParams.type, searchParams.keyword, searchParams.status);
             });
         });
     }
@@ -292,8 +316,9 @@
             }
             alert("운송장 등록 처리 완료\n성공: " + successCount + "건\n실패: " + failCount + "건");
 
+            // [수정] 현재 검색 조건을 유지하여 목록 새로고침
             const form = document.getElementById("searchForm");
-            loadInstructionList(1, form.type.value, form.keyword.value); // 목록 새로고침
+            loadInstructionList(1, form.type.value, form.keyword.value, form.si_waybill_status.value);
             document.getElementById("checkAll").checked = false;
         });
     }
@@ -303,12 +328,13 @@
         const form = document.getElementById("searchForm");
         const initialType = form.type ? form.type.value : '';
         const initialKeyword = form.keyword ? form.keyword.value : '';
+        const initialStatus = form.si_waybill_status ? form.si_waybill_status.value : '';
 
         // URL에서 page 파라미터를 읽어와서 초기 페이지 설정 (선택 사항)
         const urlParams = new URLSearchParams(window.location.search);
         const initialPage = urlParams.get('page') ? parseInt(urlParams.get('page')) : 1;
 
-        loadInstructionList(initialPage, initialType, initialKeyword);
+        loadInstructionList(initialPage, initialType, initialKeyword, initialStatus);
         bindAdminButtons();
     });
 
@@ -317,7 +343,8 @@
         const form = document.getElementById("searchForm");
         const type = form.type.value;
         const keyword = form.keyword.value;
-        loadInstructionList(1, type, keyword); // 검색 시 무조건 1페이지로 이동
+        const status = form.si_waybill_status.value;
+        loadInstructionList(1, type, keyword, status); // 검색 시 무조건 1페이지로 이동
     });
 </script>
 <%@ include file="../includes/end.jsp" %>

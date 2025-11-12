@@ -83,7 +83,7 @@ public interface OutboundService {
     /**
      * 출고 지시서 리스트 (페이징 + 검색)
      */
-    List<ShippingInstructionDTO> getShippingInstructionList(Criteria criteria, OutboundSearchDTO outboundSearchDTO);
+    List<ShippingInstructionDetailDTO> getShippingInstructionList(Criteria criteria, OutboundSearchDTO outboundSearchDTO);
 
     /**
      * 출고 지시서 검색된 총 개수

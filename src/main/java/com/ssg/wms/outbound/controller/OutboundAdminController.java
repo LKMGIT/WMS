@@ -110,7 +110,7 @@ public class OutboundAdminController {
             @ModelAttribute Criteria criteria,
             @ModelAttribute OutboundSearchDTO outboundSearchDTO) {
 
-        List<ShippingInstructionDTO> list = outboundService.getShippingInstructionList(criteria, outboundSearchDTO);
+        List<ShippingInstructionDetailDTO> list = outboundService.getShippingInstructionList(criteria, outboundSearchDTO);
         int total = outboundService.getShippingInstructionTotalCount(outboundSearchDTO);
         PageDTO pageDTO = new PageDTO(criteria, total);
 

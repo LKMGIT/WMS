@@ -1,5 +1,6 @@
 package com.ssg.wms.outbound.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ssg.wms.global.Enum.EnumStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class DispatchDTO {
     private Long dispatch_index;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy. MM. dd. a hh:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime dispatch_date;
     private String start_point;
     private String end_point;

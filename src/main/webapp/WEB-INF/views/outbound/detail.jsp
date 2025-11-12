@@ -238,7 +238,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <input type="hidden" id="hidden_or_index" name="or_index">
             <input type="hidden" id="hidden_dispatch_index" name="dispatch_index">
             <div class="row">
                 <div class="col-md-6">
@@ -262,7 +261,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>배차 일시</label>
-                        <input type="text" id="mod_dispatchDate" name="dispatch_date" class="form-control" readonly>
+                        <input type="text" id="mod_dispatchDate" class="form-control" readonly>
                     </div>
                 </div>
             </div>
@@ -572,12 +571,13 @@
                 // DTO 필드 반영
                 const vehicleInfo = dispatch.vehicle_id + ' (' + dispatch.driver_name + ')';
                 modalContent.querySelector("#mod_currentVehicleInfo").value = vehicleInfo;
-
                 modalContent.querySelector("#mod_orIndex").value = dispatch.or_index || 'N/A';
                 modalContent.querySelector("#mod_vehicleType").value = dispatch.vehicle_type || 'N/A';
                 modalContent.querySelector("#mod_dispatchDate").value = (formatDateTime(dispatch.dispatch_date) || 'N/A');
                 modalContent.querySelector("#mod_start_point").value = dispatch.start_point;
                 modalContent.querySelector("#mod_end_point").value = dispatch.end_point;
+                modalContent.querySelector("#hidden_dispatch_index").value = currentDispatchId;
+
 
                 const selectEl = modalContent.querySelector("#mod_vehicleIdSelect");
                 populateVehicleSelect(selectEl, or_index, dispatch.vehicle_index);

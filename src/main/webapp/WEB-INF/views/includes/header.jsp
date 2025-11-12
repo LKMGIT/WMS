@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="CTX" value="${pageContext.request.contextPath}"/>
-<c:set var="isLoggedIn" value="${not empty sessionScope.loginAdminId}" />
+<c:set var="isLoggedIn" value="${not empty sessionScope.loginAdminId}"/>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +48,8 @@
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
                 <a href="<c:url value='/admin/dashbaord'/>">
-                    <img src="${CTX}/img/kaiadmin/logo_background.png" alt="navbar brand" class="navbar-brand" height="20"/>
+                    <img src="${CTX}/img/kaiadmin/logo_background.png" alt="navbar brand" class="navbar-brand"
+                         height="20"/>
                 </a>
                 <div class="nav-toggle">
                     <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -147,17 +148,17 @@
                         </a>
                         <div class="collapse" id="inbound">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/inbound/list'/>">
+                                <li><a class="nav-link" href="<c:url value='/inbound/admin/list'/>">
                                     <span class="sub-item">입고 요청 목록 조회</span>
                                 </a>
-                                    <a class="nav-link" href="<c:url value='/api/inbound/status/period'/>">
-                                        <span class="sub-item">기간별 조회</span>
-                                    </a>
-                                    <a class="nav-link" href="<c:url value='/api/inbound/status/month'/>">
-                                        <span class="sub-item">월별 조회</span>
-                                    </a>
-                                    <a class="nav-link" href="<c:url value='/inbound/Form'/>">
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/form'/>">
                                         <span class="sub-item">입고 목록 조회</span>
+                                    </a>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/period'/>">
+                                        <span class="sub-item">기간별 입고 현황 조회</span>
+                                    </a>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/month'/>">
+                                        <span class="sub-item">월별 입고 현황 조회</span>
                                     </a>
                                 </li>
                             </ul>
@@ -217,11 +218,40 @@
                             </ul>
                         </div>
                     </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#announcement"> <i class="fas fa-pen-square"></i>
+                            <p>고객센터</p> <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="announcement">
+                            <ul class="nav nav-collapse">
+
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/announcement/notices/list'/>">
+                                        <span class="sub-item">공지사항</span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/announcement/onetoone/list'/>">
+                                        <span class="sub-item">1:1 문의 목록</span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/announcement/board/list'/>">
+                                        <span class="sub-item">문의 게시판</span>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </li>
 
                 </ul>
             </div>
         </div>
     </div>
+
     <!-- End Sidebar -->
 
     <div class="main-panel">
@@ -249,9 +279,11 @@
                         <div class="container-fluid">
                             <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                                 <li class="nav-item topbar-user dropdown hidden-caret">
-                                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
+                                       aria-expanded="false">
                                         <div class="avatar-sm">
-                                            <img src="${CTX}/img/defaultprofile.jpg" alt="..." class="avatar-img rounded-circle"/>
+                                            <img src="${CTX}/img/defaultprofile.jpg" alt="..."
+                                                 class="avatar-img rounded-circle"/>
                                         </div>
                                         <span class="profile-username">
                 <span class="op-7">Hi,</span>
@@ -262,25 +294,28 @@
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-user animated fadeIn">
-                                            <li>
-                                                <div class="user-box">
-                                                    <div class="avatar-lg">
-                                                        <img src="${CTX}/img/defaultprofile.jpg" alt="image profile" class="avatar-img rounded"/>
-                                                    </div>
-                                                    <div class="u-text">
-                                                        <h4><c:out value="${sessionScope.loginAdminName != null ? sessionScope.loginAdminName : sessionScope.loginAdminId}"/></h4>
-                                                        <p class="text-muted">
-                                                            <c:out value="${sessionScope.loginAdminEmail != null ? sessionScope.loginAdminEmail : 'hello@example.com'}"/>
-                                                        </p>
-                                                        <a href="${CTX}/admin/myinfo" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
-                                                    </div>
+                                        <li>
+                                            <div class="user-box">
+                                                <div class="avatar-lg">
+                                                    <img src="${CTX}/img/defaultprofile.jpg" alt="image profile"
+                                                         class="avatar-img rounded"/>
                                                 </div>
-                                            </li>
-                                            <li>
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item" href="${CTX}/admin/myinfo">내 정보 확인</a>
-                                                <a class="dropdown-item" href="${CTX}/login/logout">로그아웃</a>
-                                            </li>
+                                                <div class="u-text">
+                                                    <h4><c:out
+                                                            value="${sessionScope.loginAdminName != null ? sessionScope.loginAdminName : sessionScope.loginAdminId}"/></h4>
+                                                    <p class="text-muted">
+                                                        <c:out value="${sessionScope.loginAdminEmail != null ? sessionScope.loginAdminEmail : 'hello@example.com'}"/>
+                                                    </p>
+                                                    <a href="${CTX}/admin/myinfo"
+                                                       class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="${CTX}/admin/myinfo">내 정보 확인</a>
+                                            <a class="dropdown-item" href="${CTX}/login/logout">로그아웃</a>
+                                        </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -304,7 +339,7 @@
                 </c:otherwise>
             </c:choose>
         </div>
-            <!-- End Navbar -->
+        <!-- End Navbar -->
 
         <!-- Content Start -->
         <div class="container">

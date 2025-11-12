@@ -1,49 +1,62 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>공지사항 상세 - WMS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-</head>
-<body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/"><i class="bi bi-building"></i> WMS 시스템</a>
-    </div>
-</nav>
+<c:import url="/WEB-INF/views/includes/header.jsp"/>
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-megaphone"></i> 공지사항</h2>
-        <button class="btn btn-secondary" onclick="location.href='/announcement/notices/list'">
-            <i class="bi bi-list"></i> 목록
-        </button>
-    </div>
+<div class="main-panel">
+    <div class="container">
+        <div class="page-inner">
 
-    <div class="card">
-        <div class="card-header bg-white">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <c:if test="${notice.nPriority == 1}">
-                        <span class="badge bg-danger">중요</span>
-                    </c:if>
-                    <h4 class="mt-2">${notice.nTitle}</h4>
+            <h3 class="fw-bold mb-3">공지사항 상세</h3>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title">${notice.nTitle}</h4>
+                    <div>
+                        <c:if test="${not empty sessionScope.loginAdminId}">
+                            <a href="<c:url value='/notice/edit/${notice.noticeIndex}'/>" class="btn btn-warning btn-sm">수정</a>
+                            <button class="btn btn-danger btn-sm" onclick="deleteNotice(${notice.noticeIndex})">삭제</button>
+                        </c:if>
+                        <a href="<c:url value='/anc/notices/list'/>" class="btn btn-secondary btn-sm">목록으로</a>
+                    </div>
                 </div>
-                <small class="text-muted">
-                    <fmt:formatDate value="${notice.nCreateAt}" pattern="yyyy-MM-dd HH:mm"/>
-                </small>
+                <div class="card-body">
+                    <div class="mb-3 text-muted">
+                        작성일: <fmt:formatDate value="${notice.nCreateAt}" pattern="yyyy-MM-dd HH:mm"/> |
+                        관리자: ${notice.adminIndex}
+                    </div>
+                    <div class="content-box p-3 border rounded">
+                        ${notice.nContent}
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="card-body">
-            <div style="min-height: 300px; white-space: pre-wrap;">${notice.nContent}</div>
+
+            <script>
+                function deleteNotice(index) {
+                    if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+                        fetch('/anc/admin/notices/' + index, {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' }
+                            // CSRF 토큰 처리가 필요할 수 있습니다.
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                alert(data.message);
+                                if (data.success) {
+                                    window.location.href = '/anc/notices/list';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('삭제 오류:', error);
+                                alert('삭제 중 오류가 발생했습니다.');
+                            });
+                    }
+                }
+            </script>
+
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<c:import url="/WEB-INF/views/includes/footer.jsp"/>
+<c:import url="/WEB-INF/views/includes/end.jsp"/>

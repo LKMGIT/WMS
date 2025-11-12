@@ -12,13 +12,6 @@ import java.util.Map;
 @Mapper
 public interface BoardRequestMapper {
 
-    // ============================================
-    // 게시글 관련 메서드
-    // ============================================
-
-    /** 게시글 등록 */
-    int insertBoard(BoardRequestDTO boardDTO);
-
     /** 게시글 목록 조회 */
     List<BoardRequestDTO> selectBoards(Map<String, Object> params);
 
@@ -28,10 +21,7 @@ public interface BoardRequestMapper {
     /** 게시글 조회수 증가 */
     int increaseViews(@Param("board_index") Integer boardIndex);
 
-    /** 게시글 수정 */
-    int updateBoard(BoardRequestDTO boardDTO);
-
-    /** 게시글 삭제 */
+    /** 게시글 삭제 (관리자) */
     int deleteBoard(@Param("board_index") Integer boardIndex);
 
 

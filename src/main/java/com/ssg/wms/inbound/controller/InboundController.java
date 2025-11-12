@@ -1,6 +1,5 @@
 package com.ssg.wms.inbound.controller;
 
-import com.ssg.wms.inbound.domain.InboundDetailDTO;
 import com.ssg.wms.inbound.domain.InboundRequestDTO;
 import com.ssg.wms.inbound.service.InboundService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,251 +16,14 @@ import java.util.Map;
 
 
 @Controller
-@RequestMapping("/api/inbound")
+@RequestMapping("/inbound")
 public class InboundController {
 
     @Autowired
     private InboundService inboundService;
 
     /**
-     * 입고 요청 등록
-     */
-    @PostMapping("/request")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> requestInbound(
-            @RequestBody InboundRequestDTO requestDTO,
-            HttpSession session) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            // 세션에서 사용자 ID 가져오기
-            Long userId = (Long) session.getAttribute("userId");
-            if (userId == null) {
-                response.put("success", false);
-                response.put("message", "로그인이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            Long inboundIndex = inboundService.requestInbound(requestDTO, userId);
-
-            response.put("success", true);
-            response.put("message", "입고 요청이 등록되었습니다.");
-            response.put("inboundIndex", inboundIndex);
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "입고 요청 등록 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
      * 입고 요청 목록 조회
-     */
-    @GetMapping("/request")
-    @ResponseBody
-    public ResponseEntity<List<InboundRequestDTO>> getInboundRequests(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status,
-            HttpSession session) {
-
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        List<InboundRequestDTO> requests = inboundService.getRequests(keyword, status, userId);
-        return ResponseEntity.ok(requests);
-    }
-
-    /**
-     * 입고 요청 상세 조회
-     */
-    @GetMapping("/request/{inbound_index}")
-    @ResponseBody
-    public ResponseEntity<InboundRequestDTO> getInboundRequestDetail(
-            @PathVariable("inbound_index") Long inboundIndex,
-            HttpSession session) {
-
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        InboundRequestDTO request = inboundService.getRequestWithDetails(inboundIndex);
-
-        if (request == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // 본인의 요청인지 확인
-        if (!request.getUserIndex().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        return ResponseEntity.ok(request);
-    }
-
-    /**
-     * 입고 요청 수정
-     */
-    @PutMapping("/request")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateInboundRequest(
-            @RequestBody InboundRequestDTO requestDTO,
-            HttpSession session) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            Long userId = (Long) session.getAttribute("userId");
-            if (userId == null) {
-                response.put("success", false);
-                response.put("message", "로그인이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            boolean result = inboundService.updateRequest(requestDTO);
-
-            if (result) {
-                response.put("success", true);
-                response.put("message", "입고 요청이 수정되었습니다.");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "입고 요청 수정에 실패했습니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "입고 요청 수정 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * 입고 요청 취소
-     */
-    @PutMapping("/request/{inbound_index}/cancel")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> cancelInboundRequest(
-            @PathVariable("inbound_index") Long inboundIndex,
-            @RequestParam String cancelReason,
-            HttpSession session) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            Long userId = (Long) session.getAttribute("userId");
-            if (userId == null) {
-                response.put("success", false);
-                response.put("message", "로그인이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            boolean result = inboundService.cancelRequest(inboundIndex, cancelReason, userId);
-
-            if (result) {
-                response.put("success", true);
-                response.put("message", "입고 요청이 취소되었습니다.");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "입고 요청 취소에 실패했습니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "입고 요청 취소 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * 입고 요청 삭제
-     */
-    @DeleteMapping("/request/{inbound_index}")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> deleteInboundRequest(
-            @PathVariable("inbound_index") Long inboundIndex,
-            HttpSession session) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            Long userId = (Long) session.getAttribute("userId");
-            if (userId == null) {
-                response.put("success", false);
-                response.put("message", "로그인이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            boolean result = inboundService.deleteRequest(inboundIndex);
-
-            if (result) {
-                response.put("success", true);
-                response.put("message", "입고 요청이 삭제되었습니다.");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "입고 요청 삭제에 실패했습니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "입고 요청 삭제 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * 기간별 입고 현황 조회
-     */
-    @GetMapping("/status/period")
-    @ResponseBody
-    public ResponseEntity<List<InboundRequestDTO>> getInboundStatusByPeriod(
-            @RequestParam String startDate,
-            @RequestParam String endDate,
-            HttpSession session) {
-
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        List<InboundRequestDTO> statusList = inboundService.getInboundStatusByPeriod(startDate, endDate, userId);
-        return ResponseEntity.ok(statusList);
-    }
-
-    /**
-     * 월별 입고 현황 조회
-     */
-    @GetMapping("/status/month")
-    @ResponseBody
-    public ResponseEntity<List<InboundRequestDTO>> getInboundStatusByMonth(
-            @RequestParam int year,
-            @RequestParam int month,
-            HttpSession session) {
-
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        List<InboundRequestDTO> statusList = inboundService.getInboundStatusByMonth(year, month);
-        return ResponseEntity.ok(statusList);
-    }
-
-    // 관리자 입고 관리 API
-
-    /**
-     * 관리자용 입고 요청 목록 조회
      */
     @GetMapping("/admin/request")
     @ResponseBody
@@ -269,27 +31,41 @@ public class InboundController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
             HttpSession session) {
-
+        // ... (기존 로직 유지)
         Long adminId = (Long) session.getAttribute("adminId");
         if (adminId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         List<InboundRequestDTO> requests = inboundService.getAdminInboundRequests(keyword, status);
         return ResponseEntity.ok(requests);
     }
 
     /**
-     * 입고 요청 승인 (관리자)
+     * 입고 요청 상세 조회
+     */
+    @GetMapping("/admin/request/{inbound_index}")
+    @ResponseBody
+    public ResponseEntity<InboundRequestDTO> getAdminInboundRequestDetail(
+            @PathVariable("inbound_index") Long inboundIndex,
+            HttpSession session) {
+        Long adminId = (Long) session.getAttribute("adminId");
+        if (adminId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // 관리자는 권한 체크 없이 상세 조회
+        InboundRequestDTO request = inboundService.getRequestWithDetails(inboundIndex);
+        return request == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(request);
+    }
+
+    /**
+     * 입고 요청 승인
      */
     @PutMapping("/admin/request/{inbound_index}/approve")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> approveInboundRequest(
             @PathVariable("inbound_index") Long inboundIndex,
             HttpSession session) {
-
         Map<String, Object> response = new HashMap<>();
-
         try {
             Long adminId = (Long) session.getAttribute("adminId");
             if (adminId == null) {
@@ -297,9 +73,7 @@ public class InboundController {
                 response.put("message", "관리자 권한이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-
             boolean result = inboundService.approveRequest(inboundIndex, adminId);
-
             if (result) {
                 response.put("success", true);
                 response.put("message", "입고 요청이 승인되었습니다.");
@@ -309,7 +83,6 @@ public class InboundController {
                 response.put("message", "입고 요청 승인에 실패했습니다.");
                 return ResponseEntity.badRequest().body(response);
             }
-
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "입고 요청 승인 중 오류가 발생했습니다.");
@@ -318,138 +91,7 @@ public class InboundController {
     }
 
     /**
-     * 입고 상세 위치 지정 (관리자)
-     */
-    @PutMapping("/admin/detail/{detail_index}/location")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateInboundLocation(
-            @PathVariable("detail_index") Integer detailIndex,
-            @RequestParam String location,
-            HttpSession session) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            Long adminId = (Long) session.getAttribute("adminId");
-            if (adminId == null) {
-                response.put("success", false);
-                response.put("message", "관리자 권한이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            boolean result = inboundService.updateLocation(detailIndex, location, adminId);
-
-            if (result) {
-                response.put("success", true);
-                response.put("message", "입고 위치가 지정되었습니다.");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "입고 위치 지정에 실패했습니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "입고 위치 지정 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * QR 코드 생성 (관리자)
-     */
-    @PostMapping("/admin/detail/{detail_index}/qrcode")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> generateQrCode(
-            @PathVariable("detail_index") Integer detailIndex,
-            HttpSession session) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            Long adminId = (Long) session.getAttribute("adminId");
-            if (adminId == null) {
-                response.put("success", false);
-                response.put("message", "관리자 권한이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            String qrCode = inboundService.generateQrCode(detailIndex, adminId);
-
-            response.put("success", true);
-            response.put("message", "QR 코드가 생성되었습니다.");
-            response.put("qrCode", qrCode);
-            // 구글 QR API URL 생성
-            response.put("qrCodeImageUrl", "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=" + qrCode);
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "QR 코드 생성 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * QR 코드로 입고 상세 조회
-     */
-    @GetMapping("/admin/detail/qr")
-    @ResponseBody
-    public ResponseEntity<InboundDetailDTO> getInboundDetailByQr(
-            @RequestParam String qrCode) {
-
-        InboundDetailDTO detail = inboundService.getDetailByQr(qrCode);
-
-        if (detail == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(detail);
-    }
-
-    /**
-     * 입고 완료 처리 (관리자)
-     */
-    @PutMapping("/admin/detail/{detail_index}/complete")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> completeInbound(
-            @PathVariable("detail_index") Integer detailIndex,
-            @RequestParam Integer receivedQuantity,
-            HttpSession session) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            Long adminId = (Long) session.getAttribute("adminId");
-            if (adminId == null) {
-                response.put("success", false);
-                response.put("message", "관리자 권한이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            boolean result = inboundService.completeInbound(detailIndex, receivedQuantity, adminId);
-
-            if (result) {
-                response.put("success", true);
-                response.put("message", "입고가 완료되었습니다.");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "입고 완료 처리에 실패했습니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "입고 완료 처리 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * 관리자용 기간별 입고 현황 조회
+     * 기간별 입고 현황 조회
      */
     @GetMapping("/admin/status/period")
     @ResponseBody
@@ -457,19 +99,16 @@ public class InboundController {
             @RequestParam String startDate,
             @RequestParam String endDate,
             HttpSession session) {
-
         Long adminId = (Long) session.getAttribute("adminId");
         if (adminId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        // userId를 null로 전달하여 전체 조회
         List<InboundRequestDTO> statusList = inboundService.getInboundStatusByPeriod(startDate, endDate, null);
         return ResponseEntity.ok(statusList);
     }
 
     /**
-     * 관리자용 월별 입고 현황 조회
+     *  월별 입고 현황 조회
      */
     @GetMapping("/admin/status/month")
     @ResponseBody
@@ -477,15 +116,61 @@ public class InboundController {
             @RequestParam int year,
             @RequestParam int month,
             HttpSession session) {
-
         Long adminId = (Long) session.getAttribute("adminId");
         if (adminId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        // 관리자는 전체 현황 조회
         List<InboundRequestDTO> statusList = inboundService.getInboundStatusByMonth(year, month);
         return ResponseEntity.ok(statusList);
     }
 
+
+    /**
+     * 입고 요청 상세 화면 (Admin)
+     */
+    @GetMapping("/admin/detail/{inbound_index}") // URL을 관리자용으로 명확히 변경
+    public String showAdminInboundDetail(@PathVariable("inbound_index") Long inboundIndex, Model model) {
+        model.addAttribute("inboundIndex", inboundIndex);
+        return "inbound/admin/detail"; // View 경로도 관리자용으로 변경
+    }
+
+    /**
+     * QR 조회 화면 (Admin)
+     */
+    @GetMapping("/admin/qr")
+    public String showAdminQrSearch() {
+        return "inbound/admin/qr"; // View 경로도 관리자용으로 변경
+    }
+
+    /**
+     * 입고 요청 목록 화면 (Admin)
+     */
+    @GetMapping("/admin/list")
+    public String showAdminInboundList() {
+        return "inbound/admin/list";
+    }
+
+    /**
+     * 관리자 입고 목록 조회 (폼)
+     */
+    @GetMapping("/admin/form")
+    public String showAdminInboundForm() {
+        return "inbound/admin/form";
+    }
+
+    /**
+     * 관리자용 기간별 입고 현황 조회 화면
+     */
+    @GetMapping("/admin/period")
+    public String showAdminInboundPeriodStatus() {
+        return "inbound/admin/period";
+    }
+
+    /**
+     * 관리자용 월별 입고 현황 조회 화면
+     */
+    @GetMapping("/admin/month")
+    public String showAdminInboundMonthStatus() {
+        return "inbound/admin/month";
+    }
 }

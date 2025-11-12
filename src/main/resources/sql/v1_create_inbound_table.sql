@@ -34,46 +34,7 @@ CREATE TABLE inbound_detail
   DEFAULT CHARSET = utf8mb4 COMMENT ='입고 상세 테이블';
 
 
--- 1. 입고 요청 등록 (insertRequest)
-DELIMITER //
-CREATE PROCEDURE sp_insert_inbound_request(
-    IN p_inbound_request_quantity INT,
-    IN p_planned_receive_date DATE,
-    IN p_user_index BIGINT,
-    IN p_warehouse_index BIGINT,
-    OUT p_inbound_index BIGINT
-)
-BEGIN
-    INSERT INTO inbound_request (inbound_request_quantity,
-                                 inbound_request_date,
-                                 planned_receive_date,
-                                 approval_status,
-                                 user_index,
-                                 warehouse_index)
-    VALUES (p_inbound_request_quantity,
-            NOW(),
-            p_planned_receive_date,
-            'PENDING',
-            p_user_index,
-            p_warehouse_index);
-
-    SET p_inbound_index = LAST_INSERT_ID();
-END //
-DELIMITER ;
-
--- 2. 입고 요청 단건 조회 (selectRequestById)
-DELIMITER //
-CREATE PROCEDURE sp_select_inbound_request_by_id(
-    IN p_inbound_index BIGINT
-)
-BEGIN
-    SELECT *
-    FROM inbound_request
-    WHERE inbound_index = p_inbound_index;
-END //
-DELIMITER ;
-
--- 3. 입고 요청 목록 조회 (selectRequests) - 검색 조건 포함
+-- 입고 요청 목록 조회 (selectRequests)
 DELIMITER //
 CREATE PROCEDURE sp_select_inbound_requests(
     IN p_keyword VARCHAR(100),
@@ -91,35 +52,20 @@ BEGIN
 END //
 DELIMITER ;
 
--- 4. 입고 요청 수정 (updateRequest)
+-- 입고 요청 단건 조회 (selectRequestById)
 DELIMITER //
-CREATE PROCEDURE sp_update_inbound_request(
-    IN p_inbound_index BIGINT,
-    IN p_inbound_request_quantity INT,
-    IN p_planned_receive_date DATE
-)
-BEGIN
-    UPDATE inbound_request
-    SET inbound_request_quantity = p_inbound_request_quantity,
-        planned_receive_date     = p_planned_receive_date,
-        updated_date             = NOW()
-    WHERE inbound_index = p_inbound_index;
-END //
-DELIMITER ;
-
--- 5. 입고 요청 삭제 (deleteRequest)
-DELIMITER //
-CREATE PROCEDURE sp_delete_inbound_request(
+CREATE PROCEDURE sp_select_inbound_request_by_id(
     IN p_inbound_index BIGINT
 )
 BEGIN
-    DELETE
+    SELECT *
     FROM inbound_request
     WHERE inbound_index = p_inbound_index;
 END //
 DELIMITER ;
 
--- 6. 입고 요청 취소 (updateCancel)
+
+-- 5. 입고 요청 취소 (updateCancel)
 DELIMITER //
 CREATE PROCEDURE sp_cancel_inbound_request(
     IN p_inbound_index BIGINT,
@@ -134,7 +80,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- 7. 입고 요청 승인 (updateApproval)
+-- 6. 입고 요청 승인 (updateApproval)
 DELIMITER //
 CREATE PROCEDURE sp_approve_inbound_request(
     IN p_inbound_index BIGINT
@@ -148,32 +94,8 @@ BEGIN
 END //
 DELIMITER ;
 
--- 8. 입고 상세 추가 (insertDetail)
-DELIMITER //
-CREATE PROCEDURE sp_insert_inbound_detail(
-    IN p_request_index BIGINT,
-    IN p_qr_code VARCHAR(100),
-    IN p_received_quantity INT,
-    IN p_location VARCHAR(255),
-    OUT p_detail_index INT
-)
-BEGIN
-    INSERT INTO inbound_detail (request_index,
-                                qr_code,
-                                received_quantity,
-                                complete_date,
-                                location)
-    VALUES (p_request_index,
-            p_qr_code,
-            p_received_quantity,
-            NOW(),
-            p_location);
 
-    SET p_detail_index = LAST_INSERT_ID();
-END //
-DELIMITER ;
-
--- 9. 요청번호로 입고 상세 목록 조회 (selectDetailsByRequestId)
+-- 8. 요청번호로 입고 상세 목록 조회 (selectDetailsByRequestId)
 DELIMITER //
 CREATE PROCEDURE sp_select_details_by_request_id(
     IN p_request_index BIGINT
@@ -186,7 +108,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- 10. QR코드로 입고 상세 조회 (selectDetailByQr)
+-- 9. QR코드로 입고 상세 조회 (selectDetailByQr) - 관리자 QR 조회 기능
 DELIMITER //
 CREATE PROCEDURE sp_select_detail_by_qr(
     IN p_qr_code VARCHAR(100)
@@ -198,7 +120,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- 11. 입고 상세 수정 (updateDetail)
+-- 10. 입고 상세 위치/수량 수정 (updateDetail)
 DELIMITER //
 CREATE PROCEDURE sp_update_inbound_detail(
     IN p_detail_index INT,
@@ -213,7 +135,21 @@ BEGIN
 END //
 DELIMITER ;
 
--- 12. 입고 상세 완료 처리 (updateComplete)
+-- 11. 입고 상세 QR 코드 업데이트 (QR 코드 생성 시 사용)
+DELIMITER //
+CREATE PROCEDURE sp_update_inbound_detail_qr_code(
+    IN p_detail_index INT,
+    IN p_qr_code VARCHAR(100)
+)
+BEGIN
+    UPDATE inbound_detail
+    SET qr_code = p_qr_code
+    WHERE detail_index = p_detail_index;
+END //
+DELIMITER ;
+
+
+-- 12. 입고 상세 완료 처리 (updateComplete) - 관리자 입고 완료 기능
 DELIMITER //
 CREATE PROCEDURE sp_complete_inbound_detail(
     IN p_detail_index INT,
@@ -227,7 +163,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- 13. 입고 상세 삭제 (deleteDetail)
+-- 13. 입고 상세 삭제 (deleteDetail) - 관리자 강제 삭제 기능
 DELIMITER //
 CREATE PROCEDURE sp_delete_inbound_detail(
     IN p_detail_index INT
@@ -244,7 +180,7 @@ DELIMITER //
 CREATE PROCEDURE sp_select_inbound_status_by_period(
     IN p_start_date VARCHAR(10),
     IN p_end_date VARCHAR(10),
-    IN p_user_index BIGINT
+    IN p_user_index BIGINT -- NULL이면 관리자 전체 조회
 )
 BEGIN
     SELECT ir.*,

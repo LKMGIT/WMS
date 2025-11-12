@@ -4,7 +4,6 @@
 
 <mapper namespace="com.ssg.wms.announcement.mappers.OneToOneRequestMapper">
 
-    <!-- OneToOneRequestDTO ResultMap -->
     <resultMap id="OneToOneRequestResultMap" type="com.ssg.wms.announcement.domain.OneToOneRequestDTO">
         <id property="requestIndex" column="request_index"/>
         <result property="rTitle" column="r_title"/>
@@ -18,36 +17,6 @@
         <result property="adminIndex" column="admin_index"/>
     </resultMap>
 
-    <!-- 1:1 문의 등록 -->
-    <insert id="insertRequest" parameterType="com.ssg.wms.announcement.domain.OneToOneRequestDTO"
-            useGeneratedKeys="true" keyProperty="requestIndex">
-        INSERT INTO one_to_one_request (
-            r_title,
-            r_content,
-            r_type,
-            r_status,
-            user_index
-        ) VALUES (
-                     #{rTitle},
-                     #{rContent},
-                     #{rType},
-                     'PENDING',
-                     #{userIndex}
-                 )
-    </insert>
-
-    <!-- 사용자 본인의 1:1 문의 목록 조회 -->
-    <select id="selectMyRequests" parameterType="map" resultMap="OneToOneRequestResultMap">
-        SELECT * FROM one_to_one_request
-        WHERE user_index = #{userId}
-        <if test="keyword != null and keyword != ''">
-            AND (r_title LIKE CONCAT('%', #{keyword}, '%')
-            OR r_content LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
-        ORDER BY r_createAt DESC
-    </select>
-
-    <!-- 관리자용 1:1 문의 목록 조회 -->
     <select id="selectRequests" parameterType="map" resultMap="OneToOneRequestResultMap">
         SELECT * FROM one_to_one_request
         WHERE 1=1
@@ -61,24 +30,11 @@
         ORDER BY r_createAt DESC
     </select>
 
-    <!-- 1:1 문의 상세 조회 -->
     <select id="selectRequest" resultMap="OneToOneRequestResultMap">
         SELECT * FROM one_to_one_request
         WHERE request_index = #{request_index}
     </select>
 
-    <!-- 1:1 문의 수정 (답변 전에만) -->
-    <update id="updateRequest" parameterType="com.ssg.wms.announcement.domain.OneToOneRequestDTO">
-        UPDATE one_to_one_request
-        SET r_title = #{rTitle},
-            r_content = #{rContent},
-            r_type = #{rType},
-            r_updateAt = NOW()
-        WHERE request_index = #{requestIndex}
-          AND r_status = 'PENDING'
-    </update>
-
-    <!-- 1:1 문의 답변 등록/수정 (관리자) -->
     <update id="updateAnswer" parameterType="com.ssg.wms.announcement.domain.OneToOneRequestDTO">
         UPDATE one_to_one_request
         SET r_response = #{rResponse},
@@ -88,7 +44,6 @@
         WHERE request_index = #{requestIndex}
     </update>
 
-    <!-- 1:1 문의 삭제 -->
     <delete id="deleteRequest">
         DELETE FROM one_to_one_request
         WHERE request_index = #{request_index}

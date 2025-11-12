@@ -1,96 +1,95 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>게시판 상세 - WMS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-</head>
-<body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/"><i class="bi bi-building"></i> WMS 시스템</a>
-    </div>
-</nav>
+<c:import url="/WEB-INF/views/includes/header.jsp"/>
 
-<div class="container py-4">
-    <button class="btn btn-secondary mb-3" onclick="location.href='/announcement/board/list'">
-        <i class="bi bi-list"></i> 목록
-    </button>
+<div class="main-panel">
+  <div class="container">
+    <div class="page-inner">
 
-    <!-- 게시글 내용 -->
-    <div class="card mb-4">
-        <div class="card-header bg-white">
-            <h4>${board.bTitle}</h4>
-            <div class="d-flex justify-content-between align-items-center mt-2">
-                <div>
-                    <span class="text-muted">작성자: 사용자 #${board.userIndex}</span>
-                    <span class="text-muted ms-3">
-                            작성일: <fmt:formatDate value="${board.bCreateAt}" pattern="yyyy-MM-dd HH:mm"/>
-                        </span>
-                </div>
-                <span class="text-muted">조회: ${board.bViews != null ? board.bViews : 0}</span>
-            </div>
+      <h3 class="fw-bold mb-3">게시글 상세</h3>
+
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title">${board.bTitle} <span class="badge bg-secondary">${board.bType}</span></h4>
+          <div>
+            <c:if test="${not empty sessionScope.loginAdminId}">
+              <button class="btn btn-danger btn-sm" onclick="deleteBoard(${board.boardIndex})">삭제</button>
+            </c:if>
+            <a href="<c:url value='/anc/board/list'/>" class="btn btn-secondary btn-sm">목록으로</a>
+          </div>
         </div>
         <div class="card-body">
-            <p style="white-space: pre-wrap; min-height: 200px;">${board.bContent}</p>
+          <div class="mb-3 text-muted">
+            작성일: <fmt:formatDate value="${board.bCreateAt}" pattern="yyyy-MM-dd HH:mm"/> |
+            조회수: ${board.bViews} | 작성자: ${board.userIndex}
+          </div>
+          <div class="content-box p-3 border rounded">
+            ${board.bContent}
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- 댓글 목록 -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">
-                댓글 (<c:out value="${not empty board.comments ? board.comments.size() : 0}"/>)
-            </h5>
-        </div>
+      <div class="card">
+        <div class="card-header"><h5 class="card-title">댓글 (${fn:length(board.comments)})</h5></div>
         <div class="card-body">
-            <c:choose>
-                <c:when test="${empty board.comments}">
-                    <p class="text-muted text-center py-3">등록된 댓글이 없습니다.</p>
-                </c:when>
-                <c:otherwise>
-                    <c:forEach items="${board.comments}" var="comment" varStatus="status">
-                        <div class="mb-3 ${!status.last ? 'pb-3 border-bottom' : ''}">
-                            <div class="d-flex justify-content-between">
-                                <strong>
-                                    <c:choose>
-                                        <c:when test="${not empty comment.adminIndex}">
-                                            관리자
-                                        </c:when>
-                                        <c:otherwise>
-                                            사용자 #${comment.userIndex}
-                                        </c:otherwise>
-                                    </c:choose>
-                                </strong>
-                                <small class="text-muted">
-                                    <fmt:formatDate value="${comment.cCreateAt}" pattern="yyyy-MM-dd HH:mm"/>
-                                </small>
-                            </div>
-                            <p class="mt-2 mb-0">${comment.cContent}</p>
-                        </div>
-                    </c:forEach>
-                </c:otherwise>
-            </c:choose>
-        </div>
-        <div class="card-footer">
-            <form action="/announcement/board/comment" method="post">
-                <input type="hidden" name="boardIndex" value="${board.boardIndex}">
-                <div class="input-group">
-                    <input type="text" name="cContent" class="form-control"
-                           placeholder="댓글을 입력하세요..." required>
-                    <button class="btn btn-primary" type="submit">
-                        <i class="bi bi-send"></i> 등록
-                    </button>
+          <ul class="list-group mb-4">
+            <c:forEach items="${board.comments}" var="comment">
+              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                  <div class="fw-bold">
+                    <c:choose>
+                      <c:when test="${comment.adminIndex != null}">[관리자]</c:when>
+                      <c:otherwise>[사용자 ${comment.userIndex}]</c:otherwise>
+                    </c:choose>
+                  </div>
+                    ${comment.cContent}
+                  <small class="text-muted ms-3"><fmt:formatDate value="${comment.cCreateAt}" pattern="yyyy-MM-dd HH:mm"/></small>
                 </div>
+                <c:if test="${not empty sessionScope.loginAdminId}">
+                  <button class="btn btn-sm btn-danger" onclick="deleteComment(${comment.commentIndex})">삭제</button>
+                </c:if>
+              </li>
+            </c:forEach>
+          </ul>
+
+          <c:if test="${not empty sessionScope.loginAdminId}">
+            <form id="commentForm">
+              <input type="hidden" name="boardIndex" value="${board.boardIndex}">
+              <div class="d-flex">
+                <textarea name="cContent" class="form-control me-2" rows="2" placeholder="댓글을 입력하세요." required></textarea>
+                <button type="submit" class="btn btn-primary" style="width: 100px;">등록</button>
+              </div>
             </form>
+          </c:if>
         </div>
+      </div>
+
+      <script>
+        // 게시글 삭제 (관리자 전용)
+        function deleteBoard(index) {
+          if (confirm('게시글을 삭제하시겠습니까?')) {
+            // ... /anc/admin/board/{board_index} API 호출 로직 ...
+          }
+        }
+
+        // 댓글 삭제 (관리자 전용)
+        function deleteComment(index) {
+          if (confirm('댓글을 삭제하시겠습니까?')) {
+            // ... /anc/admin/board/comments/{comment_index} API 호출 로직 ...
+          }
+        }
+
+        // 댓글 등록 (관리자 전용)
+        document.getElementById('commentForm')?.addEventListener('submit', function(e) {
+          e.preventDefault();
+          // ... /anc/admin/board/{board_index}/comments API 호출 로직 ...
+        });
+      </script>
+
     </div>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<c:import url="/WEB-INF/views/includes/footer.jsp"/>
+<c:import url="/WEB-INF/views/includes/end.jsp"/>

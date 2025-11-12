@@ -18,14 +18,6 @@ public class BoardRequestServiceImpl implements BoardRequestService {
     @Autowired
     private BoardRequestMapper boardRequestMapper;
 
-
-    @Override
-    public Integer registerBoard(BoardRequestDTO boardDTO, Long userId) {
-        boardDTO.setUserIndex(userId);
-        boardRequestMapper.insertBoard(boardDTO);
-        return boardDTO.getBoardIndex();
-    }
-
     @Override
     public List<BoardRequestDTO> getBoards(String keyword, String type) {
         Map<String, Object> params = new HashMap<>();
@@ -51,36 +43,23 @@ public class BoardRequestServiceImpl implements BoardRequestService {
         return board;
     }
 
+    // 관리자 전용 게시글 삭제
     @Override
-    public boolean updateBoard(BoardRequestDTO boardDTO, Long userId) {
-        BoardRequestDTO existing = boardRequestMapper.selectBoard(boardDTO.getBoardIndex());
-        if (existing == null || !existing.getUserIndex().equals(userId)) {
-            return false;
-        }
-
-        return boardRequestMapper.updateBoard(boardDTO) > 0;
-    }
-
-    @Override
-    public boolean deleteBoard(Integer boardIndex, Long userId) {
+    public boolean deleteBoardByAdmin(Integer boardIndex, Long adminId) {
         BoardRequestDTO existing = boardRequestMapper.selectBoard(boardIndex);
         if (existing == null) {
             return false;
         }
 
-        // 작성자 본인이거나 관리자(userId가 null)만 삭제 가능
-        if (userId != null && !existing.getUserIndex().equals(userId)) {
-            return false;
-        }
-
+        // 관리자는 권한 체크 없이 삭제 가능
         return boardRequestMapper.deleteBoard(boardIndex) > 0;
     }
 
 
-    // 댓글 관련 메서드
+    // 댓글 관련 메서드 (관리자 전용으로 수정)
     @Override
-    public Integer registerComment(BoardCommentDTO commentDTO, Long userId, Long adminId) {
-        commentDTO.setUserIndex(userId);
+    public Integer registerComment(BoardCommentDTO commentDTO, Long adminId) {
+        commentDTO.setUserIndex(null);
         commentDTO.setAdminIndex(adminId);
         boardRequestMapper.insertComment(commentDTO);
         return commentDTO.getCommentIndex();
@@ -92,7 +71,7 @@ public class BoardRequestServiceImpl implements BoardRequestService {
     }
 
     @Override
-    public boolean deleteComment(Integer commentIndex, Long userId, Long adminId) {
+    public boolean deleteComment(Integer commentIndex, Long adminId) {
         return boardRequestMapper.deleteComment(commentIndex) > 0;
     }
 }

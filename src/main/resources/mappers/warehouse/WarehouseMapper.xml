@@ -67,11 +67,11 @@
         from warehouse
         <where>
             warehouse_status != 'CLOSED'
-            <if test="typeStr != null and typeStr != '' and typeStr == 'code'">
-                and warehouse_code like concat('%', #{keyword}, '%')
-            </if>
             <if test="typeStr != null and typeStr != '' and typeStr == 'name'">
                 and warehouse_name like concat('%', #{keyword}, '%')
+            </if>
+            <if test="typeStr != null and typeStr != '' and typeStr == 'code'">
+                and warehouse_code like concat('%', #{keyword}, '%')
             </if>
             <if test="typeStr != null and typeStr != '' and typeStr == 'location'">
                 and warehouse_location like concat('%', #{keyword}, '%')
@@ -95,4 +95,9 @@
         set warehouse_status = 'CLOSED'
         where warehouse_index = #{wIndex}
     </update>
+
+    <select id="getNextCode" resultType="int">
+        select coalesce(max(warehouse_index), 0) + 1
+        from warehouse
+    </select>
 </mapper>

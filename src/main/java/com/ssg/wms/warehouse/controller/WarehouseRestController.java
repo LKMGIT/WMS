@@ -29,6 +29,9 @@ public class WarehouseRestController {
     @PutMapping(value = "/{id}", produces = "text/plain; charset=UTF-8")
     public ResponseEntity<String> updateWarehouse(@PathVariable Long id, @RequestBody WarehouseUpdateDTO warehouseUpdateDTO) {
         warehouseUpdateDTO.setWIndex(id);
+        String address = warehouseUpdateDTO.getWAddress();
+        String location = address.substring(0, address.indexOf(" "));
+        warehouseUpdateDTO.setWLocation(location);
         boolean result = warehouseService.modifyWarehouse(warehouseUpdateDTO);
         return result ? ResponseEntity.ok("창고 수정 완료")
                 : ResponseEntity.status(HttpStatus.BAD_REQUEST).body("창고 수정 실패");

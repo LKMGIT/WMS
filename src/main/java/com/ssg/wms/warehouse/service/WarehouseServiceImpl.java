@@ -32,28 +32,48 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     @Override
     public boolean registerWarehouse(WarehouseSaveDTO warehouseSaveDTO) {
-        String code = "WH-" + UUID.randomUUID().toString().substring(0,4);
+        // 창고 code 생성 -> 1부터시작
+        int warehouseCodeNum =  warehouseMapper.getNextCode();
         WarehouseDTO warehouseDTO = WarehouseDTO.builder()
-                .wCode(code)
+                .wCode(warehouseCodeNum)
                 .wName(warehouseSaveDTO.getWName())
                 .wSize(warehouseSaveDTO.getWSize())
                 .wLocation(warehouseSaveDTO.getWLocation())
                 .wAddress(warehouseSaveDTO.getWAddress())
                 .wZipcode(warehouseSaveDTO.getWZipcode())
+                .wStatus(EnumStatus.NORMAL)
                 .build();
 
         warehouseMapper.insertWarehouse(warehouseDTO);
 
         Long warehouseIndex = warehouseDTO.getWIndex();
-
         int warehouseSize = warehouseSaveDTO.getWSize();
-        int sectionCapacity = (int) (warehouseSize * 0.3);
 
-        for (int i = 1; i <= 3; i++) {
+        int sectionCount = 0;
+        if (warehouseSize >= 1 && warehouseSize <= 1000) {
+            sectionCount = 3;
+        } else if (warehouseSize <= 2000) {
+            sectionCount = 4;
+        } else if (warehouseSize <= 3000) {
+            sectionCount = 5;
+        } else {
+            sectionCount = 6;
+        }
+
+        int sectionCapacity = warehouseSize / sectionCount;
+        int remainder = warehouseSize % sectionCount; // 나머지 계산
+
+        for (int i = 1; i <= sectionCount; i++) {
+            int capacity = sectionCapacity;
+            if (i == sectionCount) {
+                capacity += remainder; // 마지막 구역에 나머지 더하기 ex) 1000->333, 333, 334
+            }
+            int sectionCode = warehouseCodeNum * 100 + i;
+
             SectionDTO section = SectionDTO.builder()
-                    .sCode("S-" + warehouseIndex + "-" + i)
+                    .sCode(sectionCode)
                     .sName("구역 " + i)
-                    .sCapacity(sectionCapacity)
+                    .sCapacity(capacity)
                     .wIndex(warehouseIndex)
                     .build();
 

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SectionDTO {
     private Long sIndex;
-    private String sCode;
+    private int sCode;
     private String sName;
     private int sCapacity;
     private Long wIndex;

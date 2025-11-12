@@ -58,15 +58,8 @@ public class WarehouseController {
     @GetMapping("/{id}/update")
     public String updateWarehouseForm(@PathVariable Long id, Model model) {
         WarehouseDTO warehouseDTO = warehouseService.getWarehouse(id);
-        WarehouseUpdateDTO warehouseUpdateDTO = WarehouseUpdateDTO.builder()
-                .wName(warehouseDTO.getWName())
-                .wAddress(warehouseDTO.getWAddress())
-                .wZipcode(warehouseDTO.getWZipcode())
-                .wStatus(warehouseDTO.getWStatus())
-                .build();
-
         model.addAttribute("id", warehouseDTO.getWIndex());
-        model.addAttribute("warehouse", warehouseUpdateDTO);
+        model.addAttribute("warehouse", warehouseDTO);
 
         return "/warehouse/updateForm";
     }

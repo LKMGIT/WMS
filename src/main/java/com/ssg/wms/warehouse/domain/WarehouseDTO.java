@@ -15,7 +15,7 @@ public class WarehouseDTO {
     private Long wIndex;
 
     @JsonProperty("wCode")
-    private String wCode;
+    private int wCode;
 
     @JsonProperty("wName")
     private String wName;

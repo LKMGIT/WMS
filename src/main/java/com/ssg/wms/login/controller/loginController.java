@@ -36,6 +36,7 @@ public class loginController {
             case SUCCESS:
                 // 필요한 세션 정보 세팅
                 AdminDTO admin = adminService.getByAdminId(adminId).get();
+                session.setAttribute("loginAdmin", admin);
 
                 //내가 임의로 추가
                 session.setAttribute("loginAdminIndex", admin.getAdminIndex());
@@ -43,6 +44,8 @@ public class loginController {
                 session.setAttribute("loginAdminId", admin.getAdminId());
                 session.setAttribute("loginAdminName", admin.getAdminName());
                 session.setAttribute("loginAdminStatus", admin.getAdminStatus());
+                session.setAttribute("loginAdminRole", admin.getAdminRole());
+
                 return "redirect:/admin/user_list";
 
             case NOT_FOUND:

@@ -111,12 +111,12 @@
                         </a>
                         <div class="collapse" id="outbound">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">출고 요청 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/outbound/requests'/>">
+                                    <span class="sub-item">출고요청 목록 조회</span>
                                 </a>
                                 </li>
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">출고 지시서 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/outbound/instructions'/>">
+                                    <span class="sub-item">출고 지시서 목록 조회</span>
                                 </a>
                                 </li>
                             </ul>
@@ -131,8 +131,8 @@
                         </a>
                         <div class="collapse" id="quotation">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">견적 신청 목록 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/quotation/requests'/>">
+                                    <span class="sub-item">견적신청 목록 조회</span>
                                 </a>
                                 </li>
                             </ul>

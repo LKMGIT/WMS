@@ -62,7 +62,7 @@ public class InvenServiceImpl implements InvenService {
         dto.setItemIndex(itemIndex);
         dto.setWarehouseIndex(warehouseIndex);
         dto.setSectionIndex(sectionIndex);
-        dto.setInvenQuantity((long) d.getReceivedQuantity());   // +=
+        dto.setInvenQuantity(d.getReceivedQuantity());   // +=
         dto.setInboundDate(d.getCompleteDate() != null ? d.getCompleteDate() : LocalDateTime.now());
         dto.setDetailInbound(d.getDetailIndex() != null ? d.getDetailIndex().longValue() : null);
 
@@ -94,7 +94,7 @@ public class InvenServiceImpl implements InvenService {
         dto.setItemIndex(itemIndex);
         dto.setWarehouseIndex(warehouseIndex);
         dto.setSectionIndex(sectionIndex);
-        dto.setInvenQuantity((long) qty);                         // -=
+        dto.setInvenQuantity(qty);                         // -=
         dto.setShippingDate(LocalDateTime.now());
         dto.setDetailOutbound(s.getSi_index());                   // 추적용
 

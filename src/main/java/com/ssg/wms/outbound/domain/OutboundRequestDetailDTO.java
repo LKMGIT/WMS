@@ -16,6 +16,7 @@ public class OutboundRequestDetailDTO {
     private Long or_index;
     private Long user_index;
     private Long item_index;
+    private String item_name;
     private int or_quantity;
     private String or_name;
     private String or_phone;

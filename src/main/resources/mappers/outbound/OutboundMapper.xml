@@ -92,15 +92,53 @@
         WHERE or_index=#{or_index}
     </update>
 
-    <select id="selectOutboundRequest" parameterType="Long" resultType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
-        SELECT *
+    <resultMap id="OutboundRequestResultMap" type="com.ssg.wms.outbound.domain.OutboundRequestDTO">
+        <id property="or_index" column="or_index"/>
+
+        <result property="user_index" column="user_index"/>
+        <result property="item_index" column="item_index"/>
+        <result property="or_quantity" column="or_quantity"/>
+        <result property="or_name" column="or_name"/>
+        <result property="or_phone" column="or_phone"/>
+        <result property="or_zip_code" column="or_zip_code"/>
+        <result property="or_street_address" column="or_street_address"/>
+        <result property="or_detailed_address" column="or_detailed_address"/>
+        <result property="or_approval" column="or_approval"/>
+        <result property="created_at" column="created_at"/>
+        <result property="updated_at" column="updated_at"/>
+        <result property="status" column="status"/>
+        <result property="or_dispatch_status" column="or_dispatch_status"/>
+        <result property="responded_at" column="responded_at"/>
+
+        <result property="reject_detail" column="reject_detail" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <select id="selectOutboundRequest" parameterType="Long" resultMap="OutboundRequestResultMap">
+        SELECT
+        or_index,
+        user_index,
+        item_index,
+        or_quantity,
+        or_name,
+        or_phone,
+        or_zip_code,
+        or_street_address,
+        or_detailed_address,
+        or_approval,
+        created_at,
+        updated_at,
+        status,
+        or_dispatch_status,
+        responded_at,
+        reject_detail
         FROM OutboundRequest
         WHERE or_index=#{or_index}
     </select>
 
     <update id="updateOutboundResponse" parameterType="com.ssg.wms.outbound.domain.OutboundRequestDTO">
         UPDATE OutboundRequest
-        SET or_approval=#{or_approval}, updated_at=#{updated_at}, reject_detail=#{reject_detail} , responded_at=now()
+        SET or_approval=#{or_approval}, updated_at=#{updated_at}, reject_detail=#{reject_detail} , or_dispatch_status=#{or_dispatch_status}, responded_at=now()
         WHERE or_index=#{or_index}
     </update>
 
@@ -322,22 +360,26 @@
 <!--    </select>-->
 
 
-    <select id="selectStockByLocation" resultType="com.ssg.wms.outbound.domain.TestInvenDTO">
+    <select id="selectStockByLocation" resultType="com.ssg.wms.inventory.domain.InvenDTO">
         SELECT
-        SUM(I.inven_quantity) AS inven_quantity,
-        MAX(I.warehouse_index) AS warehouse_index,
-        MAX(I.section_index) AS section_index
+        SUM(I.inven_quantity) AS invenQuantity,
+        I.warehouse_index AS warehouseIndex,
+        I.section_index AS sectionIndex
         FROM inventory AS I
-        JOIN inboundDetail AS ID ON I.detail_index = ID.detail_index
-        JOIN inboundRequest AS IR ON ID.inbound_index = IR.inbound_index
+        JOIN inbound_detail AS ID ON I.detail_inbound = ID.detail_index
+        JOIN inbound_request AS IR ON ID.request_index = IR.inbound_index
         JOIN warehouse AS W ON I.warehouse_index = W.warehouse_index
-
-        WHERE IR.user_index = #{user_index}
+        WHERE
+        IR.user_index = #{user_index}
         AND I.item_index = #{item_index}
         AND W.warehouse_location = #{location_name}
         AND I.inven_quantity > 0
+        AND IR.approval_status = 'APPROVED'
         GROUP BY
-        W.warehouse_location
+        warehouseIndex, sectionIndex
+        ORDER BY
+        invenQuantity DESC
+        LIMIT 1
     </select>
 
     <select id="selectWarehouseAddress" parameterType="Long" resultType="String">

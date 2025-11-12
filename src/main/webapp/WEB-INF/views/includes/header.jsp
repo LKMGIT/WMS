@@ -202,22 +202,6 @@
                         </div>
                     </li>
 
-<%--                    <li class="nav-item">--%>
-<%--                        <a data-bs-toggle="collapse" href="#map">--%>
-<%--                            <i class="fas fa-pen-square"></i>--%>
-<%--                            <p>지도</p>--%>
-<%--                            <span class="caret"></span>--%>
-<%--                        </a>--%>
-<%--                        <div class="collapse" id="map">--%>
-<%--                            <ul class="nav nav-collapse">--%>
-<%--                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">--%>
-<%--                                    <span class="sub-item">창고 위치</span>--%>
-<%--                                </a>--%>
-<%--                                </li>--%>
-<%--                            </ul>--%>
-<%--                        </div>--%>
-<%--                    </li>--%>
-
                 </ul>
             </div>
         </div>

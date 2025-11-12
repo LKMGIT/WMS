@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssg.wms.announcement.mappers.BoardRequestMapper">
+
+    <resultMap id="BoardRequestResultMap" type="com.ssg.wms.announcement.domain.BoardRequestDTO">
+        <id property="boardIndex" column="board_index"/>
+        <result property="bTitle" column="b_title"/>
+        <result property="bContent" column="b_content"/>
+        <result property="bCreateAt" column="b_createAt"/>
+        <result property="bUpdateAt" column="b_updateAt"/>
+        <result property="bType" column="b_type"/>
+        <result property="bViews" column="b_views"/>
+        <result property="userIndex" column="user_index"/>
+    </resultMap>
+
+    <resultMap id="BoardCommentResultMap" type="com.ssg.wms.announcement.domain.BoardCommentDTO">
+        <id property="commentIndex" column="comment_index"/>
+        <result property="boardIndex" column="board_index"/>
+        <result property="cContent" column="c_content"/>
+        <result property="cCreateAt" column="c_createAt"/>
+        <result property="userIndex" column="user_index"/>
+        <result property="adminIndex" column="admin_index"/>
+    </resultMap>
+
+
+    <select id="selectBoards" parameterType="map" resultMap="BoardRequestResultMap">
+        SELECT * FROM board_request
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (b_title LIKE CONCAT('%', #{keyword}, '%')
+            OR b_content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="type != null and type != ''">
+            AND b_type = #{type}
+        </if>
+        ORDER BY b_createAt DESC
+    </select>
+
+    <select id="selectBoard" resultMap="BoardRequestResultMap">
+        SELECT * FROM board_request
+        WHERE board_index = #{board_index}
+    </select>
+
+    <update id="increaseViews">
+        UPDATE board_request
+        SET b_views = b_views + 1
+        WHERE board_index = #{board_index}
+    </update>
+
+    <delete id="deleteBoard">
+        DELETE FROM board_request
+        WHERE board_index = #{board_index}
+    </delete>
+
+
+    <insert id="insertComment" parameterType="com.ssg.wms.announcement.domain.BoardCommentDTO"
+            useGeneratedKeys="true" keyProperty="commentIndex">
+        INSERT INTO board_comment (
+            board_index,
+            c_content,
+            user_index,
+            admin_index
+        ) VALUES (
+                     #{boardIndex},
+                     #{cContent},
+                     #{userIndex},
+                     #{adminIndex}
+                 )
+    </insert>
+
+    <select id="selectComments" resultMap="BoardCommentResultMap">
+        SELECT * FROM board_comment
+        WHERE board_index = #{board_index}
+        ORDER BY c_createAt ASC
+    </select>
+
+    <delete id="deleteComment">
+        DELETE FROM board_comment
+        WHERE comment_index = #{comment_index}
+    </delete>
+
+</mapper>

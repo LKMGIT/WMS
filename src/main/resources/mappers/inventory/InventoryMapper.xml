@@ -2,6 +2,138 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.inventory.mappers">
+<mapper namespace="com.ssg.wms.inventory.mappers.InvenMapper">
+
+    <resultMap id="InvenItemViewMap" type="com.ssg.wms.inventory.domain.InvenItemViewDTO">
+        <id     property="invenIndex"     column="inven_index"/>
+        <result property="itemIndex"      column="item_index"/>
+        <result property="itemName"       column="item_name"/>
+        <result property="itemCategory"   column="item_category"/>
+        <result property="invenQuantity"  column="inven_quantity"/>
+        <result property="inboundDate"    column="inbound_date"/>
+        <result property="shippingDate"   column="shipping_date"/>
+        <result property="warehouseIndex" column="warehouse_index"/>
+        <result property="sectionIndex"      column="section_index"/>
+    </resultMap>
+
+    <sql id="InventoryWhere">
+        <where>
+            <if test="cri.category != null and cri.category != ''">
+                AND i.item_category = #{cri.category}
+            </if>
+            <if test="cri.itemName != null and cri.itemName != ''">
+                AND i.item_name LIKE CONCAT('%', #{cri.itemName}, '%')
+            </if>
+            <if test="cri.warehouseIndex != null">
+                AND inv.warehouse_index = #{cri.warehouseIndex}
+            </if>
+            <if test="cri.sectionIndex != null">
+                AND inv.section_index = #{cri.sectionIndex}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectInventoryPage" resultMap="InvenItemViewMap">
+        SELECT inv.inven_index, inv.item_index, i.item_name, i.item_category,
+        inv.inven_quantity, inv.inbound_date, inv.shipping_date,
+        inv.warehouse_index, inv.section_index
+        FROM inventory inv
+        JOIN items i ON i.item_index = inv.item_index
+        <include refid="InventoryWhere"/>
+        ORDER BY inv.inven_index DESC
+        LIMIT #{cri.amount}
+        OFFSET #{cri.skip}
+    </select>
+
+    <select id="selectInventoryTotal" resultType="int">
+        SELECT COUNT(1)
+        FROM inventory inv
+        JOIN items i ON i.item_index = inv.item_index
+        <include refid="InventoryWhere"/>
+    </select>
+
+
+    <!-- 입고: 없으면 생성, 있으면 수량 +=  -->
+    <insert id="upsertIncrease" parameterType="com.ssg.wms.inventory.domain.InvenDTO">
+        INSERT INTO inventory
+        (item_index, warehouse_index, section_index, inven_quantity, inbound_date, detail_inbound)
+        VALUES
+        (#{itemIndex}, #{warehouseIndex}, #{sectionIndex}, #{invenQuantity}, #{inboundDate}, #{detailInbound})
+        ON DUPLICATE KEY UPDATE
+        inven_quantity = inven_quantity + VALUES(inven_quantity),
+        inbound_date   = COALESCE(VALUES(inbound_date), inbound_date),
+        detail_inbound = COALESCE(VALUES(detail_inbound), detail_inbound)
+    </insert>
+
+    <!-- 출고: 재고 부족 방지 -->
+    <update id="decreaseIfEnough" parameterType="com.ssg.wms.inventory.domain.InvenDTO">
+        UPDATE inventory
+        SET inven_quantity = inven_quantity - #{invenQuantity},
+        shipping_date  = COALESCE(#{shippingDate}, shipping_date),
+        detail_outbound= COALESCE(#{detailOutbound}, detail_outbound)
+        WHERE item_index = #{itemIndex}
+        AND warehouse_index = #{warehouseIndex}
+        AND section_index = #{sectionIndex}
+        AND inven_quantity >= #{invenQuantity}
+    </update>
+
+    <!-- invenIndex 조회 -->
+    <select id="selectInvenIndex" parameterType="com.ssg.wms.inventory.domain.InvenDTO" resultType="long">
+        SELECT inven_index
+        FROM inventory
+        WHERE item_index = #{itemIndex}
+        AND warehouse_index = #{warehouseIndex}
+        AND section_index = #{sectionIndex}
+        LIMIT 1
+    </select>
+
+    <!-- 재고 스냅샷: 장부는 최신, 실사는 "직전 실사값" 유지(없으면 NULL) -->
+    <insert id="insertInvenCountSnapshot">
+        INSERT INTO inven_count
+        (inven_index, inven_quantity, actual_quantity, count_updateAt)
+        SELECT
+        inv.inven_index,
+        inv.inven_quantity,
+        (
+        SELECT ic.actual_quantity
+        FROM inven_count ic
+        WHERE ic.inven_index = inv.inven_index
+        ORDER BY ic.count_index DESC
+        LIMIT 1
+        ) AS actual_quantity,
+        NOW()
+        FROM inventory inv
+        WHERE inv.inven_index = #{invenIndex}
+    </insert>
+
+    <!-- ====== 보조 조회(서비스에서 사용하는 3개) ====== -->
+    <!-- inboundIndex -> item_index (실제 스키마에 맞춰 조정) -->
+    <select id="selectItemIndexByInbound" parameterType="long" resultType="long">
+        SELECT i.item_index
+        FROM inbound_detail d
+        JOIN inbound_request r ON r.request_index = d.request_index
+        JOIN items i ON i.inbound_index = r.inbound_index
+        WHERE d.inbound_index = #{inboundIndex}
+        LIMIT 1
+    </select>
+
+    <!-- requestIndex -> warehouse_index -->
+    <select id="selectWarehouseByRequest" parameterType="long" resultType="long">
+        SELECT r.warehouse_index
+        FROM inbound_request r
+        WHERE r.request_index = #{requestIndex}
+        LIMIT 1
+    </select>
+
+    <!-- requestIndex -> section_index -->
+    <select id="selectSectionByRequest" parameterType="long" resultType="long">
+        SELECT r.section_index
+        FROM inbound_request r
+        WHERE r.request_index = #{requestIndex}
+        LIMIT 1
+    </select>
+
+
+
 
 </mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssg.wms.announcement.mappers.OneToOneRequestMapper">
+
+    <resultMap id="OneToOneRequestResultMap" type="com.ssg.wms.announcement.domain.OneToOneRequestDTO">
+        <id property="requestIndex" column="request_index"/>
+        <result property="rTitle" column="r_title"/>
+        <result property="rContent" column="r_content"/>
+        <result property="rCreateAt" column="r_createAt"/>
+        <result property="rUpdateAt" column="r_updateAt"/>
+        <result property="rStatus" column="r_status"/>
+        <result property="rType" column="r_type"/>
+        <result property="rResponse" column="r_response"/>
+        <result property="userIndex" column="user_index"/>
+        <result property="adminIndex" column="admin_index"/>
+    </resultMap>
+
+    <select id="selectRequests" parameterType="map" resultMap="OneToOneRequestResultMap">
+        SELECT * FROM one_to_one_request
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (r_title LIKE CONCAT('%', #{keyword}, '%')
+            OR r_content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="status != null and status != ''">
+            AND r_status = #{status}
+        </if>
+        ORDER BY r_createAt DESC
+    </select>
+
+    <select id="selectRequest" resultMap="OneToOneRequestResultMap">
+        SELECT * FROM one_to_one_request
+        WHERE request_index = #{request_index}
+    </select>
+
+    <update id="updateAnswer" parameterType="com.ssg.wms.announcement.domain.OneToOneRequestDTO">
+        UPDATE one_to_one_request
+        SET r_response = #{rResponse},
+            r_status = 'ANSWERED',
+            admin_index = #{adminIndex},
+            r_updateAt = NOW()
+        WHERE request_index = #{requestIndex}
+    </update>
+
+    <delete id="deleteRequest">
+        DELETE FROM one_to_one_request
+        WHERE request_index = #{request_index}
+    </delete>
+
+</mapper>

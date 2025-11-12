@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssg.wms.announcement.mappers.NoticeMapper">
+
+    <resultMap id="NoticeResultMap" type="com.ssg.wms.announcement.domain.NoticeDTO">
+        <id property="noticeIndex" column="notice_index"/>
+        <result property="nTitle" column="n_title"/>
+        <result property="nContent" column="n_content"/>
+        <result property="nCreateAt" column="n_createAt"/>
+        <result property="nUpdateAt" column="n_updateAt"/>
+        <result property="nPriority" column="n_priority"/>
+        <result property="adminIndex" column="admin_index"/>
+    </resultMap>
+
+    <insert id="insertNotice" parameterType="com.ssg.wms.announcement.domain.NoticeDTO"
+            useGeneratedKeys="true" keyProperty="noticeIndex">
+        INSERT INTO announcement (
+            n_title,
+            n_content,
+            n_priority,
+            admin_index
+        ) VALUES (
+                     #{nTitle},
+                     #{nContent},
+                     #{nPriority},
+                     #{adminIndex}
+                 )
+    </insert>
+
+    <select id="selectNotices" resultMap="NoticeResultMap">
+        SELECT * FROM announcement
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (n_title LIKE CONCAT('%', #{keyword}, '%')
+            OR n_content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY n_priority DESC, n_createAt DESC
+    </select>
+
+    <select id="selectNotice" resultMap="NoticeResultMap">
+        SELECT * FROM announcement
+        WHERE notice_index = #{notice_index}
+    </select>
+
+    <update id="updateNotice" parameterType="com.ssg.wms.announcement.domain.NoticeDTO">
+        UPDATE announcement
+        SET n_title = #{nTitle},
+            n_content = #{nContent},
+            n_priority = #{nPriority},
+            n_updateAt = NOW()
+        WHERE notice_index = #{noticeIndex}
+    </update>
+
+    <delete id="deleteNotice">
+        DELETE FROM announcement
+        WHERE notice_index = #{notice_index}
+    </delete>
+
+</mapper>

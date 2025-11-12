@@ -16,6 +16,7 @@ build/
 # *.iws
 # *.iml
 # *.ipr
+src/test/
 
 # IntelliJ 산출물
 out/

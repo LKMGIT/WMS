@@ -13,6 +13,5 @@
         <package name="com.ssg.wms.user.domain"/>
         <package name="com.ssg.wms.warehouse.domain"/>
         <package name="com.ssg.wms.quotation.domain"/>
-        <package name="com.ssg.wms.vehicle.domain"/>
     </typeAliases>
 </configuration>

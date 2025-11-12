@@ -2,6 +2,170 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.quotation.mappers">
+<mapper namespace="com.ssg.wms.quotation.mappers.QuotationMapper">
+
+    <sql id="quotationRequestSearch">
+        <where>
+            status = 'EXIST'
+            <!--            날짜 검색 조건-->
+            <if test="search != null and search.start_date != null">
+                AND updated_at >= #{search.start_date}
+            </if>
+            <if test="search != null and search.end_date != null">
+                <![CDATA[
+                    AND updated_at < DATE_ADD(#{search.end_date}, INTERVAL 1 DAY)
+                ]]>
+            </if>
+
+            <!--            승인 완료 검색 조건-->
+            <if test="search.qrequest_status != null">
+                AND qrequest_status = #{search.qrequest_status}
+            </if>
+
+            <!--            조건별 키워드 검색 조건-->
+            <if test="search.keyword != null and search.keyword != ''">
+                <choose>
+                    <when test="search.type == 'QU'.toString()">
+                        AND user_index = #{search.keyword}
+                    </when>
+                    <when test="search.type == 'QN'.toString()">
+                        AND user_name = #{search.keyword}
+                    </when>
+                </choose>
+            </if>
+        </where>
+    </sql>
+
+    <insert id="insertQuotationRequest" parameterType="com.ssg.wms.quotation.domain.QuotationRequestDTO" useGeneratedKeys="true" keyProperty="qrequest_index">
+        INSERT INTO QuotationRequest
+        (user_index, qrequest_name, qrequest_email, qrequest_phone, qrequest_company, qrequest_detail)
+        VALUES (#{user_index}, #{qrequest_name}, #{qrequest_email}, #{qrequest_phone}, #{qrequest_company}, #{qrequest_detail})
+    </insert>
+
+    <update id="updateQuotationRequest" parameterType="com.ssg.wms.quotation.domain.QuotationRequestDTO">
+        UPDATE QuotationRequest
+        SET qrequest_name = #{qrequest_name}, qrequest_email = #{qrequest_email}, qrequest_phone = #{qrequest_phone}, qrequest_company = #{qrequest_company, jdbcType=VARCHAR}, qrequest_detail = #{qrequest_detail}, qrequest_status=#{qrequest_status}
+        WHERE qrequest_index = #{qrequest_index}
+    </update>
+
+    <update id="deleteQuotationRequest" parameterType="Long">
+        UPDATE QuotationRequest
+        SET status = 'DELETED'
+        WHERE qrequest_index = #{qrequest_index}
+    </update>
+
+    <select id="selectQuotationRequest" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationRequestDTO">
+        SELECT *
+        FROM QuotationRequest
+        WHERE qrequest_index=#{qrequest_index}
+    </select>
+
+    <select id="selectQuotationRequestList" resultType="com.ssg.wms.quotation.domain.QuotationRequestDTO">
+        SELECT *
+        FROM QuotationRequest
+        <include refid="quotationRequestSearch"/>
+        ORDER BY updated_at ${search.sort}
+        LIMIT #{cri.skip}, #{cri.amount}
+    </select>
+
+    <select id="selectQuotationRequestTotalCount" parameterType="com.ssg.wms.quotation.domain.QuotationSearchDTO" resultType="int">
+        SELECT count(qrequest_index)
+        FROM QuotationRequest
+        <include refid="quotationRequestSearch"/>
+    </select>
+
+    <select id="selectQuotationResponse" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationResponseDTO">
+        SELECT *
+        FROM QuotationResponse
+        WHERE qrequest_index = #{qrequest_index}
+        AND status = 'EXIST'
+    </select>
+
+    <insert id="insertQuotationResponse" parameterType="com.ssg.wms.quotation.domain.QuotationResponseDTO" useGeneratedKeys="true" keyProperty="qresponse_index">
+        INSERT INTO QuotationResponse
+        (qrequest_index, admin_index, qresponse_detail)
+        VALUES (#{qrequest_index}, #{admin_index}, #{qresponse_detail})
+    </insert>
+
+    <update id="updateQuotationResponse" parameterType="com.ssg.wms.quotation.domain.QuotationResponseDTO">
+        UPDATE QuotationResponse
+        SET qresponse_detail=#{qresponse_detail}
+        WHERE qresponse_index=#{qresponse_index}
+    </update>
+
+    <update id="deleteQuotationResponse" parameterType="Long">
+        UPDATE QuotationResponse
+        SET status='DELETED'
+        WHERE qresponse_index=#{qresponse_index}
+    </update>
+
+    <insert id="insertQuotationComment" parameterType="com.ssg.wms.quotation.domain.QuotationCommentDTO" useGeneratedKeys="true" keyProperty="qcomment_index">
+        INSERT INTO QuotationComment
+        (qrequest_index, qcomment_detail, writer_type, user_index, admin_index)
+        VALUES (#{qrequest_index}, #{qcomment_detail}, #{writer_type}, #{user_index, jdbcType=BIGINT}, #{admin_index, jdbcType=BIGINT})
+    </insert>
+
+    <update id="updateQuotationComment" parameterType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+        UPDATE QuotationComment
+        SET qcomment_detail=#{qcomment_detail}
+        WHERE qcomment_index=#{qcomment_index}
+    </update>
+
+    <update id="deleteQuotationComment" parameterType="Long">
+        UPDATE QuotationComment
+        SET status = 'DELETED'
+        WHERE qcomment_index = #{qcomment_index}
+    </update>
+
+    <select id="selectQuotationCommentList" resultType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+        SELECT * FROM QuotationComment
+        WHERE qrequest_index = #{qrequest_index} AND status = 'EXIST'
+        ORDER BY qcomment_index ASC
+        LIMIT #{cri.skip}, #{cri.amount}
+    </select>
+
+    <select id="selectQuotationCommentTotalCount" parameterType="Long" resultType="int">
+        SELECT count(qcomment_index)
+        FROM QuotationComment
+        WHERE qrequest_index=#{qrequest_index}
+    </select>
+
+    <sql id="WithRankedQuotationRequests">
+        WITH RankedRequests AS (
+        SELECT
+        qrequest_index,
+        updated_at, ROW_NUMBER() OVER (ORDER BY updated_at ${search.sort}) as rn
+        FROM QuotationRequest <include refid="quotationRequestSearch" /> )
+    </sql>
+
+    <select id="getPreviousQuotationPostIndex" resultType="long">
+        <include refid="WithRankedQuotationRequests" />
+        SELECT qrequest_index FROM RankedRequests
+        WHERE rn = (
+        SELECT rn - 1
+        FROM RankedRequests
+        WHERE qrequest_index = #{current_index} )
+    </select>
+
+    <select id="getNextQuotationPostIndex" resultType="long">
+        <include refid="WithRankedQuotationRequests" />
+        SELECT qrequest_index FROM RankedRequests
+        WHERE rn = (
+        SELECT rn + 1
+        FROM RankedRequests
+        WHERE qrequest_index = #{current_index} )
+    </select>
+
+    <select id="selectQuotationComment" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationCommentDTO">
+        SELECT *
+        FROM QuotationComment
+        WHERE qcomment_index=#{qcomment_index}
+    </select>
+
+    <select id="selectQuotationResponseByIndex" parameterType="Long" resultType="com.ssg.wms.quotation.domain.QuotationResponseDTO">
+        SELECT *
+        FROM QuotationResponse
+        WHERE qresponse_index=#{qresponse_index}
+    </select>
 
 </mapper>

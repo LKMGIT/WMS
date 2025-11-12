@@ -4,7 +4,11 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@ include file="../includes/header.jsp" %>
-
+<c:if test="${not empty accessDenied}">
+    <script>
+        alert("${accessDenied}");
+    </script>
+</c:if>
 
 <div class="row">
     <div class="col-md-12">
@@ -191,6 +195,9 @@
     var geocoder = new kakao.maps.services.Geocoder();
     var bounds = new kakao.maps.LatLngBounds();
 
+
+    let completed = 0;
+    const total = warehouseList.length;
     warehouseList.forEach(function (warehouse) {
 
         if (!warehouse.address) return;

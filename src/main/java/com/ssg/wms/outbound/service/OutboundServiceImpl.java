@@ -430,8 +430,23 @@ public class OutboundServiceImpl implements OutboundService {
     // 출고 지시서 리스트 (페이징 + 검색)
     @Override
     @Transactional
-    public List<ShippingInstructionDTO> getShippingInstructionList(Criteria criteria, OutboundSearchDTO outboundSearchDTO) {
-        return outboundMapper.selectShippingInstructionList(criteria, outboundSearchDTO);
+    public List<ShippingInstructionDetailDTO> getShippingInstructionList(Criteria criteria, OutboundSearchDTO outboundSearchDTO) {
+        List<ShippingInstructionDetailDTO> shippingInstructionDetailDTOList = outboundMapper.selectShippingInstructionList(criteria, outboundSearchDTO).stream().map(shippingInstructionDTO -> {
+            DispatchDTO dispatchDTO = outboundMapper.selectDispatchByIndex(shippingInstructionDTO.getDispatch_index());
+            OutboundRequestDTO outboundRequestDTO = outboundMapper.selectOutboundRequest(dispatchDTO.getOr_index());
+            return ShippingInstructionDetailDTO.builder()
+                    .si_index(shippingInstructionDTO.getSi_index())
+                    .warehouse_index(shippingInstructionDTO.getWarehouse_index())
+                    .section_index(shippingInstructionDTO.getSection_index())
+                    .item_index(outboundRequestDTO.getItem_index())
+                    .item_name(outboundMapper.selectItemName(outboundRequestDTO.getItem_index()))
+                    .user_index(outboundRequestDTO.getUser_index())
+                    .or_quantity(outboundRequestDTO.getOr_quantity())
+                    .si_waybill_status(shippingInstructionDTO.getSi_waybill_status())
+                    .approved_at(shippingInstructionDTO.getApproved_at())
+                    .build();
+        }).collect(Collectors.toList());
+        return shippingInstructionDetailDTOList;
     }
 
     // 출고 지시서 검색된 총 개수

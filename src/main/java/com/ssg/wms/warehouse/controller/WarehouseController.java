@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @Controller
@@ -56,7 +58,14 @@ public class WarehouseController {
     // 요청 : /warehouse/{id}/update
     // /WEB-INF/views/warehouse/updateForm
     @GetMapping("/{id}/update")
-    public String updateWarehouseForm(@PathVariable Long id, Model model) {
+    public String updateWarehouseForm(@PathVariable Long id,
+                                      @SessionAttribute(value = "loginAdminRole", required = false) String role,
+                                      Model model,
+                                      RedirectAttributes rttr) {
+        if (!"ADMIN".equals(role)) {
+            rttr.addFlashAttribute("accessDenied", "접근권한이 없습니다.");
+            return "redirect:/warehouse/list";
+        }
         WarehouseDTO warehouseDTO = warehouseService.getWarehouse(id);
         model.addAttribute("id", warehouseDTO.getWIndex());
         model.addAttribute("warehouse", warehouseDTO);
@@ -68,7 +77,13 @@ public class WarehouseController {
     // 요청 : /warehouse/register
     // /WEB-INF/views/warehouse/register
     @GetMapping("/register")
-    public String registerWarehouseForm(Model model) {
+    public String registerWarehouseForm(Model model,
+                                        @SessionAttribute(value = "loginAdminRole", required = false) String role,
+                                        RedirectAttributes rttr) {
+        if (!"ADMIN".equals(role)) {
+            rttr.addFlashAttribute("accessDenied", "접근권한이 없습니다.");
+            return "redirect:/warehouse/list";
+        }
         WarehouseSaveDTO warehouseSaveDTO = new WarehouseSaveDTO();
         model.addAttribute("warehouse", warehouseSaveDTO);
         return "/warehouse/registerForm";

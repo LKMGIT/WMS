@@ -154,8 +154,13 @@
     </div>
 </div>
 
-<!--  지도 + 주소검색 + 수정 + 삭제 스크립트 -->
+<script>
+    // JSP 세션 값 → JS 변수에 주입
+    const role = '${fn:escapeXml(sessionScope.loginAdminRole)}';
+</script>
 
+
+<!--  지도 + 주소검색 + 수정 + 삭제 스크립트 -->
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2879f57d00d7fd3009336abf35aad5e6&libraries=services"></script>
 
@@ -214,8 +219,14 @@
     }
 
     function updateMap(address) {
-        if (!address) return;
+        const role = '${fn:escapeXml(sessionScope.loginAdminRole)}';
 
+        if (role !== 'ADMIN') {
+            alert('접근 권한이 없습니다.');
+            return;
+        }
+
+        if (!address) return;
         geocoder.addressSearch(address, function(result, status) {
             if (status === kakao.maps.services.Status.OK) {
 
@@ -238,6 +249,12 @@
 
 <script>
     function updateWarehouse() {
+        const role = '${fn:escapeXml(sessionScope.loginAdminRole)}';
+
+        if (role !== 'ADMIN') {
+            alert('접근 권한이 없습니다.');
+            return;
+        }
 
         const id = "${warehouse.WIndex}";
 
@@ -262,6 +279,12 @@
 
 <script>
     function removeWarehouse() {
+        const role = '${fn:escapeXml(sessionScope.loginAdminRole)}';
+
+        if (role !== 'ADMIN') {
+            alert('접근 권한이 없습니다.');
+            return;
+        }
 
         const id = "${warehouse.WIndex}";
 

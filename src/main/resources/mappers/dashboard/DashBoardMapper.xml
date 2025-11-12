@@ -1,0 +1,36 @@
+<!-- resources/mappers/DashboardMapper.xml -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssg.wms.dashboard.mappers.DashboardMapper">
+
+    <!-- 총 회원 수 -->
+    <select id="countUsersTotal" resultType="long">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <!-- 특정 날짜(0~24시) 가입 수: users.user_createdAt -->
+    <select id="countUsersOnDate" parameterType="string" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE DATE(user_createdAt) = #{day}
+    </select>
+
+    <!-- 특정 날짜 입고 건수: inbound_detail.complete_date -->
+    <select id="countInboundOnDate" parameterType="string" resultType="long">
+        SELECT COUNT(*)
+        FROM inbound_detail
+        WHERE complete_date IS NOT NULL
+          AND DATE(complete_date) = #{day}
+    </select>
+
+    <!-- 특정 날짜 출고 건수: waybill.completed_at (DELIVERED 기준 권장) -->
+    <select id="countOutboundOnDate" parameterType="string" resultType="long">
+        SELECT COUNT(*)
+        FROM Waybill
+        WHERE completed_at IS NOT NULL
+        AND DATE(completed_at) = #{day}
+        <!-- 상태 조건을 쓰고 싶으면 아래 한 줄 추가 -->
+        <!-- AND waybill_status = 'DELIVERED' -->
+    </select>
+
+</mapper>

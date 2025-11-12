@@ -41,10 +41,19 @@
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-3">
-                    <a href="${pageContext.request.contextPath}/warehouse/${warehouse.WIndex}/update"
-                       class="btn btn-primary px-3 py-2 fw-bold">
-                        수정
-                    </a>
+                    <c:if test="${sessionScope.loginAdminRole == 'ADMIN'}">
+                        <a href="${pageContext.request.contextPath}/warehouse/${warehouse.WIndex}/update"
+                           class="btn btn-primary px-3 py-2 fw-bold">
+                            수정
+                        </a>
+                    </c:if>
+
+                    <c:if test="${sessionScope.loginAdminRole != 'ADMIN'}">
+                        <button type="button" class="btn btn-primary px-3 py-2 fw-bold"
+                                onclick="alert('접근 권한이 없습니다.')">
+                            수정
+                        </button>
+                    </c:if>
 
                     <a href="${pageContext.request.contextPath}/warehouse/list"
                        class="btn btn-outline-secondary px-3 py-2 fw-bold">목록</a>

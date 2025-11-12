@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -16,10 +18,21 @@ import org.springframework.web.bind.annotation.*;
 public class WarehouseRestController {
     private final WarehouseService warehouseService;
 
+    // admin 체크
+    private boolean isAdmin(String role) {
+        return "ADMIN".equals(role);
+    }
+
     // 창고 등록
     @PostMapping(produces = "text/plain; charset=UTF-8")
-    public ResponseEntity<String> registerWarehouse(@RequestBody WarehouseSaveDTO warehouseSaveDTO) {
+    public ResponseEntity<String> registerWarehouse(@SessionAttribute(value = "loginAdminRole", required = false) String role,
+                                                    @RequestBody WarehouseSaveDTO warehouseSaveDTO) {
         log.info("warehouseSaveDTO : " + warehouseSaveDTO);
+
+        if (!isAdmin(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("권한이 없습니다. (총관리자만 창고 등록 가능)");
+        }
 
         try {
             boolean result = warehouseService.registerWarehouse(warehouseSaveDTO);
@@ -39,7 +52,15 @@ public class WarehouseRestController {
 
     // 창고 수정
     @PutMapping(value = "/{id}", produces = "text/plain; charset=UTF-8")
-    public ResponseEntity<String> updateWarehouse(@PathVariable Long id, @RequestBody WarehouseUpdateDTO warehouseUpdateDTO) {
+    public ResponseEntity<String> updateWarehouse(@PathVariable Long id,
+                                                  @RequestBody WarehouseUpdateDTO warehouseUpdateDTO,
+                                                  @SessionAttribute(value = "loginAdminRole", required = false) String role) {
+
+        if (!isAdmin(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("권한이 없습니다.");
+        }
+
         warehouseUpdateDTO.setWIndex(id);
         String address = warehouseUpdateDTO.getWAddress();
         String location = address.substring(0, address.indexOf(" "));
@@ -51,7 +72,13 @@ public class WarehouseRestController {
 
     // 창고 삭제(논리적 폐쇄)
     @DeleteMapping(value = "/{id}", produces = "text/plain; charset=UTF-8")
-    public ResponseEntity<String> deleteWarehouse(@PathVariable Long id) {
+    public ResponseEntity<String> deleteWarehouse(@PathVariable Long id,
+                                                  @SessionAttribute(value = "loginAdminRole", required = false) String role) {
+        if (!isAdmin(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("권한이 없습니다.");
+        }
+
         boolean result = warehouseService.removeWarehouse(id);
         return result ? ResponseEntity.ok("창고 폐쇄 완료")
                       : ResponseEntity.status(HttpStatus.BAD_REQUEST).body("창고 폐쇄 실패");

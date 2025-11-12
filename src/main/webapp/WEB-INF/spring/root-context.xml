@@ -13,10 +13,10 @@
     <context:component-scan base-package="com.ssg.wms.outbound.service"/>
     <context:component-scan base-package="com.ssg.wms.inventory.service"/>
     <context:component-scan base-package="com.ssg.wms.inbound.service"/>
-    <context:component-scan base-package="com.ssg.wms.global.service"/>
     <context:component-scan base-package="com.ssg.wms.announcement.service"/>
     <context:component-scan base-package="com.ssg.wms.admin.service"/>
     <context:component-scan base-package="com.ssg.wms.quotation.service"/>
+    <context:component-scan base-package="com.ssg.wms.dashboard.service"/>
 
 
     <mybatis-spring:scan
@@ -29,7 +29,8 @@
                           com.ssg.wms.inventory.mappers,
                           com.ssg.wms.inbound.mappers,
                           com.ssg.wms.global.mappers,
-                          com.ssg.wms.announcement.mappers"/>
+                          com.ssg.wms.announcement.mappers,
+                          com.ssg.wms.dashboard.mappers"/>
 
     <bean name="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
         <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>

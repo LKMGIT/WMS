@@ -50,7 +50,7 @@
         <div class="sidebar-logo">
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
-                <a href="<c:url value='/admin/dashbaord'/>">
+                <a href="<c:url value='/admin/dashboard'/>">
                     <img src="${CTX}/img/kaiadmin/logo_background.png" alt="navbar brand" class="navbar-brand" height="20"/>
                 </a>
                 <div class="nav-toggle">
@@ -74,7 +74,7 @@
                         <div class="collapse" id="dashboard">
                             <ul class="nav nav-collapse">
                                 <li>
-                                    <a href="<c:url value='/admin/dashbaord'/>">
+                                    <a href="<c:url value='/admin/dashboard'/>">
                                         <span class="sub-item">대시보드 확인</span>
                                     </a>
                                 </li>
@@ -202,10 +202,10 @@
                         </a>
                         <div class="collapse" id="warehouse">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">창고조회</span>
+                                <li><a class="nav-link" href="<c:url value='/warehouse/list'/>">
+                                    <span class="sub-item">창고 조회</span>
                                 </a>
-                                    <a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                    <a class="nav-link" href="<c:url value='/warehouse/register'/>">
                                         <span class="sub-item">창고 등록</span>
                                     </a>
                                 </li>

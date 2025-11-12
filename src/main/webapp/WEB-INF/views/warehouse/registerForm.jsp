@@ -24,12 +24,12 @@
 
                         <tr>
                             <th>창고크기</th>
-                            <td><input type="number" name="wSize" class="form-control" placeholder="예: 1000" required></td>
+                            <td><input type="number" name="wSize" class="form-control" placeholder="창고 크기 입력" required></td>
                         </tr>
 
                         <tr>
                             <th>소재지</th>
-                            <td><input type="text" name="wLocation" class="form-control" readonly></td>
+                            <td><input type="text" name="wLocation" class="form-control" placeholder="소재지" readonly></td>
                         </tr>
 
                         <tr>
@@ -45,14 +45,22 @@
 
                         <tr>
                             <th>우편번호</th>
-                            <td><input type="text" name="wZipcode" id="wZipcode" class="form-control" readonly></td>
+                            <td><input type="text" name="wZipcode" id="wZipcode" class="form-control"  placeholder="창고 크기 입력" readonly></td>
                         </tr>
 
                         </tbody>
                     </table>
 
                     <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="button" class="btn btn-primary px-4 py-2 fw-bold" onclick="registerWarehouse()">등록</button>
+                        <c:if test="${sessionScope.loginAdminRole == 'ADMIN'}">
+                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold"
+                                    onclick="registerWarehouse()">등록</button>
+                        </c:if>
+
+                        <c:if test="${sessionScope.loginAdminRole != 'ADMIN'}">
+                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold"
+                                    onclick="alert('접근 권한이 없습니다.')">등록</button>
+                        </c:if>
                         <a href="${pageContext.request.contextPath}/warehouse/list"
                            class="btn btn-outline-secondary px-4 py-2 fw-bold">취소</a>
                     </div>
@@ -92,10 +100,10 @@
 
 <script>
     var mapContainer = document.getElementById('map');
-    var mapOption = { center: new kakao.maps.LatLng(37.537187, 127.005476), level: 4 };
+    var mapOption = { center: new kakao.maps.LatLng(37.554722, 126.970833), level: 4 };
     var map = new kakao.maps.Map(mapContainer, mapOption);
     var geocoder = new kakao.maps.services.Geocoder();
-    var marker = new kakao.maps.Marker({ map: map, position: map.getCenter() });
+    var marker = new kakao.maps.Marker();
     var elementLayer = document.getElementById('daumPostLayer');
 
     function sample5_execDaumPostcode() {
@@ -113,6 +121,7 @@
                         var coords = new kakao.maps.LatLng(results[0].y, results[0].x);
                         map.setCenter(coords);
                         marker.setPosition(coords);
+                        marker.setMap(map);
                     }
                 });
             },
@@ -130,6 +139,12 @@
 <!--axios POST 등록 -->
 <script>
     function registerWarehouse() {
+        <%--const role = '${fn:escapeXml(sessionScope.loginAdminRole)}';--%>
+
+        <%--if (role !== 'ADMIN') {--%>
+        <%--    alert('접근 권한이 없습니다.');--%>
+        <%--    return;--%>
+        <%--}--%>
         const data = {
             wName: document.querySelector("input[name='wName']").value,
             wSize: document.querySelector("input[name='wSize']").value,

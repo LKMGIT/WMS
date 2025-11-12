@@ -41,24 +41,27 @@
 
                 </div>
                 <div class="card-body">
-                    <div class="row g-3 justify-content-center mb-3">
+                    <div class="row g-3 mb-3 align-items-center">
                         <form id="searchForm" class="input-group">
 
-                            <div class="col-auto">
+                            <div class="col-md-5">
                                 <select class="form-select" name="type">
                                     <option value="T">제목 (q_title)</option>
 
                                     <option value="C">내용 (q_content)</option>
                                     <option value="W">작성자 (user_name)</option>
                                 </select>
-
-                            </div>
-                            <div class="col-5">
                                 <input type="text" class="form-control" name="keyword" placeholder="검색어 입력">
-
                             </div>
-                            <div class="col-auto">
-                                <button class="btn btn-default" type="button" id="searchBtn">검색</button>
+                            <div class="col-md-2">
+                                <select class="form-select" id="searchAnsweredStatus">
+                                    <option value="">-- 답변 상태 (전체) --</option>
+                                    <option value="PENDING">대기중</option>
+                                    <option value="ANSWERED">답변완료</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-outline-secondary" type="button" id="searchBtn">검색</button>
                             </div>
 
                         </form>
@@ -70,7 +73,6 @@
                             <thead>
                             <tr>
                                 <th>견적 ID (q_index)</th>
-
                                 <th>제목 (q_title)</th>
                                 <th>작성자 (user_name)</th>
                                 <th>작성일 (created_at)</th>

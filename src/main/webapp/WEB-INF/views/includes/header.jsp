@@ -13,6 +13,9 @@
     <!-- Favicon -->
     <link rel="icon" href="${CTX}/img/kaiadmin/favicon.ico" type="image/x-icon"/>
 
+    <!-- KaKaoMap api -->
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2879f57d00d7fd3009336abf35aad5e6&libraries=services"></script>
+
     <!-- Fonts and icons -->
     <script src="${CTX}/js/plugin/webfont/webfont.min.js"></script>
     <script>
@@ -194,22 +197,6 @@
                                     <a class="nav-link" href="<c:url value='/admin/user_list'/>">
                                         <span class="sub-item">창고 등록</span>
                                     </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#map">
-                            <i class="fas fa-pen-square"></i>
-                            <p>지도</p>
-                            <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="map">
-                            <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">창고 위치</span>
-                                </a>
                                 </li>
                             </ul>
                         </div>

@@ -8,6 +8,7 @@
         <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/outbound/instructionList.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/outbound" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/outbound/list.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/outbound" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/quotation/detail.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/quotation" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/warehouse/registerForm.jsp" value="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/views/warehouse" />
       </map>
     </option>
   </component>

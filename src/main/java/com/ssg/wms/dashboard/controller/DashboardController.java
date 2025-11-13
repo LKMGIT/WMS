@@ -15,17 +15,16 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-//    /** 대시보드 요약 API (JSON) */
-//    @GetMapping("/api/dashboard/summary")
-//    @ResponseBody
-//    public DashBoardSummaryDTO summary() {
-//        return dashboardService.getSummaryLast7Days();
-//    }
-
+    // com.ssg.wms.dashboard.controller.DashboardController
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        DashBoardSummaryDTO sum = dashboardService.getSummaryLast7Days();
+    public String dashboard(
+            @RequestParam(defaultValue = "30d") String range,  // "7d" | "30d"
+            Model model
+    ) {
+        DashBoardSummaryDTO sum = dashboardService.getSummary(range);
         model.addAttribute("sum", sum);
+        model.addAttribute("range", range); // JSP에서 선택 상태 유지 등에 사용 가능
         return "admin/dashboard"; // /WEB-INF/views/admin/dashboard.jsp
     }
+
 }

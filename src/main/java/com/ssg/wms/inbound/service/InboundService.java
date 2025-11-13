@@ -17,12 +17,12 @@ public interface InboundService {
     void cancelRequest(InboundRequestDTO requestDTO);
 
     /**
-     * 🔥 [수정] 입고 승인 시, 관리자가 입력한 상세 내역(DTO)을 함께 받도록 변경
+     * 구역 정보만 받아서 승인 처리
      */
     void approveRequest(InboundRequestDTO requestDTO) throws Exception;
 
     /**
-     * (참고) '승인' 이후 '수정' 시 사용되는 메서드
+     * 수정
      */
     void processInboundDetail(InboundDetailDTO detailDTO) throws Exception;
 

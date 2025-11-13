@@ -21,10 +21,7 @@ public interface InboundMapper {
     int updateApproval(@Param("request_index") Long requestIndex);
 
     // ===== 실제 입고 처리 =====
-
-    // 🔥 [신규 추가] 5단계: DB에 저장
     int insertInboundDetail(InboundDetailDTO detailDTO);
-
     int updateInboundDetail(InboundDetailDTO detailDTO);
 
     // ===== 통계 현황 =====

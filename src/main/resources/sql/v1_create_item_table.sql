@@ -8,3 +8,6 @@ create table items(
     item_category ENUM('HEALTH','BEAUTY','PERFUME','CARE','FOOD') NOT NULL,
     item_img LONGBLOB  null
 );
+
+
+d

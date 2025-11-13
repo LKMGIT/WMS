@@ -12,8 +12,7 @@
         <result property="cancelReason" column="cancel_reason"/>
         <result property="userIndex" column="user_index"/>
         <result property="warehouseIndex" column="warehouse_index"/>
-        <result property="item_index" column="item_index"/>
-        <result property="updatedDate" column="updated_date"/>
+        <result property="itemIndex" column="item_index"/> <result property="updatedDate" column="updated_date"/>
     </resultMap>
 
     <resultMap id="inboundRequestWithDetails" type="com.ssg.wms.inbound.domain.InboundRequestDTO">
@@ -26,15 +25,14 @@
         <result property="cancelReason" column="cancel_reason"/>
         <result property="userIndex" column="user_index"/>
         <result property="warehouseIndex" column="warehouse_index"/>
-        <result property="item_index" column="item_index"/>
-        <collection property="details" ofType="com.ssg.wms.inbound.domain.InboundDetailDTO">
-            <id property="detailIndex" column="detail_index"/>
-            <result property="receivedQuantity" column="received_quantity"/>
-            <result property="completeDate" column="complete_date"/>
-            <result property="inboundIndex" column="d_inbound_index"/>
-            <result property="warehouseIndex" column="d_warehouse_index"/>
-            <result property="sectionIndex" column="d_section_index"/>
-        </collection>
+        <result property="itemIndex" column="item_index"/> <collection property="details" ofType="com.ssg.wms.inbound.domain.InboundDetailDTO">
+        <id property="detailIndex" column="detail_index"/>
+        <result property="receivedQuantity" column="received_quantity"/>
+        <result property="completeDate" column="complete_date"/>
+        <result property="inboundIndex" column="d_inbound_index"/>
+        <result property="warehouseIndex" column="d_warehouse_index"/>
+        <result property="sectionIndex" column="d_section_index"/>
+    </collection>
     </resultMap>
 
     <select id="selectRequestById" resultMap="inboundRequestWithDetails">
@@ -106,31 +104,21 @@
         INSERT INTO inbound_detail
         (inbound_index, received_quantity, complete_date, warehouse_index, section_index)
         VALUES
-        (
-        #{inboundIndex},
-        #{receivedQuantity},
-        NULL,
-        #{warehouseIndex},
-        <choose>
-            <when test="sectionIndex == null"> '' </when>
-            <otherwise> #{sectionIndex} </otherwise>
-        </choose>
-        )
+            (
+                #{inboundIndex},
+                0,                             NULL,                          #{warehouseIndex},
+                #{sectionIndex}                )
     </insert>
 
     <update id="updateInboundDetail">
         UPDATE inbound_detail
         SET
-        received_quantity = #{receivedQuantity},
-        complete_date = NOW(),
-        warehouse_index = #{warehouseIndex},
-        section_index =
-        <choose>
-            <when test="sectionIndex == null"> '' </when>
-            <otherwise> #{sectionIndex} </otherwise>
-        </choose>
+            received_quantity = #{receivedQuantity},
+            complete_date = NOW(),
+            warehouse_index = #{warehouseIndex},
+            section_index = #{sectionIndex}
         WHERE
-        detail_index = #{detailIndex} AND inbound_index = #{inboundIndex}
+            detail_index = #{detailIndex} AND inbound_index = #{inboundIndex}
     </update>
 
     <select id="selectInboundStatusByPeriod" resultType="com.ssg.wms.inbound.domain.InboundRequestDTO">

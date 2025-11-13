@@ -27,7 +27,7 @@ public class InboundRequestDTO {
     private LocalDateTime updatedDate;              // 수정 일시
     private Long userIndex;                         // 유저번호 (FK)
     private Integer warehouseIndex;                     // 창고번호 (FK)
-    private Long item_index;                        // 아이템 번호(FK)
+    private Long itemIndex;                        // 아이템 번호(FK)
 
     // 입고 상세 리스트 (조인용)
     private List<InboundDetailDTO> details;

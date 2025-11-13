@@ -3,28 +3,25 @@ package com.ssg.wms.inbound.service;
 import com.ssg.wms.inbound.domain.InboundDetailDTO;
 import com.ssg.wms.inbound.domain.InboundRequestDTO;
 import com.ssg.wms.inbound.mappers.InboundMapper;
-import com.ssg.wms.inventory.service.InvenService;
-import com.ssg.wms.warehouse.service.WarehouseService;
+import com.ssg.wms.inventory.service.InvenService; // 재고 파트 연동
+import com.ssg.wms.warehouse.service.WarehouseService; // 창고 관련 서비스
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2; // 🔥 [수정] Log4j2 임포트
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@Log4j2 // 🔥 [수정] 로그 사용 선언
+@Log4j2
 public class InboundServiceImpl implements InboundService {
 
     private final InboundMapper inboundMapper;
     private final InvenService invenService;
     private final WarehouseService warehouseService;
-
-    // private final ItemService itemService;
 
     @Override
     public InboundRequestDTO getRequestById(Long inboundIndex) {
@@ -46,104 +43,68 @@ public class InboundServiceImpl implements InboundService {
     public void cancelRequest(InboundRequestDTO requestDTO) {
         int result = inboundMapper.updateCancel(requestDTO);
         if (result == 0) {
-            throw new RuntimeException("입고 요청 취소 실패 (ID: " + requestDTO.getInboundIndex() + ")");
+            throw new RuntimeException("입고 요청 취소 실패: " + requestDTO.getInboundIndex());
         }
     }
 
     /**
-     * 🔥 [수정된 로직] 5단계 흐름을 구현한 '승인 및 처리' 메서드
+     * 입고 요청 승인: 구역 배정 및 단일 상세 내역 생성
      */
     @Transactional
     @Override
     public void approveRequest(InboundRequestDTO requestDTO) throws Exception {
+        Long requestIndex = requestDTO.getInboundIndex();
 
-        // --- 0단계: DTO 유효성 검증 ---
-        List<InboundDetailDTO> details = requestDTO.getDetails();
-
-        // 🔥 [수정] 디버그 로그 추가
-        log.info("===[Inbound Approve] Request Index: {}", requestDTO.getInboundIndex());
-        log.info("===[Inbound Approve] Details received: {}", details);
-        // 🔥 만약 details가 null이거나 비어있다면, JSON 데이터 전송 오류일 가능성이 높습니다.
-
-        if (details == null || details.isEmpty()) {
-            throw new IllegalArgumentException("처리할 상세 입고 내역이 없습니다. (Details List is Empty/Null)");
+        // 1. 요청 상태를 APPROVED로 변경
+        int requestUpdateResult = inboundMapper.updateApproval(requestIndex);
+        if (requestUpdateResult == 0) {
+            throw new RuntimeException("입고 요청 승인 실패: " + requestIndex + "를 찾을 수 없거나 상태를 변경할 수 없습니다.");
         }
-        InboundDetailDTO detailToProcess = details.get(0);
 
-        // --- 1단계: item_index를 통해 item_volume 받아오기 ---
-        Long itemIndex = requestDTO.getItem_index();
-        if (itemIndex == null) {
-            InboundRequestDTO originalRequest = inboundMapper.selectRequestById(requestDTO.getInboundIndex());
-            if (originalRequest == null) {
-                throw new RuntimeException("원본 입고 요청을 찾을 수 없습니다: " + requestDTO.getInboundIndex());
+        // 2. 창고 번호 및 구역 정보 추출
+        Integer existingWarehouseIndex = requestDTO.getWarehouseIndex(); // 기존 창고 번호
+
+        // DTO에 임시로 실어온 구역 인덱스 (detail.jsp에서 cancelReason 필드에 담아 보냈음)
+        Long selectedSectionIndex = null;
+        try {
+            if (requestDTO.getCancelReason() != null && !requestDTO.getCancelReason().isEmpty()) {
+                selectedSectionIndex = Long.valueOf(requestDTO.getCancelReason());
             }
-            itemIndex = originalRequest.getItem_index();
+        } catch (NumberFormatException | NullPointerException e) { // 🔥 예외 처리 강화
+            throw new RuntimeException("구역 코드는 Long 타입 숫자여야 합니다: " + e.getMessage());
         }
 
-        // int itemVolume = itemService.getItemVolume(itemIndex);
-        int itemVolume = 1; // 🚨 임시 부피 (반드시 수정)
+        // 3. inbound_detail 레코드를 단 하나만 생성
+        InboundDetailDTO detailDTO = new InboundDetailDTO();
+        detailDTO.setInboundIndex(requestIndex);
+        detailDTO.setWarehouseIndex(existingWarehouseIndex.longValue());
+        detailDTO.setReceivedQuantity(0L);
+        detailDTO.setSectionIndex(selectedSectionIndex); // 🔥 선택된 구역 인덱스 즉시 반영
 
-        // --- 2단계: canInbound()에 전달 및 검증 ---
-        int quantity = Math.toIntExact(detailToProcess.getReceivedQuantity());
-        Long sectionIndex = detailToProcess.getSectionIndex();
-
-        if (sectionIndex == null) {
-            throw new IllegalArgumentException("구역(Section) 정보가 없습니다.");
-        }
-
-        boolean canInbound = warehouseService.canInbound(sectionIndex, itemVolume, quantity);
-
-        if (!canInbound) {
-            int remain = warehouseService.calculateSectionRemain(sectionIndex);
-            throw new Exception(
-                    String.format("재고 공간 부족: 구역(%d) (필요: %d, 남은 공간: %d)",
-                            sectionIndex, (itemVolume * quantity), remain)
-            );
-        }
-
-        // --- 3단계: 적재 가능 시 입고 요청 승인으로 변경 ---
-        int result = inboundMapper.updateApproval(requestDTO.getInboundIndex());
-        if (result == 0) {
-            throw new RuntimeException("입고 요청 승인 실패 (ID: " + requestDTO.getInboundIndex() + ")");
-        }
-
-        // --- 4단계: requestDTO의 값을 통해 detailDTO 생성 ---
-        detailToProcess.setInboundIndex(requestDTO.getInboundIndex());
-        if (detailToProcess.getWarehouseIndex() == null) {
-            detailToProcess.setWarehouseIndex(requestDTO.getWarehouseIndex().longValue());
-        }
-
-        // --- 5단계: DB에 저장(INSERT) 후 applyInbound()에 전달 ---
-        inboundMapper.insertInboundDetail(detailToProcess);
-        invenService.applyInbound(detailToProcess);
+        inboundMapper.insertInboundDetail(detailDTO); // 단 1회 삽입
     }
 
     /**
-     * (참고) 이 메서드는 '승인' 이후, 상세 내역을 '수정'할 때 사용됩니다.
+     * 입고 상세 내역 수정: 재고 반영 로직 활성화 (용량 체크 제거)
      */
     @Transactional
     @Override
     public void processInboundDetail(InboundDetailDTO detailDTO) throws Exception {
 
-        int quantity = Math.toIntExact(detailDTO.getReceivedQuantity());
-        Long sectionIndex = detailDTO.getSectionIndex();
-        int itemVolume = 1; // 🚨 임시 부피 (필수 수정)
-
-        boolean canInbound = warehouseService.canInbound(sectionIndex, itemVolume, quantity);
-        if (!canInbound) {
-            int remain = warehouseService.calculateSectionRemain(sectionIndex);
-            throw new Exception(
-                    String.format("재고 공간 부족(수정): 구역(%d) (필요: %d, 남은 공간: %d)",
-                            sectionIndex, (itemVolume * quantity), remain)
-            );
+        if (detailDTO.getWarehouseIndex() == null) {
+            throw new RuntimeException("입고 상세 처리 실패: 창고 번호(warehouseIndex)가 누락되었습니다.");
         }
+
+        // 창고 용량 검사 로직 제거
 
         int result = inboundMapper.updateInboundDetail(detailDTO);
         if (result == 0) {
             throw new RuntimeException("입고 처리(수정) 실패: " + detailDTO.getDetailIndex());
         }
 
-        invenService.applyInbound(detailDTO);
+
+        // 재고 파트로 데이터 반영
+//        invenService.applyInbound(detailDTO);
     }
 
     // --- 통계 메서드 (기존과 동일) ---

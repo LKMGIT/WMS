@@ -153,22 +153,12 @@
                                 
                                 <li>
                                     <a class="nav-link" href="<c:url value='/inbound/admin/list'/>">
-                                        <span class="sub-item">입고 요청 목록 조회</span>
+                                        <span class="sub-item">입고 요청 목록</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-link" href="<c:url value='/inbound/admin/form'/>">
-                                        <span class="sub-item">입고 목록 조회</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-link" href="<c:url value='/inbound/admin/month'/>">
-                                        <span class="sub-item">월별 현황 조회</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-link" href="<c:url value='/inbound/admin/period'/>">
-                                        <span class="sub-item">기간별 현황 조회</span>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/status'/>">
+                                        <span class="sub-item">입고 통계</span>
                                     </a>
                                 </li>
                             </ul>

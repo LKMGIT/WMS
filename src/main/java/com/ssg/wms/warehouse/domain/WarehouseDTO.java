@@ -23,6 +23,9 @@ public class WarehouseDTO {
     @JsonProperty("wSize")
     private int wSize;
 
+    @JsonProperty("usageRate")
+    private double usageRate;
+
     @JsonProperty("wCreatedAt")
     private LocalDateTime wCreatedAt;
 

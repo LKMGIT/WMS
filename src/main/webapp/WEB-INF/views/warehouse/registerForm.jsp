@@ -45,7 +45,7 @@
 
                         <tr>
                             <th>우편번호</th>
-                            <td><input type="text" name="wZipcode" id="wZipcode" class="form-control"  placeholder="창고 크기 입력" readonly></td>
+                            <td><input type="text" name="wZipcode" id="wZipcode" class="form-control"  placeholder="우편번호" readonly></td>
                         </tr>
 
                         </tbody>
@@ -145,13 +145,40 @@
         <%--    alert('접근 권한이 없습니다.');--%>
         <%--    return;--%>
         <%--}--%>
-        const data = {
-            wName: document.querySelector("input[name='wName']").value,
-            wSize: document.querySelector("input[name='wSize']").value,
-            wLocation: document.querySelector("input[name='wLocation']").value,
-            wAddress: document.querySelector("input[name='wAddress']").value,
-            wZipcode: document.querySelector("input[name='wZipcode']").value
-        };
+
+        const wName = document.querySelector("input[name='wName']").value.trim();
+        const wSize = document.querySelector("input[name='wSize']").value.trim();
+        const wLocation = document.querySelector("input[name='wLocation']").value.trim();
+        const wAddress = document.querySelector("input[name='wAddress']").value.trim();
+        const wZipcode = document.querySelector("input[name='wZipcode']").value.trim();
+
+
+        if (!wName) {
+            alert("창고 이름을 입력해주세요.");
+            return;
+        }
+
+        if (!wSize || isNaN(wSize) || wSize <= 0) {
+            alert("창고 크기를 올바르게 입력해주세요.");
+            return;
+        }
+
+        if (!wAddress) {
+            alert("주소를 입력해주세요.");
+            return;
+        }
+
+        if (!wZipcode) {
+            alert("우편번호를 입력해주세요.");
+            return;
+        }
+
+        if (!wLocation) {
+            alert("소재지를 입력해주세요.");
+            return;
+        }
+
+        const data = { wName, wSize, wLocation, wAddress, wZipcode };
 
         axios.post("/api/warehouse", data)
             .then(() => {

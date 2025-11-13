@@ -24,6 +24,7 @@
                         <tr><th>우편번호</th><td>${warehouse.WZipcode}</td></tr>
                         <tr><th>등록일</th><td>${warehouse.WCreatedAt}</td></tr>
                         <tr><th>수정일</th><td>${warehouse.WUpdatedAt}</td></tr>
+                        <tr><th>사용률</th><td>${warehouse.usageRate}%</td></tr>
 
                         <tr>
                             <th>상태</th>

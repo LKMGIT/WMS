@@ -18,7 +18,8 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
+    from { opacity: 0;
+    }
     to { opacity: 1; }
   }
 
@@ -45,816 +46,536 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,122.7C96,149,192,203,288,208C384,213,480,171,576,149.3C672,128,768,128,864,154.7C960,181,1056,235,1152,240C1248,245,1344,203,1392,181.3L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path></svg>') no-repeat center bottom;
     background-size: cover;
-    opacity: 0.3;
-  }
-
-  .detail-header h2 {
-    margin: 0;
-    font-weight: 700;
-    position: relative;
+    opacity: 0.2;
     z-index: 1;
   }
 
-  .detail-header .status-badge {
-    display: inline-block;
-    padding: 0.5rem 1.5rem;
-    border-radius: 25px;
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    font-weight: 600;
-    margin-top: 1rem;
-  }
-
-  /* 정보 카드 */
-  .info-card {
-    border: none;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    overflow: hidden;
-    transition: all 0.3s ease;
-    margin-bottom: 2rem;
-  }
-
-  .info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  }
-
-  .info-card .card-header {
-    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-    border: none;
-    padding: 1.5rem;
-  }
-
-  .info-card .card-header h4 {
-    margin: 0;
-    color: #2d3748;
-    font-weight: 700;
-  }
-
-  .info-card .card-body {
-    padding: 2rem;
-  }
-
-  /* 정보 그리드 */
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .info-item {
-    padding: 1rem;
-    background: linear-gradient(135deg, #f7fafc 0%, #ffffff 100%);
-    border-radius: 15px;
-    border-left: 4px solid #667eea;
-    transition: all 0.3s ease;
-  }
-
-  .info-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-  }
-
-  .info-label {
-    font-size: 0.75rem;
-    color: #718096;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
-  }
-
-  .info-value {
-    font-size: 1.1rem;
-    color: #2d3748;
-    font-weight: 700;
-  }
-
-  /* 상세 품목 테이블 */
-  .detail-table-card {
-    border: none;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    overflow: hidden;
-  }
-
-  .detail-table-card .card-header {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    border: none;
-    padding: 1.5rem;
-  }
-
-  .detail-table-card .card-header h4 {
-    color: white;
-    margin: 0;
-    font-weight: 700;
-  }
-
-  .detail-table-card .card-header p {
-    color: rgba(255,255,255,0.9);
-    margin: 0.5rem 0 0 0;
-  }
-
-  .detail-table {
-    margin: 0;
-  }
-
-  .detail-table thead th {
-    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-    color: #2d3748;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-    border: none;
-    padding: 1.25rem 1rem;
-  }
-
-  .detail-table tbody tr {
-    transition: all 0.3s ease;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  .detail-table tbody tr:hover {
-    background: linear-gradient(90deg, rgba(240, 147, 251, 0.05) 0%, rgba(240, 147, 251, 0) 100%);
-  }
-
-  .detail-table tbody td {
-    padding: 1.25rem 1rem;
-    vertical-align: middle;
-    border: none;
-  }
-
-  /* 입력 필드 스타일 */
-  .form-control {
-    border-radius: 10px;
-    border: 2px solid #e2e8f0;
-    padding: 0.6rem 1rem;
-    transition: all 0.3s ease;
-  }
-
-  .form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-
-  .form-control:disabled, .form-control:read-only {
-    background-color: #f7fafc;
-    border-color: #cbd5e0;
-  }
-
-  /* 버튼 스타일 */
-  .btn-modern {
-    border-radius: 10px;
-    padding: 0.6rem 1.5rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: none;
-  }
-
-  .btn-process {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    color: white;
-  }
-
-  .btn-process:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
-    color: white;
-  }
-
-  .btn-approve {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-
-  .btn-approve:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    color: white;
-  }
-
-  .btn-cancel {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    color: white;
-  }
-
-  .btn-cancel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(250, 112, 154, 0.4);
-    color: white;
-  }
-
-  .btn-back {
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
-    color: #2d3748;
-  }
-
-  .btn-back:hover {
-    background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
-    color: #2d3748;
-  }
-
-  /* 완료 체크마크 */
-  .completed-badge {
-    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-    color: white;
-    padding: 0.4rem 0.8rem;
-    border-radius: 15px;
-    font-weight: 600;
-    display: inline-block;
-  }
-
-  /* 로딩 스피너 */
-  .loading-spinner {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(102, 126, 234, 0.2);
-    border-radius: 50%;
-    border-top-color: #667eea;
-    animation: spin 1s ease-in-out infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* 진행 상황 */
-  .progress {
-    height: 30px;
-    border-radius: 15px;
-    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-    overflow: visible;
+  .header-content {
     position: relative;
+    z-index: 2;
   }
 
-  .progress-bar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .header-icon {
+    font-size: 3rem;
+    margin-right: 1.5rem;
+  }
+
+  /* 목록 스타일 */
+  .detail-table th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+  }
+
+  .detail-table .form-control {
+    max-width: 150px;
+    display: inline-block;
+  }
+
+  .data-highlight {
     font-weight: 700;
-    color: white;
-    transition: width 0.6s ease;
+    color: #4CAF50;
+    /* Green */
   }
 
-  /* 🔥 모달 스타일 */
-  .modal-content {
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  .status-badge {
+    padding: .35em .65em;
+    border-radius: .35rem;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
   }
 
-  .modal-header {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    color: white;
-    border-radius: 20px 20px 0 0;
-    border: none;
-    padding: 1.5rem 2rem;
+  .status-PENDING { background-color: #ffc107; color: #343a40;
   }
+  .status-APPROVED { background-color: #28a745; color: white; }
+  .status-REJECTED { background-color: #dc3545; color: white;
+  }
+  .status-CANCELED { background-color: #6c757d; color: white; }
 
-  .modal-header .btn-close {
-    filter: brightness(0) invert(1);
-  }
-
-  .modal-body {
-    padding: 2rem;
-  }
-
-  .modal-footer {
-    border-top: none;
-    padding: 1rem 2rem 2rem 2rem;
-  }
-
-  .btn-modal-confirm {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    color: white;
-    border: none;
-    padding: 0.6rem 2rem;
-    border-radius: 10px;
-    font-weight: 600;
-  }
-
-  .btn-modal-confirm:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(250, 112, 154, 0.4);
-    color: white;
-  }
-
-  .btn-modal-cancel {
-    background: #e2e8f0;
-    color: #2d3748;
-    border: none;
-    padding: 0.6rem 2rem;
-    border-radius: 10px;
-    font-weight: 600;
-  }
-
-  .btn-modal-cancel:hover {
-    background: #cbd5e0;
-  }
 </style>
 
-<div class="container-fluid p-4 fade-in-up">
-  <div class="container">
+<div class="container py-5 fade-in-up">
 
-    <%-- 헤더 --%>
-    <div class="detail-header">
-      <h2>
-        <i class="fas fa-box-open"></i>
-        입고 요청 상세
-        <span id="headerInboundIndex">#0</span>
-      </h2>
-      <div class="status-badge" id="headerStatusBadge">
-        <i class="fas fa-clock"></i> 대기중
-      </div>
-    </div>
-
-    <%-- 요청 개요 카드 --%>
-    <div class="card info-card">
-      <div class="card-header">
-        <h4><i class="fas fa-info-circle"></i> 요청 개요</h4>
-      </div>
-      <div class="card-body">
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-hashtag"></i> 입고 번호</div>
-            <div class="info-value" id="req-inboundIndex">#0</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-user"></i> 요청자</div>
-            <div class="info-value" id="req-userIndex">-</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-warehouse"></i> 창고</div>
-            <div class="info-value" id="req-warehouseIndex">#0</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-box"></i> 요청 수량</div>
-            <div class="info-value" id="req-inboundRequestQuantity">0 개</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-calendar-check"></i> 희망 입고일</div>
-            <div class="info-value" id="req-plannedReceiveDate">-</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-clock"></i> 요청 일시</div>
-            <div class="info-value" id="req-inboundRequestDate">-</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-flag"></i> 승인 상태</div>
-            <div class="info-value" id="req-approvalStatus">-</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label"><i class="fas fa-check-circle"></i> 승인 일시</div>
-            <div class="info-value" id="req-approveDate">-</div>
-          </div>
-        </div>
-
-        <%-- 취소 사유 (CANCELED 상태일 때만 표시) --%>
-        <div class="mt-4" id="cancelReasonSection" style="display: none;">
-          <div class="alert alert-warning" style="border-radius: 15px; border-left: 4px solid #f6d365;">
-            <strong><i class="fas fa-exclamation-triangle"></i> 취소 사유:</strong>
-            <span id="req-cancelReason">-</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <%-- 처리 진행 상황 --%>
-    <div class="card info-card">
-      <div class="card-header">
-        <h4><i class="fas fa-tasks"></i> 처리 진행 상황</h4>
-      </div>
-      <div class="card-body">
-        <div class="progress">
-          <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%">
-            <span id="progressText">0/0 완료</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <%-- 상세 품목 목록 --%>
-    <div class="card detail-table-card">
-      <div class="card-header">
-        <h4><i class="fas fa-clipboard-list"></i> 상세 품목 목록</h4>
-        <p id="detailSummary">총 0건의 상세 품목이 있습니다.</p>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table detail-table">
-            <thead>
-            <tr>
-              <th><i class="fas fa-hashtag"></i> 번호</th>
-              <th><i class="fas fa-map-marker-alt"></i> 입고 위치</th>
-              <th><i class="fas fa-box"></i> 입고 수량</th>
-              <th><i class="fas fa-calendar-check"></i> 입고 일시</th>
-              <th><i class="fas fa-cog"></i> 처리</th>
-            </tr>
-            </thead>
-            <tbody id="inboundDetailTableBody">
-            <tr>
-              <td colspan="5" class="text-center py-5">
-                <div class="loading-spinner" style="margin: 0 auto;"></div>
-                <p class="mt-3 text-muted">상세 정보 로딩 중...</p>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <%-- 액션 버튼 --%>
-    <div class="text-end mt-4 mb-5" id="requestActions">
-      <button class="btn btn-modern btn-back" onclick="history.back()">
-        <i class="fas fa-arrow-left"></i> 목록으로
-      </button>
-    </div>
-
-  </div>
-</div>
-
-<%-- 🔥 취소 사유 입력 모달 --%>
-<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="cancelModalLabel">
-          <i class="fas fa-ban"></i> 입고 요청 취소
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="cancelReasonInput" class="form-label" style="font-weight: 600;">
-            <i class="fas fa-comment-alt"></i> 취소 사유를 입력해주세요
-          </label>
-          <textarea
-                  class="form-control"
-                  id="cancelReasonInput"
-                  rows="4"
-                  placeholder="예: 재고 부족, 발주 오류, 계획 변경 등"
-                  maxlength="255"
-          ></textarea>
-          <small class="text-muted">최대 255자까지 입력 가능합니다.</small>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">
-          <i class="fas fa-times"></i> 닫기
-        </button>
-        <button type="button" class="btn btn-modal-confirm" onclick="confirmCancel()">
-          <i class="fas fa-check"></i> 취소 확정
-        </button>
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex align-items-center mb-4">
+        <i class="fas fa-warehouse header-icon"></i>
+        <h1 class="mb-0">입고 요청 상세 내역</h1>
       </div>
     </div>
   </div>
+
+  <%-- 개요 카드 --%>
+  <div class="detail-header mb-5">
+    <div class="header-content">
+      <div class="row">
+        <div class="col-md-3">
+
+          <p class="mb-1 text-light"><strong>요청 번호</strong></p>
+          <h4 id="inboundIndexDisplay" class="text-white">...</h4>
+        </div>
+        <div class="col-md-3">
+          <p class="mb-1 text-light"><strong>아이템 번호</strong></p>
+          <h4 id="itemIndexDisplay" class="text-white">...</h4>
+        </div>
+        <div class="col-md-3">
+          <p class="mb-1 text-light"><strong>요청 수량</strong></p>
+
+          <h4 id="requestQuantityDisplay" class="text-white">...</h4>
+        </div>
+        <div class="col-md-3">
+          <p class="mb-1 text-light"><strong>승인 상태</strong></p>
+          <h4 id="approvalStatusDisplay" class="text-white">...</h4>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-3">
+          <p class="mb-1 text-light"><strong>희망 입고일</strong></p>
+          <h5 id="plannedReceiveDateDisplay"
+
+              class="text-white">...</h5>
+        </div>
+        <div class="col-md-3">
+          <p class="mb-1 text-light"><strong>요청 일시</strong></p>
+          <h5 id="inboundRequestDateDisplay" class="text-white">...</h5>
+        </div>
+        <div class="col-md-3">
+          <p class="mb-1 text-light"><strong>창고 번호</strong></p>
+          <h5 id="warehouseIndexDisplay" class="text-white">...</h5>
+
+        </div>
+
+        <div class="col-md-3" id="approveDateSection" style="display: none;">
+          <p class="mb-1 text-light"><strong>승인 일시</strong></p>
+          <h5 id="approveDateDisplay" class="text-white">...</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%-- 상세 내역 테이블 --%>
+  <div class="card shadow-sm border-0 fade-in-up" style="animation-delay: 0.1s;">
+    <div class="card-header bg-white py-3 border-bottom-0">
+      <h5 class="mb-0">입고 처리 상세 항목 (단일 처리)</h5>
+
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 detail-table">
+          <thead>
+          <tr>
+            <th scope="col" style="width: 10%;">상세번호</th>
+            <th scope="col" style="width: 20%;">배정 구역</th>
+            <th scope="col" style="width: 25%;">실제 입고 수량</th>
+            <th scope="col" style="width: 20%;">처리 일시</th>
+            <th scope="col" style="width: 25%;">관리</th>
+
+          </tr>
+          </thead>
+          <tbody id="detailListTableBody">
+          <%-- 데이터가 로드될 위치 --%>
+          <tr><td colspan="5" class="text-center py-5">상세 내역을 불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%-- 관리 버튼 섹션 (구역 선택 요소 포함) --%>
+  <div id="adminActionSection" class="mt-4 fade-in-up" style="animation-delay: 0.2s;
+ display: none;">
+    <div class="row align-items-center">
+      <div class="col-md-4">
+        <div class="input-group">
+          <span class="input-group-text" style="font-weight: 600;"><i class="fas fa-map-marker-alt me-2"></i> 구역 선택</span>
+          <select id="sectionSelectForApproval" class="form-select" disabled>
+            <option value="">(창고 정보 로드 후 활성화)</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-8 text-end">
+        <button type="button" class="btn btn-danger me-2" onclick="cancelRequest()">
+          <i class="fas fa-times-circle me-1"></i> 요청 취소
+        </button>
+        <button type="button" class="btn btn-success" onclick="approveRequest()">
+          <i class="fas fa-check-circle me-1"></i> 요청 승인 </button>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<script>
+  var ctx = '${pageContext.request.contextPath}';
+  var currentRequestData = null;
+
+  // 🔥 [신규] 유틸리티 함수: LocalDateTime 배열을 'YYYY-MM-DD HH:mm:ss' 형태로 포맷팅
+  function formatLocalDateTime(dateTimeArray) {
+    if (!Array.isArray(dateTimeArray) || dateTimeArray.length < 5) {
+      return 'N/A'; // 유효하지 않은 데이터는 'N/A'로 처리
+    }
+    var pad = function(n) { return String(n).padStart(2, '0'); };
+    // [년, 월, 일, 시, 분] 배열을 'YYYY-MM-DD HH:mm' 형식으로 조합 (초도 있다면 포함)
+    var datePart = dateTimeArray[0] + '-' + pad(dateTimeArray[1]) + '-' + pad(dateTimeArray[2]);
+    var timePart = pad(dateTimeArray[3]) + ':' + pad(dateTimeArray[4]);
+    // 초(second)가 있다면 추가 (index 5)
+    if (dateTimeArray.length > 5) {
+      timePart += ':' + pad(dateTimeArray[5]);
+    }
+    return datePart + ' ' + timePart;
+  }
+
+  // 창고 번호에 따른 구역 목 데이터
+  function getSectionListByWarehouse(warehouseIndex) {
+    var sections = [];
+    if (warehouseIndex) {
+      for (var i = 1; i <= 5; i++) {
+        // 구역 인덱스: [창고번호][구역번호] 형태로 가정, 예를 들어 101, 102...
+        var sectionIndex = Number(String(warehouseIndex) + String(i).padStart(2, '0'));
+        sections.push({
+          index: sectionIndex,
+          name: '구역 ' + sectionIndex + ' (W' + warehouseIndex + ')'
+        });
+      }
+    }
+    return sections;
+  }
+
+  // 유틸리티 함수: 상태 뱃지 생성
+  function
+  getStatusBadge(status) {
+    if (!status) return 'N/A';
+    var statusMap = {
+      'PENDING': { text: '승인 대기', class: 'status-PENDING' },
+      'APPROVED': { text: '승인 완료', class: 'status-APPROVED' },
+      'REJECTED': { text: '승인 거부', class: 'status-REJECTED' },
+      'CANCELED': { text: '요청 취소', class: 'status-CANCELED' }
+    };
+    var info = statusMap[status] || { text: status, class: 'bg-secondary' };
+    return '<span class="status-badge ' + info.class + '">' + info.text +
+            '</span>';
+  }
+
+  // 데이터 표시 함수: 개요
+  function displayRequestOverview(data) {
+    currentRequestData = data;
+    $('inboundIndexDisplay').textContent = data.inboundIndex;
+    $('itemIndexDisplay').textContent = data.itemIndex || data.item_index; // DTO 변경 반영
+    $('requestQuantityDisplay').textContent = data.inboundRequestQuantity + ' 개';
+    $('approvalStatusDisplay').innerHTML = getStatusBadge(data.approvalStatus);
+    $('plannedReceiveDateDisplay').textContent = data.plannedReceiveDate;
+
+    // 🔥 [수정] 요청 일시 (inboundRequestDate) 처리
+    $('inboundRequestDateDisplay').textContent = formatLocalDateTime(data.inboundRequestDate);
+
+    $('warehouseIndexDisplay').textContent = data.warehouseIndex || '미지정';
+
+    // 구역 선택 드롭다운 업데이트
+    var sectionSelect = $('sectionSelectForApproval');
+    sectionSelect.innerHTML = '<option value="">-- 구역 선택 --</option>'; // 기본 옵션
+    if (data.warehouseIndex && data.approvalStatus === 'PENDING') {
+      var sections = getSectionListByWarehouse(data.warehouseIndex);
+      sections.forEach(function(section) {
+        var option = document.createElement('option');
+        option.value = section.index;
+        option.textContent = section.name;
+        sectionSelect.appendChild(option);
+      });
+      sectionSelect.disabled = false; // 선택 가능하게 활성화
+    } else {
+      sectionSelect.disabled = true;
+    }
+
+
+    if (data.approvalStatus !== 'PENDING') {
+      $('adminActionSection').style.display = 'none';
+
+      // 🔥 [수정] 승인 일시 (approveDate) 처리
+      var approveDateDisplay = data.approveDate ? formatLocalDateTime(data.approveDate) : 'N/A';
+
+      $('approveDateDisplay').textContent = approveDateDisplay;
+      $('approveDateSection').style.display = 'block';
+    } else {
+      $('adminActionSection').style.display = 'flex';
+      // 승인 섹션 표시
+      $('approveDateSection').style.display = 'none';
+    }
+  }
+
+  // 데이터 표시 함수: 상세 리스트
+  function displayDetailList(details, approvalStatus) {
+    var tbody = $('detailListTableBody');
+    tbody.innerHTML = ''; // 초기화
+
+    if (!details || details.length === 0) {
+      if (approvalStatus === 'PENDING') {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-info-circle text-info me-2"></i> 요청 승인 시 상세 처리 항목이 1개 생성됩니다.</td></tr>';
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-exclamation-triangle text-danger me-2"></i> 상세 내역이 존재하지 않습니다.(오류)</td></tr>';
+      }
+      return;
+    }
+
+    // 상세 내역이 1개만 로드되도록 처리됨
+    var rows = details.map(function(detail) {
+      var isProcessed = detail.receivedQuantity > 0; // receivedQuantity가 0보다 크면 처리 완료로 간주
+
+      // 🔥 [수정] 처리 일시 (completeDate) 처리
+      var completeDateDisplay = detail.completeDate ? formatLocalDateTime(detail.completeDate) : '-';
+
+      var sectionInput = '';
+      var quantityInput = '';
+      var actions = '';
+
+      if (approvalStatus === 'APPROVED' &&
+
+              !isProcessed) {
+        // 승인된 상태에서 미처리된 상세 내역 (수정/입력 가능)
+
+        // 구역은 승인 시 결정되므로, 여기에선 표시만
+        sectionInput = '<span class="data-highlight">' + (detail.sectionIndex || '-') + '</span>';
+
+        // 실제 입고 수량 필드
+        quantityInput = '<input type="number" class="form-control form-control-sm" id="qty-' + detail.detailIndex + '" value="' + (detail.receivedQuantity || 0) + '" min="0">';
+
+        actions =
+
+                '<button class="btn btn-sm btn-primary" onclick="processDetail(' + detail.detailIndex + ', ' + detail.inboundIndex + ')">입고 처리</button>';
+      } else if (approvalStatus === 'APPROVED' && isProcessed) {
+        // 승인된 상태에서 처리 완료된 상세 내역
+        sectionInput = '<span class="data-highlight">' + (detail.sectionIndex || '-') + '</span>';
+        quantityInput = '<span class="data-highlight">' + detail.receivedQuantity + ' 개</span>';
+        actions = '<button class="btn btn-sm btn-secondary" disabled>처리 완료</button>';
+      } else {
+        // PENDING 또는 CANCELED 상태
+        sectionInput = '-';
+        quantityInput = '-';
+        actions = '<button class="btn btn-sm btn-secondary" disabled>대기/취소</button>';
+      }
+
+      return '<tr>' +
+              '<td>' + detail.detailIndex + '</td>' +
+              '<td>' + sectionInput + '</td>' +
+              '<td>' + quantityInput + '</td>' +
+              '<td>' + completeDateDisplay + '</td>' +
+
+              '<td>' +
+              actions + '</td>' +
+              '</tr>';
+    }).join('');
+    tbody.innerHTML = rows;
+  }
+
+  // 🔥 상세 처리: sectionIndex를 Long 타입으로 변환하여 전송
+  window.processDetail = function(detailIndex, inboundIndex) {
+    var quantityElement = $('qty-' + detailIndex);
+
+    // 입력값 유효성 검사
+    var quantity = quantityElement ? quantityElement.value : null;
+
+    if (quantity == "" || isNaN(Number(quantity)) || Number(quantity) <= 0) {
+      return alert("올바른 입고 수량을 입력하세요.");
+    }
+
+    // currentRequestData에서 warehouseIndex와 sectionIndex를 가져와 설정
+    if (!currentRequestData || !currentRequestData.warehouseIndex) {
+      return alert("오류: 창고 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
+    }
+
+    // 현재 상세 내역에서 sectionIndex를 가져옴 (이미 DB에 저장되어 있음)
+    var detailInfo = currentRequestData.details.find(d => d.detailIndex === detailIndex);
+    if (!detailInfo || !detailInfo.sectionIndex) {
+      return alert("오류: 배정된 구역 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
+    }
+
+    var warehouseIndex = currentRequestData.warehouseIndex;
+    var sectionIndex = detailInfo.sectionIndex;
+
+    var detailData = {
+      detailIndex: detailIndex,
+      inboundIndex: inboundIndex,
+      // 🔥 String -> Number() 변환하여 서버의 DTO Long 타입에 맞춤
+      sectionIndex: Number(sectionIndex),
+      receivedQuantity: Number(quantity),
+      warehouseIndex: warehouseIndex
+    };
+
+    var url = ctx + '/inbound/admin/detail/process';
+    fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(detailData)
+    })
+            .then(function(res) {
+              if (res.ok) return res.json();
+              return res.json().then(data => {
+                return Promise.reject(new
+
+                Error(data.message || '입고 처리 중 알 수 없는 오류 발생'));
+              }).catch(() => {
+                return Promise.reject(new Error('HTTP ' + res.status + ' 오류'));
+              });
+            })
+
+            .then(function(data) {
+
+              alert('입고 처리가 성공적으로 완료되었습니다. (재고 파트로 데이터 전달 완료)');
+              loadInboundDetail(inboundIndex); // 리스트 새로고침
+            })
+            .catch(function(err) {
+              console.error('[processDetail] error:', err);
+              alert('입고 처리 중 오류 발생: ' + err.message);
+
+            });
+  };
+
+  // 🔥 요청 승인: cancelReason을 Long 타입에 맞게 처리하여 전송
+  window.approveRequest = function() {
+    var inboundIndex = currentRequestData.inboundIndex;
+    if (!currentRequestData || !inboundIndex) {
+      return alert("오류: 요청 정보가 유효하지 않습니다.");
+    }
+
+    // 구역 선택 값 가져오기 로직 복원
+    var sectionSelect = $('sectionSelectForApproval');
+    var selectedSectionIndex = sectionSelect.value;
+    if (!selectedSectionIndex || selectedSectionIndex.trim() === "") {
+      return alert("승인할 구역을 반드시 선택해야 합니다.");
+    }
+
+    if (!confirm("선택된 구역(" + selectedSectionIndex + ")으로 요청을 승인하고 상세 내역을 1건 생성하시겠습니까?")) {
+      return;
+    }
+
+    // 🔥 승인 요청 DTO 구성 (서버의 Long.valueOf() 처리에 맞춰 String(Number(..))로 전송)
+    var requestDTO = {
+      cancelReason: String(Number(selectedSectionIndex))
+    };
+    var url = ctx + '/inbound/admin/request/' + inboundIndex + '/approve';
+    fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestDTO) // 구역 정보를 담은 DTO 전송
+    })
+            .then(function(res) {
+              if (res.ok) return res.json();
+              return res.json().then(data => {
+                return Promise.reject(new Error(data.message
+
+
+                        || '승인 처리 중 알 수 없는 오류 발생'));
+              }).catch(() => {
+                return Promise.reject(new Error('HTTP ' + res.status + ' 오류'));
+              });
+            })
+
+
+            .then(function(data) {
+              alert(data.message || '요청이 성공적으로 승인되었습니다.');
+              loadInboundDetail(inboundIndex);
+            })
+            .catch(function(err) {
+              console.error('[approveRequest] error:', err);
+              alert('요청 승인 중 오류 발생: ' + err.message);
+
+            });
+  };
+
+  // 요청 취소 (취소 사유 입력)
+  window.cancelRequest = function() {
+    if (!currentRequestData || !currentRequestData.inboundIndex) {
+      return alert("오류: 요청 정보가 유효하지 않습니다.");
+    }
+
+    var cancelReason = prompt("요청 취소를 진행합니다. 취소 사유를 입력해 주세요:");
+    if (!cancelReason || cancelReason.trim() === "") {
+      return alert("취소 사유를 입력해야 취소할 수 있습니다.");
+    }
+
+    if (!confirm('입고 요청을 취소하시겠습니까? (사유: ' + cancelReason + ')')) {
+      return;
+    }
+
+    var inboundIndex = currentRequestData.inboundIndex;
+    var url = ctx + '/inbound/admin/request/' + inboundIndex + '/cancel';
+    fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cancelReason: cancelReason })
+    })
+            .then(function(res) {
+              if (res.ok) return res.json();
+              return res.json().then(data => Promise.reject(new Error(data.message || '취소 처리 중 오류 발생')));
+            })
+
+
+            .then(function(data) {
+              alert('요청이 성공적으로 취소되었습니다.');
+              loadInboundDetail(inboundIndex); // 리스트 새로고침
+            })
+            .catch(function(err) {
+              console.error('[cancelRequest] error:', err);
+              alert('요청 취소 중 오류 발생: ' + err.message);
+            });
+  };
+
+  // 데이터 로드
+  function loadInboundDetail(inboundIndex) {
+    var url = ctx + '/inbound/admin/request/' + inboundIndex;
+    var tbody = $('detailListTableBody');
+
+    console.log('[loadInboundDetail] API 호출 URL:', url);
+
+    fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'same-origin'
+    })
+            .then(function(res) {
+              console.log('[loadInboundDetail] 응답 상태:', res.status);
+              if (res.ok) return res.json();
+              return
+
+              Promise.reject(new Error('HTTP ' + res.status));
+            })
+            .then(function(data) {
+              console.log('[loadInboundDetail] 받은 데이터:', data);
+              if (!data) throw new Error('EMPTY_DATA');
+
+              displayRequestOverview(data);
+
+              displayDetailList(data.details, data.approvalStatus);
+
+            })
+            .catch(function(err) {
+              console.error('[loadInboundDetail] error:', err);
+              tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f56565;"></i><p class="mt-3 text-danger">상세 정보를 불러오는 중 오류가 발생했습니다.</p></td></tr>';
+            });
+  }
+
+  // 초기화
+  document.addEventListener('DOMContentLoaded', function () {
+    // 간편 셀렉터 함수
+    window.$ = function(id) { return document.getElementById(id); };
+
+    try {
+      var segs = (location.pathname || '').split('/').filter(Boolean);
+      var last = segs[segs.length - 1] || '';
+      var inboundIndex = /^[0-9]+$/.test(last) ? last : '';
+      loadInboundDetail(inboundIndex);
+    } catch (e) {
+      console.error('초기화 오류:', e);
+      $('detailListTableBody').innerHTML = '<tr><td colspan="5" class="text-center py-5">입고 요청 번호를 확인해주세요.</td></tr>';
+    }
+  });
+
+</script>
 
 <%-- 템플릿 끝 --%>
 <c:import url="/WEB-INF/views/includes/footer.jsp"/>
-
-<%-- JavaScript --%>
-<script>
-  (function () {
-    var ctx = '${pageContext.request.contextPath}';
-    var currentInboundIndex = null;
-    var $ = function(id) { return document.getElementById(id); };
-    var safeHtml = function(s) {
-      var str = (s != null && s != undefined) ? String(s) : '';
-      return str.replace(/[&<>"']/g, function(m) {
-        var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
-        return map[m];
-      });
-    };
-
-    // 날짜 포매터
-    function formatDateTime(dateStr) {
-      if (!dateStr) return '-';
-      var d = new Date(dateStr);
-      if (!isNaN(d.getTime())) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
-        return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-      }
-      if (Array.isArray(dateStr)) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
-        return dateStr[0] + '-' + pad(dateStr[1]) + '-' + pad(dateStr[2]) + ' ' + pad(dateStr[3] || 0) + ':' + pad(dateStr[4] || 0);
-      }
-      return String(dateStr);
-    }
-
-    function formatDate(dateStr) {
-      if (!dateStr) return '-';
-      var d = new Date(dateStr);
-      if (!isNaN(d.getTime())) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
-        return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-      }
-      if (Array.isArray(dateStr)) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
-        return dateStr[0] + '-' + pad(dateStr[1]) + '-' + pad(dateStr[2]);
-      }
-      return String(dateStr);
-    }
-
-    function getStatusBadge(status) {
-      var badges = {
-        'PENDING': '<i class="fas fa-clock"></i> 대기중',
-        'APPROVED': '<i class="fas fa-check-circle"></i> 승인됨',
-        'REJECTED': '<i class="fas fa-times-circle"></i> 거부됨',
-        'CANCELED': '<i class="fas fa-ban"></i> 취소됨'
-      };
-      return badges[status] || safeHtml(status || '-');
-    }
-
-    // 요청 개요 렌더링
-    function displayRequestOverview(data) {
-      console.log('[displayRequestOverview] 데이터 수신:', data);
-      $('req-inboundIndex').textContent = '#' + (data.inboundIndex || '-');
-      $('req-userIndex').textContent = data.userIndex || '-';
-      $('req-warehouseIndex').textContent = '#' + (data.warehouseIndex || '-');
-      $('req-inboundRequestQuantity').textContent = (data.inboundRequestQuantity || 0) + ' 개';
-      $('req-plannedReceiveDate').textContent = formatDate(data.plannedReceiveDate);
-      $('req-inboundRequestDate').textContent = formatDateTime(data.inboundRequestDate);
-      $('req-approvalStatus').innerHTML = getStatusBadge(data.approvalStatus);
-      $('req-approveDate').textContent = data.approveDate ? formatDateTime(data.approveDate) : '-';
-
-      // 취소 사유 표시
-      if (data.approvalStatus === 'CANCELED' && data.cancelReason) {
-        $('req-cancelReason').textContent = data.cancelReason;
-        $('cancelReasonSection').style.display = 'block';
-      } else {
-        $('cancelReasonSection').style.display = 'none';
-      }
-
-      $('headerInboundIndex').textContent = '#' + (data.inboundIndex || '-');
-      $('headerStatusBadge').innerHTML = getStatusBadge(data.approvalStatus);
-
-      console.log('[displayRequestOverview] updateActionButtons 호출 직전');
-      updateActionButtons(data);
-      console.log('[displayRequestOverview] updateActionButtons 호출 완료');
-    }
-
-    // 상세 품목 목록 렌더링
-    function displayDetailList(details, requestStatus) {
-      var tbody = $('inboundDetailTableBody');
-      var summary = $('detailSummary');
-
-      if (!Array.isArray(details) || details.length == 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-inbox" style="font-size: 3rem; color: #cbd5e0;"></i><p class="mt-3 text-muted">등록된 상세 품목이 없습니다.</p></td></tr>';
-        summary.textContent = '총 0건의 상세 품목이 있습니다.';
-        return;
-      }
-
-      var isEditable = function(detail) {
-        return (requestStatus == 'APPROVED' && !detail.completeDate);
-      };
-
-      var completedCount = 0;
-      details.forEach(function(d) {
-        if (d.completeDate) completedCount++;
-      });
-
-      var rows = details.map(function(detail) {
-        var cdt = detail.completeDate ? formatDateTime(detail.completeDate) : '-';
-        var completed = !isEditable(detail);
-        var readonlyAttr = completed ? 'readonly' : '';
-
-        var html = '<tr>';
-        html += '<td><strong style="color: #667eea;">#' + safeHtml(detail.detailIndex) + '</strong></td>';
-        html += '<td>';
-        html += '<span class="badge bg-light text-dark me-2"><i class="fas fa-warehouse"></i> ' + safeHtml(detail.warehouse_index) + '번</span>';
-        html += '<input type="text" class="form-control d-inline-block" style="width: 150px;" ';
-        html += 'id="section-' + detail.detailIndex + '" ';
-        html += 'value="' + safeHtml(detail.section_index) + '" ';
-        html += 'placeholder="A-01-01" ' + readonlyAttr + '>';
-        html += '</td>';
-        html += '<td>';
-        html += '<input type="number" class="form-control d-inline-block" style="width: 100px;" ';
-        html += 'id="qty-' + detail.detailIndex + '" ';
-        html += 'value="' + safeHtml(detail.receivedQuantity) + '" ';
-        html += 'min="0" ' + readonlyAttr + '> <span style="color: #718096;">개</span>';
-        html += '</td>';
-        html += '<td>' + (completed ? '<span class="completed-badge"><i class="fas fa-check"></i>' + cdt + '</span>' : '<span class="text-muted">미처리</span>') + '</td>';
-        html += '<td>';
-        if (!completed) {
-          html += '<button class="btn btn-modern btn-process btn-sm" onclick="processDetail(' + detail.detailIndex + ', ' + detail.inboundIndex + ')">';
-          html += '<i class="fas fa-check"></i> 처리';
-          html += '</button>';
-        } else {
-          html += '<span class="text-success"><i class="fas fa-check-circle"></i> 완료</span>';
-        }
-        html += '</td>';
-        html += '</tr>';
-        return html;
-      }).join('');
-
-      tbody.innerHTML = rows;
-      summary.textContent = '총 ' + details.length + '건의 상세 품목이 있습니다.';
-
-      // 프로그레스 업데이트
-      var progress = details.length > 0 ? (completedCount / details.length) * 100 : 0;
-      $('progressBar').style.width = progress + '%';
-      $('progressText').textContent = completedCount + '/' + details.length + ' 완료';
-    }
-
-    // 액션 버튼
-    function updateActionButtons(data) {
-      console.log('[updateActionButtons] data:', data);
-      console.log('[updateActionButtons] approvalStatus:', data.approvalStatus);
-
-      var area = $('requestActions');
-      if (!area) {
-        console.error('[updateActionButtons] requestActions 요소를 찾을 수 없습니다!');
-        return;
-      }
-
-      var html = '';
-      // PENDING 상태일 때 승인/취소 버튼 표시
-      if (data.approvalStatus == 'PENDING') {
-        console.log('[updateActionButtons] PENDING 상태 - 승인/취소 버튼 생성');
-        html += '<button class="btn btn-modern btn-approve me-2" onclick="approveRequest(' + (Number(data.inboundIndex) || 0) + ')">';
-        html += '<i class="fas fa-check"></i> 요청 승인';
-        html += '</button>';
-        html += '<button class="btn btn-modern btn-cancel me-2" onclick="showCancelModal(' + (Number(data.inboundIndex) || 0) + ')">';
-        html += '<i class="fas fa-ban"></i> 요청 취소';
-        html += '</button>';
-      } else {
-        console.log('[updateActionButtons] 상태:', data.approvalStatus, '- 승인/취소 버튼 숨김');
-      }
-
-      // 목록으로 버튼은 항상 표시
-      html += '<button class="btn btn-modern btn-back" onclick="history.back()"><i class="fas fa-arrow-left"></i> 목록으로</button>';
-      console.log('[updateActionButtons] 생성된 HTML:', html);
-      area.innerHTML = html;
-    }
-
-    // 요청 승인
-    window.approveRequest = function(inboundIndex) {
-      if (!inboundIndex) return alert('잘못된 요청 번호입니다.');
-      if (!confirm('이 입고 요청을 승인하시겠습니까?')) return;
-
-      var url = ctx + '/inbound/admin/request/' + encodeURIComponent(inboundIndex) + '/approve';
-      fetch(url, {
-        method: 'PUT',
-        headers: { 'Accept': 'application/json' },
-        credentials: 'same-origin'
-      })
-              .then(function(res) { return res.json(); })
-              .then(function(d) {
-                if (d && d.success) {
-                  alert(d.message || '승인이 완료되었습니다.');
-                  loadInboundDetail(inboundIndex);
-                } else {
-                  alert((d && d.message) || '승인에 실패했습니다.');
-                }
-              })
-              .catch(function(err) {
-                console.error(err);
-                alert('승인 처리 중 오류가 발생했습니다.');
-              });
-    };
-
-    // 🔥 취소 모달 표시
-    window.showCancelModal = function(inboundIndex) {
-      if (!inboundIndex) return alert('잘못된 요청 번호입니다.');
-      currentInboundIndex = inboundIndex;
-      $('cancelReasonInput').value = '';
-      var modal = new bootstrap.Modal($('cancelModal'));
-      modal.show();
-    };
-
-    // 🔥 취소 확정
-    window.confirmCancel = function() {
-      var cancelReason = $('cancelReasonInput').value.trim();
-      if (!cancelReason) {
-        alert('취소 사유를 입력해주세요.');
-        return;
-      }
-
-      var url = ctx + '/inbound/admin/request/' + encodeURIComponent(currentInboundIndex) + '/cancel';
-      fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({ cancelReason: cancelReason })
-      })
-              .then(function(res) { return res.json(); })
-              .then(function(d) {
-                if (d && d.success) {
-                  alert(d.message || '요청이 취소되었습니다.');
-                  bootstrap.Modal.getInstance($('cancelModal')).hide();
-                  loadInboundDetail(currentInboundIndex);
-                } else {
-                  alert((d && d.message) || '취소 처리에 실패했습니다.');
-                }
-              })
-              .catch(function(err) {
-                console.error(err);
-                alert('취소 처리 중 오류가 발생했습니다.');
-              });
-    };
-
-    // 상세 처리
-    window.processDetail = function(detailIndex, inboundIndex) {
-      var section = $('section-' + detailIndex).value;
-      var quantity = $('qty-' + detailIndex).value;
-
-      if (!section || section.trim() == "") {
-        return alert("입고 위치(구역)를 입력하세요.");
-      }
-      if (quantity == "" || isNaN(Number(quantity)) || Number(quantity) < 0) {
-        return alert("올바른 입고 수량을 입력하세요.");
-      }
-
-      var detailData = {
-        detailIndex: detailIndex,
-        inboundIndex: inboundIndex,
-        section_index: section,
-        receivedQuantity: Number(quantity)
-      };
-
-      var url = ctx + '/inbound/admin/detail/process';
-      fetch(url, {
-        method: 'PUT',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(detailData)
-      })
-              .then(function(res) { return res.json(); })
-              .then(function(d) {
-                if (d && d.success) {
-                  alert(d.message || '입고 처리가 완료되었습니다.');
-                  loadInboundDetail(inboundIndex);
-                } else {
-                  alert((d && d.message) || '처리 중 오류가 발생했습니다.');
-                }
-              })
-              .catch(function(err) {
-                console.error(err);
-                alert('입고 처리 API 호출 중 오류가 발생했습니다.');
-              });
-    };
-
-    // 메인 데이터 로드
-    function loadInboundDetail(inboundIndex) {
-      console.log('[loadInboundDetail] 시작 - inboundIndex:', inboundIndex);
-      var tbody = $('inboundDetailTableBody');
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="loading-spinner" style="margin: 0 auto;"></div><p class="mt-3 text-muted">상세 정보 로딩 중...</p></td></tr>';
-
-      if (!inboundIndex || isNaN(Number(inboundIndex))) {
-        console.error('[loadInboundDetail] 잘못된 inboundIndex:', inboundIndex);
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f56565;"></i><p class="mt-3 text-danger">올바른 요청 번호를 찾을 수 없습니다.</p></td></tr>';
-        return;
-      }
-
-      currentInboundIndex = inboundIndex;
-      var url = ctx + '/inbound/admin/request/' + encodeURIComponent(inboundIndex);
-      console.log('[loadInboundDetail] API 호출 URL:', url);
-
-      fetch(url, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        credentials: 'same-origin'
-      })
-              .then(function(res) {
-                console.log('[loadInboundDetail] 응답 상태:', res.status);
-                if (res.ok) return res.json();
-                return Promise.reject(new Error('HTTP ' + res.status));
-              })
-              .then(function(data) {
-                console.log('[loadInboundDetail] 받은 데이터:', data);
-                if (!data) throw new Error('EMPTY_DATA');
-
-                displayRequestOverview(data);
-                displayDetailList(data.details, data.approvalStatus);
-              })
-              .catch(function(err) {
-                console.error('[loadInboundDetail] error:', err);
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f56565;"></i><p class="mt-3 text-danger">상세 정보를 불러오는 중 오류가 발생했습니다.</p></td></tr>';
-              });
-    }
-
-    // 초기화
-    document.addEventListener('DOMContentLoaded', function () {
-      try {
-        var segs = (location.pathname || '').split('/').filter(Boolean);
-        var last = segs[segs.length - 1] || '';
-        var inboundIndex = /^[0-9]+$/.test(last) ? last : '';
-        loadInboundDetail(inboundIndex);
-      } catch (e) {
-        console.error('[init] error:', e);
-      }
-    });
-  })();
-</script>

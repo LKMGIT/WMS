@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS inbound_detail
     received_quantity bigint       NOT NULL DEFAULT 0 COMMENT '실제 입고 수량',
     complete_date     DATETIME COMMENT '실제 입고 일시',
     warehouse_index   bigint         NOT NULL COMMENT '창고번호 (FK)',
-    section_index     VARCHAR(100) NOT NULL COMMENT '구역 번호',
+    section_index     bigint NOT NULL comment '구역 번호',
 
 
     CONSTRAINT fk_inbound_request
@@ -45,4 +45,3 @@ CREATE TABLE IF NOT EXISTS inbound_detail
 
 select * from inbound_request;
 select * from inbound_detail;
-SELECT approval_status FROM inbound_request WHERE inbound_index = 7;

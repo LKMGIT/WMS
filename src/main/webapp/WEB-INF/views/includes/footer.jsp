@@ -5,22 +5,11 @@
 </div><!-- /.page-inner -->
 </div><!-- /.container -->
 
+
+
 <!-- Footer -->
-<footer class="footer">
-  <div class="container-fluid d-flex justify-content-between">
-    <nav class="pull-left">
-      <ul class="nav">
-        <li class="nav-item"><a class="nav-link" href="http://www.themekita.com">ThemeKita</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Help</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Licenses</a></li>
-      </ul>
-    </nav>
-    <div class="copyright">
-      2024, made with <i class="fa fa-heart heart text-danger"></i> by
-      <a href="http://www.themekita.com">ThemeKita</a>
-    </div>
-    <div>Distributed by <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.</div>
-  </div>
+<footer class="site-footer">
+  © 2025 WMS Admin · /admin (view) & /admin/api (API) · UTF-8 · CSRF ready
 </footer>
 </div><!-- /.main-panel -->
 </div><!-- /.wrapper -->
@@ -77,12 +66,16 @@
 
 <style>
   .placeholder, .placeholder-wave { display: none !important; }
+  .site-footer{
+    margin:28px 0 12px; color:var(--muted); font-size:12px; text-align:center;
+  }
 </style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#basic-datatables .placeholder, #basic-datatables .placeholder-wave')
             .forEach(el => el.classList.remove('placeholder','placeholder-wave'));
   });
+
 </script>
 
 

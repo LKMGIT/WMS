@@ -139,7 +139,7 @@ public class WarehouseServiceImpl implements WarehouseService {
        return warehouseDTO;
     }
 
-    public int calculateSectionRemain(Long sIndex) {
+    public Integer calculateSectionRemain(Long sIndex) {
         Integer remain = sectionMapper.calculateSectionRemain(sIndex);
         return remain == null ? 0 : remain;
     }

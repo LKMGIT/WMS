@@ -82,7 +82,7 @@ public class InboundController {
         }
     }
 
-    // --- 2. 입고 상세 (Detail) API ---
+    // --- 2. 입고 상세 ---
     @GetMapping("/request/{inboundIndex}")
     public ResponseEntity<InboundRequestDTO> getInboundRequestDetail(
             @PathVariable("inboundIndex") Long inboundIndex) {
@@ -98,8 +98,7 @@ public class InboundController {
     }
 
     /**
-     * 🔥 [수정] 입고 요청 승인 (및 상세 내역 동시 처리)
-     * detail.jsp에서 관리자가 입력한 DTO를 RequestBody로 받습니다.
+     * 🔥 [수정] 입고 요청 승인 (구역 선택 후 승인)
      */
     @PutMapping("/request/{inboundIndex}/approve")
     public ResponseEntity<Map<String, Object>> approveInboundRequest(
@@ -108,16 +107,31 @@ public class InboundController {
 
         Map<String, Object> response = new HashMap<>();
         try {
-            requestDTO.setInboundIndex(inboundIndex);
+            // 1. 구역 번호 유효성 검사 (DTO의 cancelReason 필드에 임시로 구역 코드를 받음)
+            if (requestDTO.getCancelReason() == null || requestDTO.getCancelReason().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "승인할 구역을 반드시 선택해야 합니다.");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
 
-            // 5단계 로직이 구현된 서비스 호출
-            inboundService.approveRequest(requestDTO);
+            // 2. 기존 요청 정보를 가져옴
+            InboundRequestDTO existingRequest = inboundService.getRequestById(inboundIndex);
+            if (existingRequest == null) {
+                response.put("success", false);
+                response.put("message", "요청 번호 " + inboundIndex + "를 찾을 수 없습니다.");
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+
+            // 3. 기존 DTO에 구역 번호를 설정 (cancelReason에 임시로 담아 서비스로 전달)
+            existingRequest.setInboundIndex(inboundIndex);
+            existingRequest.setCancelReason(requestDTO.getCancelReason());
+
+            inboundService.approveRequest(existingRequest);
 
             response.put("success", true);
-            response.put("message", "요청이 성공적으로 승인 및 처리되었습니다.");
+            response.put("message", "요청이 성공적으로 승인 및 구역 배정되었습니다.");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            // (예: 용량 부족 시 500 에러)
             response.put("success", false);
             response.put("message", "승인 처리 중 오류가 발생했습니다: " + e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -151,9 +165,7 @@ public class InboundController {
         }
     }
 
-    /**
-     * (참고) 이 API는 '승인' 이후, 상세 내역을 '수정'할 때 사용됩니다.
-     */
+    /** '승인' 이후, 상세 내역을 '수정'할 때 사용됩니다. */
     @PutMapping("/detail/process")
     public ResponseEntity<Map<String, Object>> processInboundDetail(
             @RequestBody InboundDetailDTO detailDTO) {

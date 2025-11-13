@@ -146,9 +146,9 @@
      * @param {number} page - 페이지 번호
      * @param {string} type - 검색 타입 (W, A)
      * @param {string} keyword - 검색어
-     * @param {string} status - 운송장 상태 (PENDING, APPROVED)
+     * @param {string} si_waybill_status - 운송장 상태 (PENDING, APPROVED)
      */
-    async function loadInstructionList(page = 1, type = '', keyword = '', status = '') {
+    async function loadInstructionList(page = 1, type = '', keyword = '', si_waybill_status = '') {
         const tbody = document.getElementById("instructionTbody");
         tbody.innerHTML = '<tr><td colspan="7" class="text-center">데이터를 불러오는 중입니다...</td></tr>';
 
@@ -159,7 +159,7 @@
                 amount: 10,
                 type: type,
                 keyword: keyword,
-                approval_status: status // XML의 search.approval_status로 매핑됨
+                approval_status: si_waybill_status // XML의 search.approval_status로 매핑됨
             });
             const response = await axios.get(API_BASE + "/instruction", { params });
 
@@ -171,7 +171,7 @@
 
             if (!list || list.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center">출고 지시 내역이 없습니다.</td></tr>';
-                renderPagination(pageDTO, loadInstructionList, { type, keyword, status });
+                renderPagination(pageDTO, loadInstructionList, { type, keyword, si_waybill_status });
                 return;
             }
 
@@ -216,7 +216,7 @@
             });
 
             // 페이지네이션 생성
-            renderPagination(pageDTO, loadInstructionList, { type, keyword, status });
+            renderPagination(pageDTO, loadInstructionList, { type, keyword, si_waybill_status });
 
         } catch (error) {
             console.error("Instruction List loading failed:", error);
@@ -231,10 +231,10 @@
         const paginationUl = document.getElementById("instructionPagination");
         paginationUl.innerHTML = "";
 
-        if (!pageDTO || !pageDTO.criteria) return;
+        if (!pageDTO || !pageDTO.cri) return;
 
         let paginationHtml = '<ul class="pagination">';
-        const { criteria, startPage, endPage, prev, next } = pageDTO;
+        const { cri, startPage, endPage, prev, next } = pageDTO;
 
         // '이전' 버튼 (문자열 연결로 복원)
         if (prev) {
@@ -243,7 +243,7 @@
 
         // 페이지 번호 (문자열 연결로 복원)
         for (let i = startPage; i <= endPage; i++) {
-            const activeClass = (criteria.pageNum == i) ? 'active' : '';
+            const activeClass = (cri.pageNum == i) ? 'active' : '';
 
             paginationHtml += '<li class="page-item ' + activeClass + '">' +
                 '  <a class="page-link" href="#" data-page="' + i + '">' + i + '</a>' +
@@ -263,7 +263,7 @@
                 e.preventDefault();
                 const pageNum = this.dataset.page;
                 // [수정] loadFn 호출 시 searchParams의 모든 값을 전달
-                loadFn(pageNum, searchParams.type, searchParams.keyword, searchParams.status);
+                loadFn(pageNum, searchParams.type, searchParams.keyword, searchParams.si_waybill_status);
             });
         });
     }

@@ -51,8 +51,8 @@ public class InvenServiceImpl implements InvenService {
         // 1) 입고 상세로부터 item/warehouse/section/qty 조회(필요시 조인으로 보강)
         // 여기서는 Shipping/Inbound DTO에 이미 값이 들어오는 것으로 가정:
         Long itemIndex      = d.getInboundIndex() != null ? inventoryMapper.selectItemIndexByInbound(d.getInboundIndex()) : null;
-        Long warehouseIndex = inventoryMapper.selectWarehouseByRequest(d.getRequestIndex());
-        Long sectionIndex      = inventoryMapper.selectSectionByRequest(d.getRequestIndex());
+        Long warehouseIndex = inventoryMapper.selectWarehouseByRequest(d.getInboundIndex());
+        Long sectionIndex      = inventoryMapper.selectSectionByRequest(d.getInboundIndex());
 
         if (itemIndex == null || warehouseIndex == null || sectionIndex == null) {
             throw new IllegalStateException("입고 상세에서 item/warehouse/section 정보를 찾을 수 없습니다.");

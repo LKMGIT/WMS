@@ -8,6 +8,7 @@ import com.ssg.wms.announcement.domain.OneToOneRequestDTO;
 import com.ssg.wms.announcement.service.BoardRequestService;
 import com.ssg.wms.announcement.service.NoticeService;
 import com.ssg.wms.announcement.service.OneToOneRequestService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +23,16 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/announcement")
+@RequiredArgsConstructor
 public class AnnouncementController {
 
-    @Autowired
-    private NoticeService noticeService;
+    private final NoticeService noticeService;
 
-    @Autowired
-    private OneToOneRequestService oneToOneRequestService;
 
-    @Autowired
-    private BoardRequestService boardRequestService;
+    private final OneToOneRequestService oneToOneRequestService;
+
+
+    private final BoardRequestService boardRequestService;
 
     // ============================================
     // 공지사항 (Notice) API - R은 공용, CUD는 관리자

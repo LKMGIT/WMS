@@ -197,15 +197,15 @@
         </article>
 
         <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-truck"></i></div><strong>배차/차량</strong></div>
-            <div class="card-body">차량 등록·위치·배차·운행 상태를 통합 관리합니다.</div>
-            <div class="card-foot"><a class="link" href="/vehicle/admin/list">바로가기 →</a></div>
+            <div class="card-head"><div class="icon"><i class="fa fa-truck"></i></div><strong>창고 관리</strong></div>
+            <div class="card-body">창고 등록·위치·운행 상태를 통합 관리합니다.</div>
+            <div class="card-foot"><a class="link" href="/warehouse/list">바로가기 →</a></div>
         </article>
 
         <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-gear"></i></div><strong>시스템 설정</strong></div>
-            <div class="card-body">관리자/권한, 창고/구역, 코드 테이블 등 시스템 전반을 설정합니다.</div>
-            <div class="card-foot"><a class="link" href="/admin/setting">바로가기 →</a></div>
+            <div class="card-head"><div class="icon"><i class="fa fa-gear"></i></div><strong>고객센터 관리</strong></div>
+            <div class="card-body">공지사항 답변·조회·수정 통합 관리합니다.</div>
+            <div class="card-foot"><a class="link" href="/announcement/notice/list">바로가기 →</a></div>
         </article>
     </section>
 

@@ -1,3 +1,6 @@
+use wms;
+
+
 INSERT INTO Vehicle
 (vehicle_name, vehicle_id, vehicle_volume, driver_name, driver_phone)
 VALUES

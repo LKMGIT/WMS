@@ -46,7 +46,7 @@ public class loginController {
                 session.setAttribute("loginAdminStatus", admin.getAdminStatus());
                 session.setAttribute("loginAdminRole", admin.getAdminRole());
 
-                return "redirect:/admin/user_list";
+                return "redirect:/admin/dashboard";
 
             case NOT_FOUND:
                 rttr.addFlashAttribute("loginError", "존재하지 않는 아이디입니다.");

@@ -1,3 +1,4 @@
+use wms;
 INSERT INTO inbound_request
 (inbound_index, inbound_request_quantity, inbound_request_date, planned_receive_date, approval_status, approve_date, cancel_reason, user_index, warehouse_index, item_index)
 VALUES

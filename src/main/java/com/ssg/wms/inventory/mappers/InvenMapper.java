@@ -1,8 +1,8 @@
 package com.ssg.wms.inventory.mappers;
 
-import com.ssg.wms.global.domain.Criteria;
 import com.ssg.wms.inventory.domain.InvenDTO;
 import com.ssg.wms.inventory.domain.InvenItemViewDTO;
+import com.ssg.wms.global.domain.Criteria;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -26,10 +26,8 @@ public interface InvenMapper {
     // 실재고 스냅샷
     int insertInvenCountSnapshot(@Param("invenIndex") Long invenIndex);
 
-
-    // 보조 조회(서비스에서 호출)
+    /* ===== 보조 조회 (inboundIndex 기준으로 통일) ===== */
     Long selectItemIndexByInbound(@Param("inboundIndex") Long inboundIndex);
-    Long selectWarehouseByRequest(@Param("requestIndex") Long requestIndex);
-    Long selectSectionByRequest(@Param("requestIndex") Long requestIndex);
-
+    Long selectWarehouseByInbound(@Param("inboundIndex") Long inboundIndex);
+    Long selectSectionByInbound(@Param("inboundIndex") Long inboundIndex);
 }

@@ -1,5 +1,6 @@
-
+use wms;
 -- 1. inbound_request 테이블
+drop table if exists inbound_request;
 CREATE TABLE inbound_request
 (
     inbound_index            bigint AUTO_INCREMENT PRIMARY KEY COMMENT '입고 번호 (PK)',

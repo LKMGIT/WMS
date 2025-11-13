@@ -13,7 +13,7 @@
         <result property="inboundDate"    column="inbound_date"/>
         <result property="shippingDate"   column="shipping_date"/>
         <result property="warehouseIndex" column="warehouse_index"/>
-        <result property="sectionIndex"      column="section_index"/>
+        <result property="sectionIndex"   column="section_index"/>
     </resultMap>
 
     <sql id="InventoryWhere">
@@ -27,7 +27,7 @@
             <if test="cri.warehouseIndex != null">
                 AND inv.warehouse_index = #{cri.warehouseIndex}
             </if>
-            <if test="cri.sectionIndex != null">
+            <if test="cri.sectionIndex != null and cri.sectionIndex != ''">
                 AND inv.section_index = #{cri.sectionIndex}
             </if>
         </where>
@@ -52,8 +52,7 @@
         <include refid="InventoryWhere"/>
     </select>
 
-
-    <!-- 입고: 없으면 생성, 있으면 수량 +=  -->
+    <!-- 입고: 없으면 생성, 있으면 수량 += -->
     <insert id="upsertIncrease" parameterType="com.ssg.wms.inventory.domain.InvenDTO">
         INSERT INTO inventory
         (item_index, warehouse_index, section_index, inven_quantity, inbound_date, detail_inbound)
@@ -87,7 +86,7 @@
         LIMIT 1
     </select>
 
-    <!-- 재고 스냅샷: 장부는 최신, 실사는 "직전 실사값" 유지(없으면 NULL) -->
+    <!-- 재고 스냅샷 -->
     <insert id="insertInvenCountSnapshot">
         INSERT INTO inven_count
         (inven_index, inven_quantity, actual_quantity, count_updateAt)
@@ -106,34 +105,31 @@
         WHERE inv.inven_index = #{invenIndex}
     </insert>
 
-    <!-- ====== 보조 조회(서비스에서 사용하는 3개) ====== -->
-    <!-- inboundIndex -> item_index (실제 스키마에 맞춰 조정) -->
+    <!-- ===== 보조 조회 (스키마에 맞게 수정) ===== -->
+
+    <!-- inbound_request 에서 바로 item_index 조회 -->
     <select id="selectItemIndexByInbound" parameterType="long" resultType="long">
-        SELECT i.item_index
-        FROM inbound_detail d
-        JOIN inbound_request r ON r.request_index = d.request_index
-        JOIN items i ON i.inbound_index = r.inbound_index
-        WHERE d.inbound_index = #{inboundIndex}
+        SELECT r.item_index
+        FROM inbound_request r
+        WHERE r.inbound_index = #{inboundIndex}
         LIMIT 1
     </select>
 
-    <!-- requestIndex -> warehouse_index -->
-    <select id="selectWarehouseByRequest" parameterType="long" resultType="long">
+    <!-- inbound_request 에서 warehouse_index 조회 -->
+    <select id="selectWarehouseByInbound" parameterType="long" resultType="long">
         SELECT r.warehouse_index
         FROM inbound_request r
-        WHERE r.request_index = #{requestIndex}
+        WHERE r.inbound_index = #{inboundIndex}
         LIMIT 1
     </select>
 
-    <!-- requestIndex -> section_index -->
-    <select id="selectSectionByRequest" parameterType="long" resultType="long">
-        SELECT r.section_index
-        FROM inbound_request r
-        WHERE r.request_index = #{requestIndex}
+    <!-- inbound_detail 에서 section_index 조회 (문자열) -->
+    <select id="selectSectionByInbound" parameterType="long" resultType="long">
+        SELECT d.section_index
+        FROM inbound_detail d
+        WHERE d.inbound_index = #{inboundIndex}
+        ORDER BY d.detail_index DESC
         LIMIT 1
     </select>
-
-
-
 
 </mapper>

@@ -45,36 +45,43 @@ public class InvenServiceImpl implements InvenService {
         return inventoryMapper.selectInventoryTotal(cri);
     }
 
+    // InboundDetailDTO는 그대로 사용 (sectionIndex: String)
     @Override
     @Transactional
     public Long applyInbound(InboundDetailDTO d) {
-        // 1) 입고 상세로부터 item/warehouse/section/qty 조회(필요시 조인으로 보강)
-        // 여기서는 Shipping/Inbound DTO에 이미 값이 들어오는 것으로 가정:
-        Long itemIndex      = d.getInboundIndex() != null ? inventoryMapper.selectItemIndexByInbound(d.getInboundIndex()) : null;
-        Long warehouseIndex = inventoryMapper.selectWarehouseByRequest(d.getInboundIndex());
-        Long sectionIndex      = inventoryMapper.selectSectionByRequest(d.getInboundIndex());
+        if (d.getInboundIndex() == null) {
+            throw new IllegalArgumentException("inboundIndex가 필요합니다.");
+        }
+
+        final Long inboundIndex = d.getInboundIndex();
+
+        // 1) inboundIndex 기반 파생 정보 조회
+        Long itemIndex       = inventoryMapper.selectItemIndexByInbound(inboundIndex);
+        Long warehouseIndex  = inventoryMapper.selectWarehouseByInbound(inboundIndex);
+        Long sectionIndex  = inventoryMapper.selectSectionByInbound(inboundIndex); // 문자열
 
         if (itemIndex == null || warehouseIndex == null || sectionIndex == null) {
             throw new IllegalStateException("입고 상세에서 item/warehouse/section 정보를 찾을 수 없습니다.");
         }
 
+        // 2) 재고 upsert(+)
         InvenDTO dto = new InvenDTO();
         dto.setItemIndex(itemIndex);
         dto.setWarehouseIndex(warehouseIndex);
         dto.setSectionIndex(sectionIndex);
-        dto.setInvenQuantity(Math.toIntExact(d.getReceivedQuantity()));   // +=
+        dto.setInvenQuantity(Math.toIntExact(d.getReceivedQuantity()));     // 누적 +=
         dto.setInboundDate(d.getCompleteDate() != null ? d.getCompleteDate() : LocalDateTime.now());
-        dto.setDetailInbound(d.getDetailIndex() != null ? d.getDetailIndex().longValue() : null);
+        dto.setDetailInbound(d.getDetailIndex()); // detail_index 그대로 저장 (nullable OK)
 
-        // 2) 업서트: 없으면 INSERT, 있으면 누적
         inventoryMapper.upsertIncrease(dto);
         Long invenIndex = inventoryMapper.selectInvenIndex(dto);
 
-        // 3) 정책상: 재고 → 실재고 순서
+        // 3) 실사 스냅샷
         inventoryMapper.insertInvenCountSnapshot(invenIndex);
 
         return invenIndex;
     }
+
 
     @Override
     @Transactional

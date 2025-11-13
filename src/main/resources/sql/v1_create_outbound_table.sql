@@ -1,4 +1,5 @@
 -- 테이블 생성
+use wms;
 CREATE TABLE OutboundRequest (
                                  or_index	BIGINT	NOT NULL,
                                  user_index BIGINT	NOT NULL,

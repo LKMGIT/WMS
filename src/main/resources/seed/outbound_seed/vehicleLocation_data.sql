@@ -1,3 +1,4 @@
+use wms;
 INSERT INTO VehicleLocation
 (vehicle_index, vl_zip_code)
 VALUES

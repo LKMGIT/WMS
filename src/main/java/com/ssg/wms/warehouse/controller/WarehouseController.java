@@ -21,7 +21,6 @@ import java.util.List;
 @RequestMapping("/warehouse")
 public class WarehouseController {
     private final WarehouseService warehouseService;
-
     // 창고 조회 시, 필터 조건 검색창, 창고 리스트, 지도 화면 출력 페이지
     // 요청 : /warehouses/list
     // /WEB-INF/views/warehouse/list.jsp

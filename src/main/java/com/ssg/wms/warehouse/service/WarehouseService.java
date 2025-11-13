@@ -14,4 +14,6 @@ public interface WarehouseService {
     WarehouseDTO getWarehouse(Long wIndex);
     boolean modifyWarehouse(WarehouseUpdateDTO warehouseUpdateDTO);
     boolean removeWarehouse(Long wIndex);
+    int calculateSectionRemain(Long sIndex);
+    boolean canInbound(Long sIndex, int itemVolume, int quantity);
 }

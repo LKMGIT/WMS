@@ -139,15 +139,15 @@ public class WarehouseServiceImpl implements WarehouseService {
        return warehouseDTO;
     }
 
-    public int calculateSectionRemain(Long sectionId) {
-        Integer remain = sectionMapper.calculateSectionRemain(sectionId);
+    public int calculateSectionRemain(Long sIndex) {
+        Integer remain = sectionMapper.calculateSectionRemain(sIndex);
         return remain == null ? 0 : remain;
     }
 
-    public boolean canInbound(Long sectionId, int itemVolume, int quantity) {
+        public boolean canInbound(Long sIndex, int itemVolume, int quantity) {
 
         int required = itemVolume * quantity;
-        int remain = calculateSectionRemain(sectionId);
+        int remain = calculateSectionRemain(sIndex);
 
         return remain >= required;
     }

@@ -33,13 +33,13 @@
         from section s
         left join inventory inv on s.section_index = inv.section_index
         left join items i on i.item_index = inv.item_index
-        where s.section_index = #{sectionId}
+        where s.section_index = #{sIndex}
         group by s.section_index
     </select>
 
     <select id="getSectionsByWarehouse" resultMap="SectionMap">
         SELECT *
         FROM section
-        WHERE warehouse_index = #{warehouseIndex}
+        WHERE warehouse_index = #{wIndex}
     </select>
 </mapper>

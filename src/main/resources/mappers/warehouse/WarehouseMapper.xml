@@ -57,6 +57,7 @@
                 and warehouse_location like concat('%', #{keyword}, '%')
             </if>
         </where>
+        order by warehouse_index desc
         limit #{skip}, #{amount}
     </select>
 

@@ -68,7 +68,7 @@ public class OutboundServiceImpl implements OutboundService {
     private String getWarehouseLocationFromZip(String zip_prefix) {
         int zip = Integer.parseInt(zip_prefix);
         if (zip >= 1 && zip <= 9) {
-            return "서울";
+            return "서울특별시";
         } else if (zip >= 10 && zip <= 18) {
             // return "경기";
             return "수도권"; //테스트 위해서

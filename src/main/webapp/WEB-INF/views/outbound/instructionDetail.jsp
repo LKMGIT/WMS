@@ -264,9 +264,21 @@
      * LocalDateTime 배열을 JavaScript Date 객체로 변환
      */
     function parseLocalDateTime(arr) {
-        if (!arr || arr.length < 6) { return null; }
-        // JS Date 객체의 month는 0부터 시작하므로 arr[1]에서 1을 뺌
-        return new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4], arr[5]);
+        if (!arr) return null;
+
+        // 5개면 초(seconds)를 0으로, 6개 이상이면 배열 값 사용
+        const year = arr[0];
+        const month = arr[1] - 1; // 월은 0부터 시작
+        const day = arr[2];
+        const hour = arr[3] || 0;
+        const minute = arr[4] || 0;
+        const second = arr[5] || 0; // 5개일 때 'undefined'가 되므로 0으로 처리
+
+        if (arr.length >= 5) { // 최소 5개(년~분)는 있어야 함
+            return new Date(year, month, day, hour, minute, second);
+        }
+
+        return null; // 5개 미만이면 실패
     }
 
     /**

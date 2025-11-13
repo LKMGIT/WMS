@@ -230,8 +230,13 @@
 
                 <div class="mt-4 text-center">
                     <label>배송 추적 QR 코드</label>
-                    <div id="qrcode" class="mt-2 d-flex justify-content-center">
-                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    <div id="qrcode" class="mt-2 d-flex justify-content-center"></div>
+                    <br>
+                    <br>
+                    <br>
                 </div>
             </div>
             <div class="modal-footer">
@@ -405,16 +410,12 @@
 // 🚨 [핵심 수정]: 필요한 필드만 포함하는 새로운 객체 생성
                 const essentialWaybillData = {
                     waybillId: waybill.waybill_id, // 운송장 고유 번호
-                    warehouseAddress: waybill.warehouse_address, // 출발 위치 (창고 주소)
-                    destinationAddress: waybill.or_street_address + waybill.or_detailed_address, // 도착지 (요청 주소)
-                    itemName: waybill.item_name,                // 물품 이름
-                    quantity: waybill.or_quantity,              // 수량
                 };
 
                 new QRCode("qrcode", { // 🚨 DOM 객체(qrDiv) 대신 ID 문자열("qrcode") 사용
                     text: essentialWaybillData,
-                    width: 150,
-                    height: 150,
+                    width: 256,
+                    height: 256,
                     colorDark: "#000000",
                     colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H

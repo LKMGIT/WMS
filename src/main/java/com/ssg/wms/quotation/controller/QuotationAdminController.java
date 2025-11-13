@@ -31,7 +31,7 @@ public class QuotationAdminController {
     public Map<String, Object> getQuotationRequests(
             @ModelAttribute Criteria criteria,
             @ModelAttribute QuotationSearchDTO quotationSearchDTO) {
-
+        log.info(criteria.getPageNum());
         List<QuotationRequestDTO> list = quotationService.getQuotationRequestList(criteria, quotationSearchDTO);
         int total = quotationService.getQuotationRequestTotalCount(quotationSearchDTO);
 

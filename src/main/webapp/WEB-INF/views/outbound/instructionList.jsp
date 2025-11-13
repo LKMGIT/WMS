@@ -144,10 +144,10 @@
         try {
             // [수정] params에 status 추가
             const params = new URLSearchParams({
-                page,
+                pageNum: page,
                 amount: 10,
-                type,
-                keyword,
+                type: type,
+                keyword: keyword,
                 approval_status: status // XML의 search.approval_status로 매핑됨
             });
             const response = await axios.get(API_BASE + "/instruction", { params });

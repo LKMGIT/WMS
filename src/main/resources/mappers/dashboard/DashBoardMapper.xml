@@ -33,4 +33,11 @@
         <!-- AND waybill_status = 'DELIVERED' -->
     </select>
 
+    <select id="countUsersBetween" parameterType="map" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE user_createdAt >= #{start}
+        AND user_createdAt &lt;  #{end}
+    </select>
+
 </mapper>

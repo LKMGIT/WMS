@@ -367,7 +367,7 @@
         I.section_index AS sectionIndex
         FROM inventory AS I
         JOIN inbound_detail AS ID ON I.detail_inbound = ID.detail_index
-        JOIN inbound_request AS IR ON ID.request_index = IR.inbound_index
+        JOIN inbound_request AS IR ON ID.inbound_index = IR.inbound_index
         JOIN warehouse AS W ON I.warehouse_index = W.warehouse_index
         WHERE
         IR.user_index = #{user_index}

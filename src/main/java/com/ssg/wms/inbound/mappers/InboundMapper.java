@@ -20,10 +20,14 @@ public interface InboundMapper {
     int updateCancel(InboundRequestDTO requestDTO);
     int updateApproval(@Param("request_index") Long requestIndex);
 
-    // ===== (신규) 실제 입고 처리 =====
+    // ===== 실제 입고 처리 =====
+
+    // 🔥 [신규 추가] 5단계: DB에 저장
+    int insertInboundDetail(InboundDetailDTO detailDTO);
+
     int updateInboundDetail(InboundDetailDTO detailDTO);
 
-    // ===== (신규) 통계 현황 =====
+    // ===== 통계 현황 =====
     List<InboundRequestDTO> selectInboundStatusByPeriod(Map<String, Object> params);
     List<InboundRequestDTO> selectInboundStatusByMonth(@Param("year") int year, @Param("month") int month);
 }

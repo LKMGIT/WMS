@@ -17,6 +17,6 @@ public class InboundDetailDTO {
     private Long inboundIndex;                      // 입고번호 (FK)
     private Long receivedQuantity;               // 입고 수량
     private LocalDateTime completeDate;             // 입고 일시
-    private Integer warehouseIndex;                    // 창고번호
-    private String sectionIndex;                   // 구역번호
+    private Long warehouseIndex;                    // 창고번호
+    private Long sectionIndex;                   // 구역번호
 }

@@ -2,6 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssg.wms.inbound.mappers.InboundMapper">
 
+    <resultMap id="inboundRequestSimpleMap" type="com.ssg.wms.inbound.domain.InboundRequestDTO">
+        <id property="inboundIndex" column="inbound_index"/>
+        <result property="inboundRequestQuantity" column="inbound_request_quantity"/>
+        <result property="inboundRequestDate" column="inbound_request_date"/>
+        <result property="plannedReceiveDate" column="planned_receive_date"/>
+        <result property="approvalStatus" column="approval_status"/>
+        <result property="approveDate" column="approve_date"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="userIndex" column="user_index"/>
+        <result property="warehouseIndex" column="warehouse_index"/>
+        <result property="item_index" column="item_index"/>
+        <result property="updatedDate" column="updated_date"/>
+    </resultMap>
+
     <resultMap id="inboundRequestWithDetails" type="com.ssg.wms.inbound.domain.InboundRequestDTO">
         <id property="inboundIndex" column="inbound_index"/>
         <result property="inboundRequestQuantity" column="inbound_request_quantity"/>
@@ -13,7 +27,6 @@
         <result property="userIndex" column="user_index"/>
         <result property="warehouseIndex" column="warehouse_index"/>
         <result property="item_index" column="item_index"/>
-
         <collection property="details" ofType="com.ssg.wms.inbound.domain.InboundDetailDTO">
             <id property="detailIndex" column="detail_index"/>
             <result property="receivedQuantity" column="received_quantity"/>
@@ -23,70 +36,44 @@
             <result property="sectionIndex" column="d_section_index"/>
         </collection>
     </resultMap>
+
     <select id="selectRequestById" resultMap="inboundRequestWithDetails">
         SELECT
             r.*,
-            d.detail_index,
-            d.received_quantity,
-            d.complete_date,
+            d.detail_index, d.received_quantity, d.complete_date,
             d.inbound_index AS d_inbound_index,
             d.warehouse_index AS d_warehouse_index,
             d.section_index AS d_section_index
-        FROM
-            inbound_request r
-                LEFT JOIN
-            inbound_detail d ON r.inbound_index = d.inbound_index
-        WHERE
-            r.inbound_index = #{inbound_index}
+        FROM inbound_request r
+                 LEFT JOIN inbound_detail d ON r.inbound_index = d.inbound_index
+        WHERE r.inbound_index = #{inbound_index}
     </select>
 
     <sql id="searchConditions">
         <where>
             <if test="searchType != null and searchKeyword != null and searchKeyword != ''">
                 <choose>
-                    <when test="searchType == 'status'">
-                        AND approval_status = #{searchKeyword}
-                    </when>
-                    <when test="searchType == 'warehouse'">
-                        AND warehouse_index = #{searchKeyword}
-                    </when>
+                    <when test="searchType == 'status'"> AND approval_status = #{searchKeyword} </when>
+                    <when test="searchType == 'warehouse'"> AND warehouse_index = #{searchKeyword} </when>
                 </choose>
             </if>
-
             <if test="fromDate != null and toDate != null and fromDate != '' and toDate != ''">
                 AND DATE(inbound_request_date) BETWEEN #{fromDate} AND #{toDate}
             </if>
-
             <if test="warehouseIndex != null">
                 AND warehouse_index = #{warehouseIndex}
             </if>
-
             <if test="approvalStatus != null and approvalStatus != ''">
                 <choose>
-                    <when test="approvalStatus == 'PROCESSED'">
-                        AND approval_status IN ('APPROVED', 'REJECTED', 'CANCELED')
-                    </when>
-                    <otherwise>
-                        AND approval_status = #{approvalStatus}
-                    </otherwise>
+                    <when test="approvalStatus == 'PROCESSED'"> AND approval_status IN ('APPROVED', 'REJECTED', 'CANCELED') </when>
+                    <otherwise> AND approval_status = #{approvalStatus} </otherwise>
                 </choose>
             </if>
         </where>
     </sql>
 
-    <select id="selectAllRequests" resultType="com.ssg.wms.inbound.domain.InboundRequestDTO">
-        SELECT
-        inbound_index AS inboundIndex,
-        inbound_request_quantity AS inboundRequestQuantity,
-        inbound_request_date AS inboundRequestDate,
-        planned_receive_date AS plannedReceiveDate,
-        approval_status AS approvalStatus,
-        approve_date AS approveDate,
-        cancel_reason AS cancelReason,
-        updated_date AS updatedDate,
-        user_index AS userIndex,
-        warehouse_index AS warehouseIndex,
-        item_index AS item_index
+    <select id="selectAllRequests" resultMap="inboundRequestSimpleMap">
+        SELECT *
         FROM inbound_request
         <include refid="searchConditions"/>
         ORDER BY inbound_index DESC
@@ -103,20 +90,34 @@
 
     <update id="updateCancel">
         UPDATE inbound_request
-        SET
-            approval_status = 'CANCELED',
-            cancel_reason = #{cancelReason}
-        WHERE
-            inbound_index = #{inboundIndex}
+        SET approval_status = 'CANCELED', cancel_reason = #{cancelReason}
+        WHERE inbound_index = #{inboundIndex} AND approval_status = 'PENDING'
     </update>
 
     <update id="updateApproval">
         UPDATE inbound_request
+        SET approval_status = 'APPROVED', approve_date = NOW()
+        WHERE inbound_index = #{request_index} AND approval_status = 'PENDING'
+    </update>
+
+    <insert id="insertInboundDetail"
+            parameterType="com.ssg.wms.inbound.domain.InboundDetailDTO"
+            useGeneratedKeys="true" keyProperty="detailIndex">
+        INSERT INTO inbound_detail
+        (inbound_index, received_quantity, complete_date, warehouse_index, section_index)
+        VALUES
+            (#{inboundIndex}, #{receivedQuantity}, NOW(), #{warehouseIndex}, #{sectionIndex})
+    </insert>
+
+    <update id="updateInboundDetail">
+        UPDATE inbound_detail
         SET
-            approval_status = 'APPROVED',
-            approve_date = NOW()
+            received_quantity = #{receivedQuantity},
+            complete_date = NOW(),
+            warehouse_index = #{warehouseIndex},
+            section_index = #{sectionIndex}
         WHERE
-            inbound_index = #{request_index}
+            detail_index = #{detailIndex} AND inbound_index = #{inboundIndex}
     </update>
 
     <select id="selectInboundStatusByPeriod" resultType="com.ssg.wms.inbound.domain.InboundRequestDTO">
@@ -126,7 +127,7 @@
             COUNT(inbound_index) AS detailCount,
             SUM(inbound_request_quantity) AS totalReceivedQuantity
         FROM inbound_request
-        WHERE inbound_request_date BETWEEN #{fromDate} AND #{toDate}
+        WHERE inbound_request_date BETWEEN #{fromDate} AND DATE_ADD(#{toDate}, INTERVAL 1 DAY)
         GROUP BY DATE(inbound_request_date), approval_status
         ORDER BY inboundRequestDate, approval_status
     </select>
@@ -141,14 +142,4 @@
         GROUP BY approval_status
     </select>
 
-    <update id="updateInboundDetail">
-        UPDATE inbound_detail
-        SET
-            received_quantity = #{receivedQuantity},
-            complete_date = NOW(),
-            section_index = #{section_index}
-        WHERE
-            detail_index = #{detailIndex}
-          AND inbound_index = #{inboundIndex}
-    </update>
 </mapper>

@@ -27,4 +27,19 @@
         )
     </insert>
 
+    <select id="calculateSectionRemain" resultType="int">
+        select
+        s.section_capacity - COALESCE(SUM(i.item_volume * inv.inven_quantity), 0) as remain
+        from section s
+        left join inventory inv on s.section_index = inv.section_index
+        left join items i on i.item_index = inv.item_index
+        where s.section_index = #{sectionId}
+        group by s.section_index
+    </select>
+
+    <select id="getSectionsByWarehouse" resultMap="SectionMap">
+        SELECT *
+        FROM section
+        WHERE warehouse_index = #{warehouseIndex}
+    </select>
 </mapper>

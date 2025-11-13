@@ -4,7 +4,6 @@
 
 <mapper namespace="com.ssg.wms.announcement.mappers.BoardRequestMapper">
 
-    <!-- BoardRequestDTO ResultMap -->
     <resultMap id="BoardRequestResultMap" type="com.ssg.wms.announcement.domain.BoardRequestDTO">
         <id property="boardIndex" column="board_index"/>
         <result property="bTitle" column="b_title"/>
@@ -16,7 +15,6 @@
         <result property="userIndex" column="user_index"/>
     </resultMap>
 
-    <!-- BoardCommentDTO ResultMap -->
     <resultMap id="BoardCommentResultMap" type="com.ssg.wms.announcement.domain.BoardCommentDTO">
         <id property="commentIndex" column="comment_index"/>
         <result property="boardIndex" column="board_index"/>
@@ -27,23 +25,6 @@
     </resultMap>
 
 
-    <!-- 게시글 등록 -->
-    <insert id="insertBoard" parameterType="com.ssg.wms.announcement.domain.BoardRequestDTO"
-            useGeneratedKeys="true" keyProperty="boardIndex">
-        INSERT INTO board_request (
-            b_title,
-            b_content,
-            b_type,
-            user_index
-        ) VALUES (
-                     #{bTitle},
-                     #{bContent},
-                     #{bType},
-                     #{userIndex}
-                 )
-    </insert>
-
-    <!-- 게시글 목록 조회 -->
     <select id="selectBoards" parameterType="map" resultMap="BoardRequestResultMap">
         SELECT * FROM board_request
         WHERE 1=1
@@ -57,37 +38,23 @@
         ORDER BY b_createAt DESC
     </select>
 
-    <!-- 게시글 상세 조회 -->
     <select id="selectBoard" resultMap="BoardRequestResultMap">
         SELECT * FROM board_request
         WHERE board_index = #{board_index}
     </select>
 
-    <!-- 게시글 조회수 증가 -->
     <update id="increaseViews">
         UPDATE board_request
         SET b_views = b_views + 1
         WHERE board_index = #{board_index}
     </update>
 
-    <!-- 게시글 수정 -->
-    <update id="updateBoard" parameterType="com.ssg.wms.announcement.domain.BoardRequestDTO">
-        UPDATE board_request
-        SET b_title = #{bTitle},
-            b_content = #{bContent},
-            b_type = #{bType},
-            b_updateAt = NOW()
-        WHERE board_index = #{boardIndex}
-    </update>
-
-    <!-- 게시글 삭제 -->
     <delete id="deleteBoard">
         DELETE FROM board_request
         WHERE board_index = #{board_index}
     </delete>
 
 
-    <!-- 댓글 등록 -->
     <insert id="insertComment" parameterType="com.ssg.wms.announcement.domain.BoardCommentDTO"
             useGeneratedKeys="true" keyProperty="commentIndex">
         INSERT INTO board_comment (
@@ -103,14 +70,12 @@
                  )
     </insert>
 
-    <!-- 게시글의 댓글 목록 조회 -->
     <select id="selectComments" resultMap="BoardCommentResultMap">
         SELECT * FROM board_comment
         WHERE board_index = #{board_index}
         ORDER BY c_createAt ASC
     </select>
 
-    <!-- 댓글 삭제 -->
     <delete id="deleteComment">
         DELETE FROM board_comment
         WHERE comment_index = #{comment_index}

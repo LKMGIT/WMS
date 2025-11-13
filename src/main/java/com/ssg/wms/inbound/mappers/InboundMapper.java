@@ -49,6 +49,10 @@ public interface InboundMapper {
     /** 요청번호로 입고 상세 목록 조회 */
     List<InboundDetailDTO> selectDetailsByRequestId(@Param("request_index") Long requestIndex);
 
+    // [신규 추가] form.jsp용 입고 상세 전체 조회
+    /** 입고 상세 목록 전체 조회 (form.jsp용) */
+    List<InboundDetailDTO> selectAllDetails(Map<String, Object> params);
+
     /** QR코드로 입고 상세 조회 */
     InboundDetailDTO selectDetailByQr(@Param("qr_code") String qrCode);
 
@@ -59,5 +63,5 @@ public interface InboundMapper {
     int updateComplete(InboundDetailDTO detailDTO);
 
     /** 입고 상세 삭제  */
-    int deleteDetail(@Param("detail_index") Integer detailIndex);
+    int deleteDetail(@Param("detail_index") Long detailIndex);
 }

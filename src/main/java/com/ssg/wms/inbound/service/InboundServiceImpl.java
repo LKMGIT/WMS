@@ -3,6 +3,7 @@ package com.ssg.wms.inbound.service;
 import com.ssg.wms.inbound.domain.InboundDetailDTO;
 import com.ssg.wms.inbound.domain.InboundRequestDTO;
 import com.ssg.wms.inbound.mappers.InboundMapper;
+import com.ssg.wms.inventory.service.InvenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,9 @@ import java.util.Map;
 @Service
 @Transactional
 public class InboundServiceImpl implements InboundService {
+
+    @Autowired
+    private InvenService invenService;
 
     @Autowired
     private InboundMapper inboundMapper;
@@ -148,6 +152,10 @@ public class InboundServiceImpl implements InboundService {
     public boolean approveRequest(Long requestIndex, Long adminId) {
         InboundRequestDTO request = inboundMapper.selectRequestById(requestIndex);
         if (request == null || !"PENDING".equals(request.getApprovalStatus())) {
+
+            InboundDetailDTO inboundDetailDTO = new InboundDetailDTO();
+            inboundDetailDTO.setInboundIndex(requestIndex);
+
             return false;
         }
 
@@ -158,10 +166,10 @@ public class InboundServiceImpl implements InboundService {
      * 입고 상세 위치 지정 (관리자)
      */
     @Override
-    public boolean updateLocation(Integer detailIndex, String location, Long adminId) {
+    public boolean updateLocation(Long detailIndex, String location, Long adminId) {
         InboundDetailDTO detailDTO = new InboundDetailDTO();
         detailDTO.setDetailIndex(detailIndex);
-        detailDTO.setLocation(location);
+        detailDTO.setSection_index(location);
 
         return inboundMapper.updateDetail(detailDTO) > 0;
     }
@@ -170,7 +178,7 @@ public class InboundServiceImpl implements InboundService {
      * QR 코드 생성 및 지정 (관리자)
      */
     @Override
-    public String generateQrCode(Integer detailIndex, Long adminId) {
+    public String generateQrCode(Long detailIndex, Long adminId) {
         // QR 코드 값 생성 (예: INB-DETAIL-{detailIndex})
         String qrCode = "INB-DETAIL-" + detailIndex;
 
@@ -196,7 +204,7 @@ public class InboundServiceImpl implements InboundService {
      * 입고 상세 완료 처리 (관리자)
      */
     @Override
-    public boolean completeInbound(Integer detailIndex, Integer receivedQuantity, Long adminId) {
+    public boolean completeInbound(Long detailIndex, Long receivedQuantity, Long adminId) {
         InboundDetailDTO detailDTO = new InboundDetailDTO();
         detailDTO.setDetailIndex(detailIndex);
         detailDTO.setReceivedQuantity(receivedQuantity);
@@ -205,7 +213,7 @@ public class InboundServiceImpl implements InboundService {
     }
 
     /**
-     * 관리자용 입고 요청 목록 조회
+     * 관리자용 입고 요청 목록 조회 (list.jsp)
      */
     @Override
     public List<InboundRequestDTO> getAdminInboundRequests(String keyword, String status) {
@@ -214,5 +222,16 @@ public class InboundServiceImpl implements InboundService {
         params.put("status", status);
         params.put("userId", null); // 관리자는 모든 요청 조회
         return inboundMapper.selectRequests(params);
+    }
+
+    /**
+     * 관리자용 입고 (상세) 목록 조회 (form.jsp)
+     */
+    @Override
+    public List<InboundDetailDTO> getAdminInboundDetails(String keyword, String status) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("keyword", keyword);
+        params.put("status", status);
+        return inboundMapper.selectAllDetails(params);
     }
 }

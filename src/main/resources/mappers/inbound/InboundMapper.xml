@@ -4,10 +4,9 @@
 
 <mapper namespace="com.ssg.wms.inbound.mappers.InboundMapper">
 
-    <!-- InboundRequestDTO ResultMap -->
-    <resultMap id="InboundRequestResultMap" type="com.ssg.wms.inbound.domain.InboundRequestDTO">
+    <resultMap id="SimpleRequestResultMap" type="com.ssg.wms.inbound.domain.InboundRequestDTO">
         <id property="inboundIndex" column="inbound_index"/>
-        <result property="inboundRequestQuantity" column="inbound_request_quantity"/>
+        <result property="inboundRequestQuantity" column="inbound_receive_quantity"/>
         <result property="inboundRequestDate" column="inbound_request_date"/>
         <result property="plannedReceiveDate" column="planned_receive_date"/>
         <result property="approvalStatus" column="approval_status"/>
@@ -16,12 +15,15 @@
         <result property="updatedDate" column="updated_date"/>
         <result property="userIndex" column="user_index"/>
         <result property="warehouseIndex" column="warehouse_index"/>
-        <!-- 통계용 필드 -->
+        <result property="item_index" column="item_index"/>
+    </resultMap>
+
+    <resultMap id="StatusRequestResultMap" type="com.ssg.wms.inbound.domain.InboundRequestDTO"
+               extends="SimpleRequestResultMap">
         <result property="detailCount" column="detail_count"/>
         <result property="totalReceivedQuantity" column="total_received_quantity"/>
     </resultMap>
 
-    <!-- InboundDetailDTO ResultMap -->
     <resultMap id="InboundDetailResultMap" type="com.ssg.wms.inbound.domain.InboundDetailDTO">
         <id property="detailIndex" column="detail_index"/>
         <result property="requestIndex" column="request_index"/>
@@ -29,45 +31,44 @@
         <result property="receivedQuantity" column="received_quantity"/>
         <result property="completeDate" column="complete_date"/>
         <result property="inboundIndex" column="inbound_index"/>
-        <result property="location" column="location"/>
+        <result property="warehouse_index" column="warehouse_index"/>
+        <result property="section_index" column="section_index"/>
     </resultMap>
 
-    <!-- ============================================ -->
-    <!-- 입고 요청 관련 쿼리 -->
-    <!-- ============================================ -->
-
-    <!-- 입고 요청 등록 -->
     <insert id="insertRequest" parameterType="com.ssg.wms.inbound.domain.InboundRequestDTO"
             useGeneratedKeys="true" keyProperty="inboundIndex">
         INSERT INTO inbound_request (
-            inbound_request_quantity,
+            inbound_receive_quantity,
             inbound_request_date,
             planned_receive_date,
             approval_status,
             user_index,
-            warehouse_index
+            warehouse_index,
+            item_index
         ) VALUES (
                      #{inboundRequestQuantity},
                      NOW(),
                      #{plannedReceiveDate},
                      'PENDING',
                      #{userIndex},
-                     #{warehouseIndex}
+                     #{warehouseIndex},
+                     #{item_index}
                  )
     </insert>
-
-    <!-- 입고 요청 단건 조회 -->
-    <select id="selectRequestById" resultMap="InboundRequestResultMap">
+    <select id="selectRequestById" resultMap="SimpleRequestResultMap">
         SELECT * FROM inbound_request
         WHERE inbound_index = #{inbound_index}
     </select>
 
-    <!-- 입고 요청 목록 조회 (검색 조건 포함) -->
-    <select id="selectRequests" parameterType="map" resultMap="InboundRequestResultMap">
+    <select id="selectRequests" parameterType="map" resultMap="SimpleRequestResultMap">
         SELECT * FROM inbound_request
         WHERE 1=1
         <if test="keyword != null and keyword != ''">
-            AND inbound_index LIKE CONCAT('%', #{keyword}, '%')
+            AND (
+            inbound_index LIKE CONCAT('%', #{keyword}, '%')
+            OR user_index LIKE CONCAT('%', #{keyword}, '%')
+            OR warehouse_index LIKE CONCAT('%', #{keyword}, '%')
+            )
         </if>
         <if test="status != null and status != ''">
             AND approval_status = #{status}
@@ -78,22 +79,17 @@
         ORDER BY inbound_request_date DESC
     </select>
 
-    <!-- 입고 요청 수정 -->
     <update id="updateRequest" parameterType="com.ssg.wms.inbound.domain.InboundRequestDTO">
         UPDATE inbound_request
-        SET inbound_request_quantity = #{inboundRequestQuantity},
+        SET inbound_receive_quantity = #{inboundRequestQuantity},
             planned_receive_date = #{plannedReceiveDate},
             updated_date = NOW()
         WHERE inbound_index = #{inboundIndex}
     </update>
-
-    <!-- 입고 요청 삭제 -->
     <delete id="deleteRequest">
         DELETE FROM inbound_request
         WHERE inbound_index = #{request_index}
     </delete>
-
-    <!-- 입고 요청 취소 -->
     <update id="updateCancel" parameterType="com.ssg.wms.inbound.domain.InboundRequestDTO">
         UPDATE inbound_request
         SET approval_status = 'CANCELED',
@@ -101,8 +97,6 @@
             updated_date = NOW()
         WHERE inbound_index = #{inboundIndex}
     </update>
-
-    <!-- 입고 요청 승인 -->
     <update id="updateApproval">
         UPDATE inbound_request
         SET approval_status = 'APPROVED',
@@ -111,8 +105,8 @@
         WHERE inbound_index = #{request_index}
     </update>
 
-    <!-- 기간별 입고 현황 조회 -->
-    <select id="selectInboundStatusByPeriod" parameterType="map" resultMap="InboundRequestResultMap">
+
+    <select id="selectInboundStatusByPeriod" parameterType="map" resultMap="StatusRequestResultMap">
         SELECT
         ir.*,
         COUNT(id.detail_index) as detail_count,
@@ -127,8 +121,7 @@
 
     </select>
 
-    <!-- 월별 입고 현황 조회 -->
-    <select id="selectInboundStatusByMonth" resultMap="InboundRequestResultMap">
+    <select id="selectInboundStatusByMonth" resultMap="StatusRequestResultMap">
         SELECT
             ir.*,
             COUNT(id.detail_index) as detail_count,
@@ -141,12 +134,29 @@
 
     </select>
 
-
-    <!-- ============================================ -->
-    <!-- 입고 상세 관련 쿼리 -->
-    <!-- ============================================ -->
-
-    <!-- 입고 상세 추가 -->
+    <select id="selectAllDetails" parameterType="map" resultMap="InboundDetailResultMap">
+        SELECT * FROM inbound_detail
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (
+            request_index LIKE CONCAT('%', #{keyword}, '%')
+            OR qr_code LIKE CONCAT('%', #{keyword}, '%')
+            OR inbound_index LIKE CONCAT('%', #{keyword}, '%')
+            OR section_index LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="status != null and status != ''">
+            <choose>
+                <when test="status == 'COMPLETED'">
+                    AND complete_date IS NOT NULL
+                </when>
+                <when test="status == 'PENDING_RECEIPT'">
+                    AND complete_date IS NULL
+                </when>
+            </choose>
+        </if>
+        ORDER BY detail_index DESC
+    </select>
     <insert id="insertDetail" parameterType="com.ssg.wms.inbound.domain.InboundDetailDTO"
             useGeneratedKeys="true" keyProperty="detailIndex">
         INSERT INTO inbound_detail (
@@ -154,46 +164,41 @@
             qr_code,
             received_quantity,
             complete_date,
-            location
+            inbound_index,
+            warehouse_index,
+            section_index
         ) VALUES (
                      #{requestIndex},
                      #{qrCode},
                      #{receivedQuantity},
-                     NOW(),
-                     #{location}
+                     #{completeDate},
+                     #{inboundIndex},
+                     #{warehouse_index},
+                     #{section_index}
                  )
     </insert>
-
-    <!-- 요청번호로 입고 상세 목록 조회 -->
     <select id="selectDetailsByRequestId" resultMap="InboundDetailResultMap">
         SELECT * FROM inbound_detail
         WHERE request_index = #{request_index}
         ORDER BY detail_index DESC
     </select>
-
-    <!-- QR코드로 입고 상세 조회 -->
     <select id="selectDetailByQr" resultMap="InboundDetailResultMap">
         SELECT * FROM inbound_detail
         WHERE qr_code = #{qr_code}
     </select>
-
-    <!-- 입고 상세 수정 -->
     <update id="updateDetail" parameterType="com.ssg.wms.inbound.domain.InboundDetailDTO">
         UPDATE inbound_detail
         SET received_quantity = #{receivedQuantity},
-            location = #{location}
+            section_index = #{section_index},
+            qr_code = #{qrCode}
         WHERE detail_index = #{detailIndex}
     </update>
-
-    <!-- 입고 상세 완료 처리 -->
     <update id="updateComplete" parameterType="com.ssg.wms.inbound.domain.InboundDetailDTO">
         UPDATE inbound_detail
         SET received_quantity = #{receivedQuantity},
             complete_date = NOW()
         WHERE detail_index = #{detailIndex}
     </update>
-
-    <!-- 입고 상세 삭제 -->
     <delete id="deleteDetail">
         DELETE FROM inbound_detail
         WHERE detail_index = #{detail_index}

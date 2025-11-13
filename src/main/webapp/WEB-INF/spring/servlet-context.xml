@@ -19,6 +19,7 @@
     <context:component-scan base-package="com.ssg.wms.user.controller"/>
     <context:component-scan base-package="com.ssg.wms.warehouse.controller"/>
     <context:component-scan base-package="com.ssg.wms.login.controller"/>
+    <context:component-scan base-package="com.ssg.wms.inbound.controller"/>
     <context:component-scan base-package="com.ssg.wms.dashboard.controller"/>
 
     <mvc:annotation-driven/>

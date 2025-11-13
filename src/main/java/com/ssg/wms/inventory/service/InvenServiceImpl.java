@@ -62,7 +62,7 @@ public class InvenServiceImpl implements InvenService {
         dto.setItemIndex(itemIndex);
         dto.setWarehouseIndex(warehouseIndex);
         dto.setSectionIndex(sectionIndex);
-        dto.setInvenQuantity(d.getReceivedQuantity());   // +=
+        dto.setInvenQuantity(Math.toIntExact(d.getReceivedQuantity()));   // +=
         dto.setInboundDate(d.getCompleteDate() != null ? d.getCompleteDate() : LocalDateTime.now());
         dto.setDetailInbound(d.getDetailIndex() != null ? d.getDetailIndex().longValue() : null);
 

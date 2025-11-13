@@ -35,3 +35,5 @@ VALUES (1, '입고 시에는 상품 상태를 꼼꼼히 확인하시고, 수량�
 
 INSERT INTO board_comment (board_index, c_content, user_index)
 VALUES (1, '감사합니다! 도움이 되었어요.', 1);
+
+select * from board_request;

@@ -150,14 +150,25 @@
                         </a>
                         <div class="collapse" id="inbound">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">입고 요청 목록 조회</span>
-                                </a>
-                                    <a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                        <span class="sub-item">기간/날짜별 조회</span>
+                                
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/list'/>">
+                                        <span class="sub-item">입고 요청 목록 조회</span>
                                     </a>
-                                    <a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/form'/>">
                                         <span class="sub-item">입고 목록 조회</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/month'/>">
+                                        <span class="sub-item">월별 현황 조회</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/period'/>">
+                                        <span class="sub-item">기간별 현황 조회</span>
                                     </a>
                                 </li>
                             </ul>
@@ -196,6 +207,33 @@
                                 </a>
                                     <a class="nav-link" href="<c:url value='/warehouse/register'/>">
                                         <span class="sub-item">창고 등록</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#announcement">
+                            <i class="fas fa-pen-square"></i>
+                            <p>고객센터</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="announcement">
+                            <ul class="nav nav-collapse">
+                                <!-- <li> 태그를 각 항목별로 분리 -->
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/announcement/notice/list'/>">
+                                        <span class="sub-item">공지사항</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/announcement/onetoone/list'/>">
+                                        <span class="sub-item">1:1 문의</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/announcement/board/list'/>">
+                                        <span class="sub-item">문의 게시판</span>
                                     </a>
                                 </li>
                             </ul>

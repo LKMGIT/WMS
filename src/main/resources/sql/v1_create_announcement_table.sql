@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS announcement
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='공지사항 테이블';
 
--- 2. 1:1 문의 테이블 (one_to_one_request) - 비공개
+-- 2. 1:1 문의 테이블 (one_to_one_request)
 CREATE TABLE IF NOT EXISTS one_to_one_request
 (
     request_index INT AUTO_INCREMENT PRIMARY KEY COMMENT '1:1 문의 번호',
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS one_to_one_request
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='1:1 문의 테이블';
 
--- 3. 문의 게시판 테이블 (board_request) - 공개
+-- 3. 문의 게시판 테이블 (board_request)
 CREATE TABLE IF NOT EXISTS board_request
 (
     board_index INT AUTO_INCREMENT PRIMARY KEY COMMENT '게시글 번호',
@@ -65,9 +65,7 @@ CREATE TABLE IF NOT EXISTS board_comment
   DEFAULT CHARSET = utf8mb4 COMMENT ='문의 게시판 댓글 테이블';
 
 
--- ============================================
--- 공지사항 관련 프로시저
--- ============================================
+=
 
 -- 1. 공지사항 등록
 DELIMITER //

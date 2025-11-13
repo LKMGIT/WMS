@@ -18,6 +18,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public Integer registerNotice(NoticeDTO noticeDTO, Long adminId) {
+        // 관리자 ID 설정
         noticeDTO.setAdminIndex(adminId);
         noticeMapper.insertNotice(noticeDTO);
         return noticeDTO.getNoticeIndex();

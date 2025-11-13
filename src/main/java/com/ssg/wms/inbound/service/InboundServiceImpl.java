@@ -6,18 +6,18 @@ import com.ssg.wms.inbound.mappers.InboundMapper;
 import com.ssg.wms.inventory.service.InvenService;
 import com.ssg.wms.warehouse.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2; // 🔥 [수정] Log4j2 임포트
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@Log4j2 // 🔥 [수정] 로그 사용 선언
+@Log4j2
 public class InboundServiceImpl implements InboundService {
 
     private final InboundMapper inboundMapper;
@@ -57,65 +57,61 @@ public class InboundServiceImpl implements InboundService {
     @Override
     public void approveRequest(InboundRequestDTO requestDTO) throws Exception {
 
-        // --- 0단계: DTO 유효성 검증 ---
-        List<InboundDetailDTO> details = requestDTO.getDetails();
-
-        // 🔥 [수정] 디버그 로그 추가
-        log.info("===[Inbound Approve] Request Index: {}", requestDTO.getInboundIndex());
-        log.info("===[Inbound Approve] Details received: {}", details);
-        // 🔥 만약 details가 null이거나 비어있다면, JSON 데이터 전송 오류일 가능성이 높습니다.
-
-        if (details == null || details.isEmpty()) {
-            throw new IllegalArgumentException("처리할 상세 입고 내역이 없습니다. (Details List is Empty/Null)");
+        // --- 0단계: 원본 요청 정보 로드 및 상세 내역 검증/생성 ---
+        InboundRequestDTO originalRequest = inboundMapper.selectRequestById(requestDTO.getInboundIndex());
+        if (originalRequest == null) {
+            throw new RuntimeException("원본 입고 요청을 찾을 수 없습니다: " + requestDTO.getInboundIndex());
         }
-        InboundDetailDTO detailToProcess = details.get(0);
+
+        List<InboundDetailDTO> details = requestDTO.getDetails();
+        InboundDetailDTO detailToProcess;
+
+        // 클라이언트에서 상세 내역(details)이 넘어오지 않은 경우 (최초 승인 시)
+        if (details == null || details.isEmpty()) {
+
+            // 4단계: requestDTO의 값을 통해 detailDTO 생성 (여기서는 originalRequest 사용)
+            detailToProcess = InboundDetailDTO.builder()
+                    .inboundIndex(requestDTO.getInboundIndex())
+                    .receivedQuantity(0L) // 승인 시에는 0으로 초기화
+                    .warehouseIndex(originalRequest.getWarehouseIndex().longValue())
+                    .sectionIndex(null) // 🔥 수정: Long 타입이므로 null을 사용 (XML에서 처리)
+                    .build();
+
+            // requestDTO에 상세 내역을 다시 설정하여 후속 로직에서 사용
+            requestDTO.setDetails(Collections.singletonList(detailToProcess));
+            requestDTO.setWarehouseIndex(originalRequest.getWarehouseIndex()); // 원본 창고 정보 설정
+            requestDTO.setItem_index(originalRequest.getItem_index()); // 원본 아이템 정보 설정
+        } else {
+            // 클라이언트가 상세 내역을 보내온 경우
+            detailToProcess = details.get(0);
+        }
 
         // --- 1단계: item_index를 통해 item_volume 받아오기 ---
-        Long itemIndex = requestDTO.getItem_index();
-        if (itemIndex == null) {
-            InboundRequestDTO originalRequest = inboundMapper.selectRequestById(requestDTO.getInboundIndex());
-            if (originalRequest == null) {
-                throw new RuntimeException("원본 입고 요청을 찾을 수 없습니다: " + requestDTO.getInboundIndex());
-            }
-            itemIndex = originalRequest.getItem_index();
-        }
+        Long itemIndex = originalRequest.getItem_index();
 
         // int itemVolume = itemService.getItemVolume(itemIndex);
-        int itemVolume = 1; // 🚨 임시 부피 (반드시 수정)
+        int itemVolume = 1; // 🚨 임시 부피
 
-        // --- 2단계: canInbound()에 전달 및 검증 ---
-        int quantity = Math.toIntExact(detailToProcess.getReceivedQuantity());
-        Long sectionIndex = detailToProcess.getSectionIndex();
+        // --- 2단계: canInbound() 검증 (승인 단계에서는 재고 공간 검증을 건너뜁니다.) ---
 
-        if (sectionIndex == null) {
-            throw new IllegalArgumentException("구역(Section) 정보가 없습니다.");
-        }
+        warehouseService.canInbound(Long sectionId, int itemVolume, int quantity)
 
-        boolean canInbound = warehouseService.canInbound(sectionIndex, itemVolume, quantity);
-
-        if (!canInbound) {
-            int remain = warehouseService.calculateSectionRemain(sectionIndex);
-            throw new Exception(
-                    String.format("재고 공간 부족: 구역(%d) (필요: %d, 남은 공간: %d)",
-                            sectionIndex, (itemVolume * quantity), remain)
-            );
-        }
-
-        // --- 3단계: 적재 가능 시 입고 요청 승인으로 변경 ---
+        // --- 3단계: 입고 요청 승인으로 변경 (PENDING -> APPROVED) ---
         int result = inboundMapper.updateApproval(requestDTO.getInboundIndex());
         if (result == 0) {
-            throw new RuntimeException("입고 요청 승인 실패 (ID: " + requestDTO.getInboundIndex() + ")");
+            throw new RuntimeException("입고 요청 승인 실패 (ID: " + requestDTO.getInboundIndex() + ") - 이미 승인되었거나 존재하지 않는 요청입니다.");
         }
 
-        // --- 4단계: requestDTO의 값을 통해 detailDTO 생성 ---
+        // --- 4단계 (재사용): detailToProcess 필드 값 재설정 ---
         detailToProcess.setInboundIndex(requestDTO.getInboundIndex());
-        if (detailToProcess.getWarehouseIndex() == null) {
-            detailToProcess.setWarehouseIndex(requestDTO.getWarehouseIndex().longValue());
-        }
+        detailToProcess.setWarehouseIndex(originalRequest.getWarehouseIndex().longValue());
+        detailToProcess.setReceivedQuantity(0L);
+        detailToProcess.setSectionIndex(null); // 🔥 수정: Long 타입이므로 null을 사용 (XML에서 처리)
 
-        // --- 5단계: DB에 저장(INSERT) 후 applyInbound()에 전달 ---
+        // --- 5단계: DB에 상세 내역(미처리 상태) INSERT만 수행 ---
         inboundMapper.insertInboundDetail(detailToProcess);
-        invenService.applyInbound(detailToProcess);
+
+        // invenService.applyInbound(detailToProcess); // receivedQuantity=0 이므로 재고 반영하지 않음
     }
 
     /**
@@ -137,6 +133,9 @@ public class InboundServiceImpl implements InboundService {
                             sectionIndex, (itemVolume * quantity), remain)
             );
         }
+
+        // DTO 필드가 Long이므로, String으로 변환이 필요하다면 여기서 처리해야 합니다.
+        // 현재는 SectionIndex가 Long이므로, 실제 Section 코드가 아닌 ID가 넘어온다고 가정합니다.
 
         int result = inboundMapper.updateInboundDetail(detailDTO);
         if (result == 0) {

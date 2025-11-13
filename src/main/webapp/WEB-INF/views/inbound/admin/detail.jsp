@@ -18,7 +18,8 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
+    from { opacity: 0;
+    }
     to { opacity: 1; }
   }
 
@@ -280,7 +281,8 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to { transform: rotate(360deg);
+    }
   }
 
   /* 진행 상황 */
@@ -376,7 +378,8 @@
     </div>
 
     <%-- 요청 개요 카드 --%>
-    <div class="card info-card">
+    <div
+            class="card info-card">
       <div class="card-header">
         <h4><i class="fas fa-info-circle"></i> 요청 개요</h4>
       </div>
@@ -386,6 +389,7 @@
             <div class="info-label"><i class="fas fa-hashtag"></i> 입고 번호</div>
             <div class="info-value" id="req-inboundIndex">#0</div>
           </div>
+
           <div class="info-item">
             <div class="info-label"><i class="fas fa-user"></i> 요청자</div>
             <div class="info-value" id="req-userIndex">-</div>
@@ -394,6 +398,7 @@
             <div class="info-label"><i class="fas fa-warehouse"></i> 창고</div>
             <div class="info-value" id="req-warehouseIndex">#0</div>
           </div>
+
           <div class="info-item">
             <div class="info-label"><i class="fas fa-box"></i> 요청 수량</div>
             <div class="info-value" id="req-inboundRequestQuantity">0 개</div>
@@ -401,6 +406,7 @@
           <div class="info-item">
             <div class="info-label"><i class="fas fa-calendar-check"></i> 희망 입고일</div>
             <div class="info-value" id="req-plannedReceiveDate">-</div>
+
           </div>
           <div class="info-item">
             <div class="info-label"><i class="fas fa-clock"></i> 요청 일시</div>
@@ -409,6 +415,7 @@
           <div class="info-item">
             <div class="info-label"><i class="fas fa-flag"></i> 승인 상태</div>
             <div class="info-value" id="req-approvalStatus">-</div>
+
           </div>
           <div class="info-item">
             <div class="info-label"><i class="fas fa-check-circle"></i> 승인 일시</div>
@@ -418,6 +425,7 @@
 
         <%-- 취소 사유 (CANCELED 상태일 때만 표시) --%>
         <div class="mt-4" id="cancelReasonSection" style="display: none;">
+
           <div class="alert alert-warning" style="border-radius: 15px; border-left: 4px solid #f6d365;">
             <strong><i class="fas fa-exclamation-triangle"></i> 취소 사유:</strong>
             <span id="req-cancelReason">-</span>
@@ -429,7 +437,8 @@
     <%-- 처리 진행 상황 --%>
     <div class="card info-card">
       <div class="card-header">
-        <h4><i class="fas fa-tasks"></i> 처리 진행 상황</h4>
+        <h4><i class="fas fa-tasks"></i> 처리
+          진행 상황</h4>
       </div>
       <div class="card-body">
         <div class="progress">
@@ -442,6 +451,7 @@
 
     <%-- 상세 품목 목록 --%>
     <div class="card detail-table-card">
+
       <div class="card-header">
         <h4><i class="fas fa-clipboard-list"></i> 상세 품목 목록</h4>
         <p id="detailSummary">총 0건의 상세 품목이 있습니다.</p>
@@ -451,19 +461,22 @@
           <table class="table detail-table">
             <thead>
             <tr>
-              <th><i class="fas fa-hashtag"></i> 번호</th>
+              <th><i
+                      class="fas fa-hashtag"></i> 번호</th>
               <th><i class="fas fa-map-marker-alt"></i> 입고 위치</th>
               <th><i class="fas fa-box"></i> 입고 수량</th>
               <th><i class="fas fa-calendar-check"></i> 입고 일시</th>
               <th><i class="fas fa-cog"></i> 처리</th>
             </tr>
             </thead>
+
             <tbody id="inboundDetailTableBody">
             <tr>
               <td colspan="5" class="text-center py-5">
                 <div class="loading-spinner" style="margin: 0 auto;"></div>
                 <p class="mt-3 text-muted">상세 정보 로딩 중...</p>
               </td>
+
             </tr>
             </tbody>
           </table>
@@ -481,7 +494,8 @@
   </div>
 </div>
 
-<%-- 🔥 취소 사유 입력 모달 --%>
+<%-- 🔥 취소 사유 입력 모달
+ --%>
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -493,13 +507,15 @@
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="cancelReasonInput" class="form-label" style="font-weight: 600;">
+          <label
+                  for="cancelReasonInput" class="form-label" style="font-weight: 600;">
             <i class="fas fa-comment-alt"></i> 취소 사유를 입력해주세요
           </label>
           <textarea
                   class="form-control"
                   id="cancelReasonInput"
                   rows="4"
+
                   placeholder="예: 재고 부족, 발주 오류, 계획 변경 등"
                   maxlength="255"
           ></textarea>
@@ -508,6 +524,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">
+
           <i class="fas fa-times"></i> 닫기
         </button>
         <button type="button" class="btn btn-modal-confirm" onclick="confirmCancel()">
@@ -526,25 +543,29 @@
   (function () {
     var ctx = '${pageContext.request.contextPath}';
     var currentInboundIndex = null;
+    var currentRequestData = {};
     var $ = function(id) { return document.getElementById(id); };
     var safeHtml = function(s) {
-      var str = (s != null && s != undefined) ? String(s) : '';
+      var str = (s != null && s != undefined) ?
+              String(s) : '';
       return str.replace(/[&<>"']/g, function(m) {
         var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
         return map[m];
       });
     };
 
-    // 날짜 포매터
+    // 날짜 포매터 (기존과 동일)
     function formatDateTime(dateStr) {
       if (!dateStr) return '-';
       var d = new Date(dateStr);
       if (!isNaN(d.getTime())) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
+        var pad = function(n) { return String(n).padStart(2,'0');
+        };
         return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
       }
       if (Array.isArray(dateStr)) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
+        var pad = function(n) { return String(n).padStart(2,'0');
+        };
         return dateStr[0] + '-' + pad(dateStr[1]) + '-' + pad(dateStr[2]) + ' ' + pad(dateStr[3] || 0) + ':' + pad(dateStr[4] || 0);
       }
       return String(dateStr);
@@ -554,11 +575,13 @@
       if (!dateStr) return '-';
       var d = new Date(dateStr);
       if (!isNaN(d.getTime())) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
+        var pad = function(n) { return String(n).padStart(2,'0');
+        };
         return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
       }
       if (Array.isArray(dateStr)) {
-        var pad = function(n) { return String(n).padStart(2,'0'); };
+        var pad = function(n) { return String(n).padStart(2,'0');
+        };
         return dateStr[0] + '-' + pad(dateStr[1]) + '-' + pad(dateStr[2]);
       }
       return String(dateStr);
@@ -574,8 +597,10 @@
       return badges[status] || safeHtml(status || '-');
     }
 
-    // 요청 개요 렌더링
+    // 요청 개요 렌더링 (현재 요청 데이터 저장 로직 추가)
     function displayRequestOverview(data) {
+      currentRequestData = data;
+
       console.log('[displayRequestOverview] 데이터 수신:', data);
       $('req-inboundIndex').textContent = '#' + (data.inboundIndex || '-');
       $('req-userIndex').textContent = data.userIndex || '-';
@@ -602,7 +627,7 @@
       console.log('[displayRequestOverview] updateActionButtons 호출 완료');
     }
 
-    // 상세 품목 목록 렌더링
+    // 🔥 상세 품목 목록 렌더링 (필드명 오류 수정)
     function displayDetailList(details, requestStatus) {
       var tbody = $('inboundDetailTableBody');
       var summary = $('detailSummary');
@@ -614,14 +639,15 @@
       }
 
       var isEditable = function(detail) {
-        return (requestStatus == 'APPROVED' && !detail.completeDate);
+        // detail.receivedQuantity가 0이면 미처리 상태로 간주
+        return (requestStatus == 'APPROVED' && detail.receivedQuantity == 0 && !detail.completeDate);
       };
 
       var completedCount = 0;
       details.forEach(function(d) {
-        if (d.completeDate) completedCount++;
+        // receivedQuantity가 0보다 크고 completeDate가 있으면 완료로 간주
+        if (d.receivedQuantity > 0 && d.completeDate) completedCount++;
       });
-
       var rows = details.map(function(detail) {
         var cdt = detail.completeDate ? formatDateTime(detail.completeDate) : '-';
         var completed = !isEditable(detail);
@@ -630,10 +656,14 @@
         var html = '<tr>';
         html += '<td><strong style="color: #667eea;">#' + safeHtml(detail.detailIndex) + '</strong></td>';
         html += '<td>';
-        html += '<span class="badge bg-light text-dark me-2"><i class="fas fa-warehouse"></i> ' + safeHtml(detail.warehouse_index) + '번</span>';
+        // 🔥 수정: detail.warehouseIndex (DTO와 일치)
+        html += '<span class="badge bg-light text-dark me-2"><i class="fas fa-warehouse"></i> '
+                + safeHtml(detail.warehouseIndex) + '번</span>';
+
         html += '<input type="text" class="form-control d-inline-block" style="width: 150px;" ';
         html += 'id="section-' + detail.detailIndex + '" ';
-        html += 'value="' + safeHtml(detail.section_index) + '" ';
+        // 🔥 수정: detail.sectionIndex (DTO와 일치)
+        html += 'value="' + safeHtml(detail.sectionIndex || '') + '" ';
         html += 'placeholder="A-01-01" ' + readonlyAttr + '>';
         html += '</td>';
         html += '<td>';
@@ -642,7 +672,10 @@
         html += 'value="' + safeHtml(detail.receivedQuantity) + '" ';
         html += 'min="0" ' + readonlyAttr + '> <span style="color: #718096;">개</span>';
         html += '</td>';
-        html += '<td>' + (completed ? '<span class="completed-badge"><i class="fas fa-check"></i>' + cdt + '</span>' : '<span class="text-muted">미처리</span>') + '</td>';
+        var displayStatus = (detail.receivedQuantity > 0 && detail.completeDate) ?
+                '<span class="completed-badge"><i class="fas fa-check"></i>' + cdt + '</span>' :
+                '<span class="text-muted">미처리</span>';
+        html += '<td>' + displayStatus + '</td>';
         html += '<td>';
         if (!completed) {
           html += '<button class="btn btn-modern btn-process btn-sm" onclick="processDetail(' + detail.detailIndex + ', ' + detail.inboundIndex + ')">';
@@ -658,14 +691,13 @@
 
       tbody.innerHTML = rows;
       summary.textContent = '총 ' + details.length + '건의 상세 품목이 있습니다.';
-
-      // 프로그레스 업데이트
-      var progress = details.length > 0 ? (completedCount / details.length) * 100 : 0;
+      var progress = details.length > 0 ?
+              (completedCount / details.length) * 100 : 0;
       $('progressBar').style.width = progress + '%';
       $('progressText').textContent = completedCount + '/' + details.length + ' 완료';
     }
 
-    // 액션 버튼
+    // 액션 버튼 (기존과 동일)
     function updateActionButtons(data) {
       console.log('[updateActionButtons] data:', data);
       console.log('[updateActionButtons] approvalStatus:', data.approvalStatus);
@@ -696,18 +728,36 @@
       area.innerHTML = html;
     }
 
-    // 요청 승인
+    // 🔥 요청 승인 (수정된 부분: DTO를 생성하여 전송)
     window.approveRequest = function(inboundIndex) {
       if (!inboundIndex) return alert('잘못된 요청 번호입니다.');
-      if (!confirm('이 입고 요청을 승인하시겠습니까?')) return;
+      if (!confirm('이 입고 요청을 승인하시겠습니까? (상세 내역이 자동으로 생성됩니다)')) return;
+
+      // 🔥 클라이언트에서 필요한 최소한의 DTO 데이터를 생성하여 전송
+      var requestDTO = {
+        // 서버에서 detail을 생성할 때 참조할 필드만 전송
+        inboundRequestQuantity: currentRequestData.inboundRequestQuantity,
+        warehouseIndex: currentRequestData.warehouseIndex,
+        item_index: currentRequestData.item_index,
+        details: [] // 서버에서 details 리스트가 null이 아닌 것으로 인식되도록 빈 리스트 전송
+      };
 
       var url = ctx + '/inbound/admin/request/' + encodeURIComponent(inboundIndex) + '/approve';
       fetch(url, {
         method: 'PUT',
-        headers: { 'Accept': 'application/json' },
-        credentials: 'same-origin'
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(requestDTO) // requestDTO를 JSON 본문에 담아 전송
       })
-              .then(function(res) { return res.json(); })
+              .then(function(res) {
+                if (res.ok) return res.json();
+                return res.json().then(errorData => {
+                  throw new Error(errorData.message || 'HTTP Error ' + res.status);
+                });
+              })
               .then(function(d) {
                 if (d && d.success) {
                   alert(d.message || '승인이 완료되었습니다.');
@@ -718,11 +768,11 @@
               })
               .catch(function(err) {
                 console.error(err);
-                alert('승인 처리 중 오류가 발생했습니다.');
+                alert('승인 처리 중 오류가 발생했습니다: ' + err.message);
               });
     };
 
-    // 🔥 취소 모달 표시
+    // 취소 모달 표시 및 취소 확정 (기존과 동일)
     window.showCancelModal = function(inboundIndex) {
       if (!inboundIndex) return alert('잘못된 요청 번호입니다.');
       currentInboundIndex = inboundIndex;
@@ -731,7 +781,6 @@
       modal.show();
     };
 
-    // 🔥 취소 확정
     window.confirmCancel = function() {
       var cancelReason = $('cancelReasonInput').value.trim();
       if (!cancelReason) {
@@ -765,7 +814,7 @@
               });
     };
 
-    // 상세 처리
+    // 상세 처리 (필드명 수정)
     window.processDetail = function(detailIndex, inboundIndex) {
       var section = $('section-' + detailIndex).value;
       var quantity = $('qty-' + detailIndex).value;
@@ -777,10 +826,11 @@
         return alert("올바른 입고 수량을 입력하세요.");
       }
 
+      // DTO 필드명에 맞게 수정
       var detailData = {
         detailIndex: detailIndex,
         inboundIndex: inboundIndex,
-        section_index: section,
+        sectionIndex: section, // DTO와 일치
         receivedQuantity: Number(quantity)
       };
 
@@ -806,12 +856,11 @@
               });
     };
 
-    // 메인 데이터 로드
+    // 메인 데이터 로드 (기존과 동일)
     function loadInboundDetail(inboundIndex) {
       console.log('[loadInboundDetail] 시작 - inboundIndex:', inboundIndex);
       var tbody = $('inboundDetailTableBody');
       tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="loading-spinner" style="margin: 0 auto;"></div><p class="mt-3 text-muted">상세 정보 로딩 중...</p></td></tr>';
-
       if (!inboundIndex || isNaN(Number(inboundIndex))) {
         console.error('[loadInboundDetail] 잘못된 inboundIndex:', inboundIndex);
         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f56565;"></i><p class="mt-3 text-danger">올바른 요청 번호를 찾을 수 없습니다.</p></td></tr>';
@@ -845,7 +894,7 @@
               });
     }
 
-    // 초기화
+    // 초기화 (기존과 동일)
     document.addEventListener('DOMContentLoaded', function () {
       try {
         var segs = (location.pathname || '').split('/').filter(Boolean);

@@ -106,18 +106,31 @@
         INSERT INTO inbound_detail
         (inbound_index, received_quantity, complete_date, warehouse_index, section_index)
         VALUES
-            (#{inboundIndex}, #{receivedQuantity}, NOW(), #{warehouseIndex}, #{sectionIndex})
+        (
+        #{inboundIndex},
+        #{receivedQuantity},
+        NULL,
+        #{warehouseIndex},
+        <choose>
+            <when test="sectionIndex == null"> '' </when>
+            <otherwise> #{sectionIndex} </otherwise>
+        </choose>
+        )
     </insert>
 
     <update id="updateInboundDetail">
         UPDATE inbound_detail
         SET
-            received_quantity = #{receivedQuantity},
-            complete_date = NOW(),
-            warehouse_index = #{warehouseIndex},
-            section_index = #{sectionIndex}
+        received_quantity = #{receivedQuantity},
+        complete_date = NOW(),
+        warehouse_index = #{warehouseIndex},
+        section_index =
+        <choose>
+            <when test="sectionIndex == null"> '' </when>
+            <otherwise> #{sectionIndex} </otherwise>
+        </choose>
         WHERE
-            detail_index = #{detailIndex} AND inbound_index = #{inboundIndex}
+        detail_index = #{detailIndex} AND inbound_index = #{inboundIndex}
     </update>
 
     <select id="selectInboundStatusByPeriod" resultType="com.ssg.wms.inbound.domain.InboundRequestDTO">

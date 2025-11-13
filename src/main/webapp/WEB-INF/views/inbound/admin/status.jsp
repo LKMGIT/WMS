@@ -459,7 +459,6 @@
       var approvedCount = 0;
 
       var allData = (periodData || []).concat(monthData || []);
-
       allData.forEach(function(item) {
         var count = parseInt(item.detailCount || item.detail_count || 0);
         var qty = parseInt(item.totalReceivedQuantity || item.total_received_quantity || 0);
@@ -470,7 +469,6 @@
           approvedCount += count;
         }
       });
-
       var avgQty = totalCount > 0 ? Math.round(totalQty / totalCount) : 0;
       var approvalRate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
 

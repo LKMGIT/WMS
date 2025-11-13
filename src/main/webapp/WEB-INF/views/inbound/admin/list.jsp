@@ -571,7 +571,6 @@
     // '대기중' 목록 로드 함수 (검색 조건 X)
     function loadPendingList() {
       var pendingApiUrl = ctx + '/inbound/admin/requests?approvalStatus=PENDING&size=10';
-
       fetchAndRenderList('pendingListTableBody', pendingApiUrl, renderPendingRow, function(total) {
         $('pendingCountHeader').textContent = total;
         // [수정] '대기중' 카드는 DB 전체 카운트(totals.pending)를 쓰므로 여기선 업데이트 안 함
@@ -608,7 +607,8 @@
       $('warehouseSelect').value = '';
       $('statusSelect').value = ''; // '전체 상태'
 
-      loadProcessedList(); // 처리된 목록만 검색 조건으로 새로고침
+      loadProcessedList();
+      // 처리된 목록만 검색 조건으로 새로고침
     };
 
     // [수정] 이벤트 리스너

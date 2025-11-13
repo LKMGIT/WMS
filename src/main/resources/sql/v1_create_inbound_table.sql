@@ -11,7 +11,7 @@ CREATE TABLE inbound_request
     cancel_reason            VARCHAR(255) COMMENT '취소 사유',
     updated_date             DATETIME             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     user_index               BIGINT      NOT NULL COMMENT '유저번호 (FK)',
-    warehouse_index          int         NOT NULL COMMENT '창고번호 (FK)',
+    warehouse_index          BIGINT        NOT NULL COMMENT '창고번호 (FK)',
     item_index               bigint      NOT NULL COMMENT '아이템번호 (FK)',
 
     INDEX idx_user (user_index),
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS inbound_detail
     inbound_index     bigint       NOT NULL COMMENT '입고 요청 번호 (FK)',
     received_quantity bigint       NOT NULL DEFAULT 0 COMMENT '실제 입고 수량',
     complete_date     DATETIME COMMENT '실제 입고 일시',
-    warehouse_index   int          NOT NULL COMMENT '창고번호 (FK)',
+    warehouse_index   bigint         NOT NULL COMMENT '창고번호 (FK)',
     section_index     VARCHAR(100) NOT NULL COMMENT '구역 번호',
 
 
@@ -43,3 +43,5 @@ CREATE TABLE IF NOT EXISTS inbound_detail
 
 
 select * from inbound_request;
+select * from inbound_detail;
+SELECT approval_status FROM inbound_request WHERE inbound_index = 7;

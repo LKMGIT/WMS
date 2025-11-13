@@ -577,7 +577,6 @@
     // 요청 개요 렌더링
     function displayRequestOverview(data) {
       console.log('[displayRequestOverview] 데이터 수신:', data);
-
       $('req-inboundIndex').textContent = '#' + (data.inboundIndex || '-');
       $('req-userIndex').textContent = data.userIndex || '-';
       $('req-warehouseIndex').textContent = '#' + (data.warehouseIndex || '-');
@@ -678,7 +677,6 @@
       }
 
       var html = '';
-
       // PENDING 상태일 때 승인/취소 버튼 표시
       if (data.approvalStatus == 'PENDING') {
         console.log('[updateActionButtons] PENDING 상태 - 승인/취소 버튼 생성');
@@ -694,7 +692,6 @@
 
       // 목록으로 버튼은 항상 표시
       html += '<button class="btn btn-modern btn-back" onclick="history.back()"><i class="fas fa-arrow-left"></i> 목록으로</button>';
-
       console.log('[updateActionButtons] 생성된 HTML:', html);
       area.innerHTML = html;
     }
@@ -737,7 +734,6 @@
     // 🔥 취소 확정
     window.confirmCancel = function() {
       var cancelReason = $('cancelReasonInput').value.trim();
-
       if (!cancelReason) {
         alert('취소 사유를 입력해주세요.');
         return;
@@ -813,7 +809,6 @@
     // 메인 데이터 로드
     function loadInboundDetail(inboundIndex) {
       console.log('[loadInboundDetail] 시작 - inboundIndex:', inboundIndex);
-
       var tbody = $('inboundDetailTableBody');
       tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="loading-spinner" style="margin: 0 auto;"></div><p class="mt-3 text-muted">상세 정보 로딩 중...</p></td></tr>';
 
@@ -840,6 +835,7 @@
               .then(function(data) {
                 console.log('[loadInboundDetail] 받은 데이터:', data);
                 if (!data) throw new Error('EMPTY_DATA');
+
                 displayRequestOverview(data);
                 displayDetailList(data.details, data.approvalStatus);
               })

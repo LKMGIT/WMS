@@ -83,7 +83,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             SectionDTO section = SectionDTO.builder()
                     .sCode(sectionCode)
-                    .sName("구역 " + i)
+                    .sName("S-" + i)
                     .sCapacity(capacity)
                     .wIndex(warehouseIndex)
                     .build();
@@ -129,15 +129,27 @@ public class WarehouseServiceImpl implements WarehouseService {
         if (warehouseDTO == null) {
             throw new IllegalArgumentException("존재하지 않는 창고입니다.");
         }
+
+        int used = warehouseMapper.getUsedCapacity(wIndex);
+        int total = warehouseDTO.getWSize();
+
+        double usageRate = total == 0 ? 0 : (double) used / total * 100;
+
+        warehouseDTO.setUsageRate(Math.round(usageRate * 100) / 100.0);
        return warehouseDTO;
     }
 
-//    @Override
-//    public List<WarehouseDTO> getAllWarehouses(WarehouseSearchDTO warehouseSearchDTO) {
-//        List<WarehouseDTO> dtoList = warehouseMapper.findAllWarehouses(warehouseSearchDTO);
-//        if (dtoList == null || dtoList.isEmpty()) {
-//            throw new IllegalArgumentException("조회 가능한 창고가 없습니다.");
-//        }
-//        return dtoList;
-//    }
+    public int calculateSectionRemain(Long sectionId) {
+        Integer remain = sectionMapper.calculateSectionRemain(sectionId);
+        return remain == null ? 0 : remain;
+    }
+
+    public boolean canInbound(Long sectionId, int itemVolume, int quantity) {
+
+        int required = itemVolume * quantity;
+        int remain = calculateSectionRemain(sectionId);
+
+        return remain >= required;
+    }
+
 }

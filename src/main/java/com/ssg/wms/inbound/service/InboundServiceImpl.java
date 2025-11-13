@@ -94,8 +94,6 @@ public class InboundServiceImpl implements InboundService {
 
         // --- 2단계: canInbound() 검증 (승인 단계에서는 재고 공간 검증을 건너뜁니다.) ---
 
-        warehouseService.canInbound(Long sectionId, int itemVolume, int quantity)
-
         // --- 3단계: 입고 요청 승인으로 변경 (PENDING -> APPROVED) ---
         int result = inboundMapper.updateApproval(requestDTO.getInboundIndex());
         if (result == 0) {

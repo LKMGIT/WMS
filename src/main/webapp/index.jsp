@@ -55,17 +55,42 @@
 
         /* ===== 히어로 ===== */
         .hero{
-            display:grid; grid-template-columns: 1.1fr 1fr; gap:28px;
-            background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:36px 32px; margin-top:24px;
-            overflow:hidden;
+            display:flex;
+            align-items:center;            /* 세로 가운데 */
+            justify-content:center;        /* 가로 가운데 */
+            min-height:calc(100vh - 120px);/* 헤더가 있으면 대략 높이만큼 빼 주세요 */
+            padding:40px 20px;             /* 가장자리 여백 */
+            background:linear-gradient(180deg,#f7f9fc,#eef3fb); /* 선택: 은은한 배경 */
         }
+
+        /* 가운데 올 콘텐츠 래퍼 */
         .hero-left{
-            display:flex; flex-direction:column; justify-content:center; gap:16px;
-            padding:8px 8px 8px 8px;
+            width:100%;
+            max-width: 820px;              /* 텍스트 폭 제한 */
+            text-align:center;             /* 가운데 정렬 */
         }
-        .hero-title{font-size:34px; line-height:1.2; margin:0}
-        .hero-sub{color:var(--muted); font-size:16px}
-        .hero-cta{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+        .hero-title{
+            margin:0 0 16px;
+            font-size: clamp(28px, 4.5vw, 44px);
+            line-height:1.2;
+            color:#111827;
+            letter-spacing:-0.02em;
+        }
+
+        .hero-sub{
+            margin:0 auto 28px;
+            max-width: 720px;
+            color:#64748b;                 /* muted */
+            font-size: clamp(14px, 1.6vw, 18px);
+            line-height:1.7;
+        }
+
+        .hero-cta{
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            justify-content:center;
+        }
         .hero-right{
             background:
                     radial-gradient(180px 80px at 70% 40%, rgba(36,8,83,.08), transparent 60%),
@@ -128,9 +153,8 @@
                 <span>WMS Admin</span>
             </div>
             <div class="nav-actions">
-                <a class="btn btn-ghost" href="/admin/register">회원가입</a>
-                <a class="btn btn-outline" href="/admin/dashboard">대시보드</a>
                 <a class="btn btn-accent" href="/login/loginForm">로그인</a>
+                <a class="btn btn-ghost" href="/admin/register">회원가입</a>
             </div>
         </nav>
     </div>
@@ -147,67 +171,11 @@
             </p>
             <div class="hero-cta">
                 <a class="btn btn-accent" href="/login/loginForm"><i class="fa fa-right-to-bracket"></i> 지금 로그인</a>
-                <a class="btn btn-outline" href="/admin/dashboard"><i class="fa fa-chart-column"></i> 실시간 대시보드</a>
-                <a class="btn btn-ghost" href="/admin/register"><i class="fa fa-user-plus"></i> 관리자 등록</a>
-            </div>
-        </div>
-        <div class="hero-right">
-            <!-- 데모 KPI (정적 목업; 실제 대시보드는 /admin/dashboard에서 렌더) -->
-            <div class="hero-stats">
-                <div class="kpi">
-                    <div class="label">총 회원 수</div>
-                    <div class="value">30</div>
-                </div>
-                <div class="kpi">
-                    <div class="label">오늘 가입</div>
-                    <div class="value">6</div>
-                </div>
-                <div class="kpi">
-                    <div class="label">오늘 입/출고</div>
-                    <div class="value">3 / 2</div>
-                </div>
             </div>
         </div>
     </section>
 
-    <!-- 주요 기능 -->
-    <section class="grid">
-        <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-users"></i></div><strong>회원 관리</strong></div>
-            <div class="card-body">회원 조회/검색/상태 변경, 승인·보류·거절 등 계정 라이프사이클을 관리합니다.</div>
-            <div class="card-foot"><a class="link" href="/admin/user_list">바로가기 →</a></div>
-        </article>
-
-        <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-boxes-stacked"></i></div><strong>입고 관리</strong></div>
-            <div class="card-body">입고 요청 승인, 상세 등록, QR/위치 지정, 실제 입고 처리까지 한 번에 진행합니다.</div>
-            <div class="card-foot"><a class="link" href="/inbound/admin/list">바로가기 →</a></div>
-        </article>
-
-        <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-dolly"></i></div><strong>출고 관리</strong></div>
-            <div class="card-body">출고 요청·배차·지시·운송장까지 연결해 작업 현황을 추적합니다.</div>
-            <div class="card-foot"><a class="link" href="/outbound/admin/list">바로가기 →</a></div>
-        </article>
-
-        <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-warehouse"></i></div><strong>재고 관리</strong></div>
-            <div class="card-body">품목/창고/구역별 재고 현황을 확인하고, 실재고 스냅샷·조정 기능을 제공합니다.</div>
-            <div class="card-foot"><a class="link" href="/inventory/admin/list">바로가기 →</a></div>
-        </article>
-
-        <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-truck"></i></div><strong>창고 관리</strong></div>
-            <div class="card-body">창고 등록·위치·운행 상태를 통합 관리합니다.</div>
-            <div class="card-foot"><a class="link" href="/warehouse/list">바로가기 →</a></div>
-        </article>
-
-        <article class="card">
-            <div class="card-head"><div class="icon"><i class="fa fa-gear"></i></div><strong>고객센터 관리</strong></div>
-            <div class="card-body">공지사항 답변·조회·수정 통합 관리합니다.</div>
-            <div class="card-foot"><a class="link" href="/announcement/notice/list">바로가기 →</a></div>
-        </article>
-    </section>
+    
 
     <footer class="site-footer">
         © 2025 WMS Admin · /admin (view) & /admin/api (API) · UTF-8 · CSRF ready

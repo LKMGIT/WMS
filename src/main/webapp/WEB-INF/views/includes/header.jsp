@@ -51,7 +51,10 @@
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
                 <a href="<c:url value='/admin/dashboard'/>">
-                    <img src="${CTX}/img/kaiadmin/logo_background.png" alt="navbar brand" class="navbar-brand" height="20"/>
+                    <img src="${CTX}/img/kaiadmin/logo_background.png"
+                         alt="navbar brand"
+                         class="navbar-brand"
+                         style="height:50px; width:auto;" />
                 </a>
                 <div class="nav-toggle">
                     <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>

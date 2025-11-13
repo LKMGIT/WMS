@@ -39,20 +39,44 @@ ALTER TABLE Waybill AUTO_INCREMENT = 1;
 -- 1. 기본 데이터 생성 (창고, 섹션, 아이템, 차량)
 -- =================================================================
 -- 1-1. 창고 (Warehouse)
-INSERT INTO warehouse (warehouse_index, warehouse_code, warehouse_name, warehouse_size, warehouse_location, warehouse_address, warehouse_zipcode, warehouse_status)
-VALUES
-    (1, 1001, '서울 A 센터', 5000, '서울', '서울특별시 강남구', '01', 'NORMAL'),
-    (2, 1002, '서울 B 센터', 3000, '서울', '서울특별시 마포구', '03', 'NORMAL'),
-    (3, 2001, '경기 센터', 10000, '경기', '경기도 용인시', '10', 'NORMAL'),
-    (4, 3001, '충남 센터', 8000, '충남', '충청남도 천안시', '31', 'NORMAL');
+insert into warehouse(warehouse_code, warehouse_name, warehouse_size, warehouse_createdAt, warehouse_updatedAt,
+                      warehouse_location, warehouse_address, warehouse_zipcode, warehouse_status)
+values (1, 1,'강남창고', 1000, NOW(), NOW(),
+        '서울특별시', '서울 강남구 삼성로 534', '06166', 'NORMAL'),
+       (2, '구로창고', 2000, NOW(), NOW(),
+        '서울특별시', '서울 구로구 디지털로26길 72', '08393', 'NORMAL'),
+       (3, '수원창고', 3000, NOW(), NOW(),
+        '경기', '경기 수원시 영통구 광교중앙로 145', '16509', 'NORMAL'),
+       (4, '천안창고', 1800, NOW(), NOW(),
+        '충남', '충남 천안시 동남구 목천읍 천안대로 2-10', '31226', 'NORMAL');
 
 -- 1-2. 섹션 (Section)
-INSERT INTO section (section_code, section_name, section_capacity, warehouse_index)
-VALUES
-    (100101, 'A-01-01 (상온)', 5000, 1), -- 서울 A 센터
-    (100201, 'B-01-01 (항온)', 3000, 2), -- 서울 B 센터
-    (200101, 'C-01-01 (상온)', 10000, 3), -- 경기 센터
-    (300101, 'D-01-01 (상온)', 8000, 4); -- 충남 센터
+insert into section
+(section_code, section_name, section_capacity, warehouse_index)
+values
+-- 강남창고 (WIndex = 1, WCode = 1)
+(101, 'S-1', 333, 1),
+(102, 'S-2', 333, 1),
+(103, 'S-3', 334, 1),
+
+-- 구로창고 (WIndex = 2, WCode = 2)
+(201, 'S-1', 500, 2),
+(202, 'S-2', 500, 2),
+(203, 'S-3', 500, 2),
+(204, 'S-4', 500, 2),
+
+-- 수원창고 (WIndex = 3, WCode = 3)
+(301, 'S-1', 600, 3),
+(302, 'S-2', 600, 3),
+(303, 'S-3', 600, 3),
+(304, 'S-4', 600, 3),
+(305, 'S-5', 600, 3),
+
+-- 천안창고 (WIndex = 4, WCode = 4)
+(401, 'S-1', 450, 4),
+(402, 'S-2', 450, 4),
+(403, 'S-3', 450, 4),
+(404, 'S-4', 450, 4);
 
 -- 1-3. 아이템 (Items) - (inbound_index 컬럼은 NOT NULL 제약에도 불구하고 논리적 오류로 판단, 제외함)
 INSERT INTO items (item_name, item_price, item_volume, item_category)

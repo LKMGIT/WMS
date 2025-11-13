@@ -13,3 +13,4 @@ create table admin(
                       admin_status ENUM('APPROVED','PENDING','REJECTED') NOT NULL DEFAULT 'PENDING'
 );
 
+use wms;

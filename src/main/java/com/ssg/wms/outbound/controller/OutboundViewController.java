@@ -19,13 +19,13 @@ public class OutboundViewController {
         return "/quotation/list";
     }
 
-    @GetMapping("/qoutation/request/register") // 명세서 오타(qoutation) 반영
+    @GetMapping("/quotation/request/register") // 명세서 오타(qoutation) 반영
     public String showRegisterQuotationRequestForm() {
         return "/quotation/register";
     }
 
     @GetMapping("/quotation/request/{qrequest_index}")
-    public String showQuotationRequestDetailForm(@PathVariable("/qrequest_index") Long qrequest_index , Model model) {
+    public String showQuotationRequestDetailForm(@PathVariable("qrequest_index") Long qrequest_index , Model model) {
         model.addAttribute("qrequest_index", qrequest_index);
         return "/quotation/detail";
     }

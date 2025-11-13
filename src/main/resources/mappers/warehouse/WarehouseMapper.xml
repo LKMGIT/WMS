@@ -108,4 +108,12 @@
         OR warehouse_address = #{wAddress}
     </select>
 
+    <select id="getUsedCapacity" resultType="int">
+        SELECT
+        COALESCE(SUM(i.item_volume * inv.inven_quantity), 0)
+        FROM warehouse w
+        LEFT JOIN inventory inv ON w.warehouse_index = inv.warehouse_index
+        LEFT JOIN items i ON inv.item_index = i.item_index
+        WHERE w.warehouse_index = #{wIndex}
+    </select>
 </mapper>

@@ -12,7 +12,6 @@ public interface WarehouseService {
     int getTotal(Criteria cri);
     boolean registerWarehouse(WarehouseSaveDTO warehouseSaveDTO);
     WarehouseDTO getWarehouse(Long wIndex);
-//    List<WarehouseDTO> getAllWarehouses(WarehouseSearchDTO warehouseSearchDTO);
     boolean modifyWarehouse(WarehouseUpdateDTO warehouseUpdateDTO);
     boolean removeWarehouse(Long wIndex);
 }

@@ -32,16 +32,16 @@ public class QuotationServiceImpl implements QuotationService {
     // 견적 요청 등록
     @Override
     @Transactional
-    public boolean registerQuotationRequest(QuotationRequestDTO requestDTO) {
-        return quotationMapper.insertQuotationRequest(requestDTO) > 0;
+    public boolean registerQuotationRequest(QuotationRequestDTO quotationRequestDTO) {
+        return quotationMapper.insertQuotationRequest(quotationRequestDTO) > 0;
     }
 
     @Override
     @Transactional
-    public boolean modifyQuotationRequest(QuotationRequestDTO requestDTO) {
-        boolean result = quotationMapper.updateQuotationRequest(requestDTO) > 0;
+    public boolean modifyQuotationRequest(QuotationRequestDTO quotationRequestDTO) {
+        boolean result = quotationMapper.updateQuotationRequest(quotationRequestDTO) > 0;
         if(result) {
-            QuotationRequestDTO request = quotationMapper.selectQuotationRequest(requestDTO.getQrequest_index());
+            QuotationRequestDTO request = quotationMapper.selectQuotationRequest(quotationRequestDTO.getQrequest_index());
             if(request.getQrequest_status() == EnumStatus.ANSWERED) {
                 request.setQrequest_status(EnumStatus.PENDING);
                 QuotationResponseDTO response = quotationMapper.selectQuotationResponse(request.getQrequest_index());
@@ -73,47 +73,43 @@ public class QuotationServiceImpl implements QuotationService {
     @Override
     @Transactional
     public QuotationDetailDTO getQuotationRequestDetailById(QuotationSearchDTO quotationSearchDTO, Long qrequest_index) {
-        // 건적 신청 단건 데이터 가져오기
+        // 1. 요청 기본 정보 조회
         QuotationRequestDTO request = quotationMapper.selectQuotationRequest(qrequest_index);
+        if (request == null) return null;
+
+        // 2. 답변 정보 조회 (PENDING/ANSWERED 무관하게 시도. response는 null일 수 있음)
+        QuotationResponseDTO response = quotationMapper.selectQuotationResponse(qrequest_index);
+
+        // 3. 이전/다음 글 인덱스 조회
         Long previous = quotationMapper.getPreviousQuotationPostIndex(quotationSearchDTO, qrequest_index);
         Long next = quotationMapper.getNextQuotationPostIndex(quotationSearchDTO, qrequest_index);
 
-        if(request.getQrequest_status() == EnumStatus.PENDING) {
-            return QuotationDetailDTO.builder()
-                    .qrequest_index(request.getQrequest_index())
-                    .user_index(request.getUser_index())
-                    .qrequest_name(request.getQrequest_name())
-                    .qrequest_email(request.getQrequest_email())
-                    .qrequest_phone(request.getQrequest_phone())
-                    .qrequest_detail(request.getQrequest_detail())
-                    .qrequest_status(request.getQrequest_status())
-                    .updated_at(request.getUpdated_at())
-                    .previousPostIndex(previous)
-                    .nextPostIndex(next)
-                    .build();
-        } else {
-            // 견적 답변 조회
-            QuotationResponseDTO response = quotationMapper.selectQuotationResponse(qrequest_index);
+        // 4. DTO 빌더 통합: NullPointerException 방지 로직 적용
 
+        QuotationDetailDTO.QuotationDetailDTOBuilder builder = QuotationDetailDTO.builder()
+                // Request 필수 필드는 항상 존재함
+                .qrequest_index(request.getQrequest_index())
+                .user_index(request.getUser_index())
+                .qrequest_name(request.getQrequest_name()) // qrequest_name (작성자 이름 필드)
+                .qrequest_email(request.getQrequest_email())
+                .qrequest_phone(request.getQrequest_phone())
+                .qrequest_detail(request.getQrequest_detail())
+                .qrequest_status(request.getQrequest_status())
+                .updated_at(request.getUpdated_at()) // DDL에 따라 updated_at 사용
+                .previousPostIndex(previous)
+                .nextPostIndex(next);
 
-            // 3. QuotationDetailDTO로 조합
-            return QuotationDetailDTO.builder()
-                    .qrequest_index(request.getQrequest_index())
-                    .user_index(request.getUser_index())
-                    .qrequest_name(request.getQrequest_name())
-                    .qrequest_email(request.getQrequest_email())
-                    .qrequest_phone(request.getQrequest_phone())
-                    .qrequest_detail(request.getQrequest_detail())
-                    .qrequest_status(request.getQrequest_status())
-                    .updated_at(request.getUpdated_at())
+        // ▼▼▼ Null 체크 후 답변 필드만 추가 (response가 null일 때 안전하게 건너뛰기) ▼▼▼
+        if (response != null) {
+            builder
                     .qresponse_index(response.getQresponse_index())
                     .qresponse_detail(response.getQresponse_detail())
                     .admin_index(response.getAdmin_index())
-                    .responded_at(response.getUpdated_at())
-                    .previousPostIndex(previous)
-                    .nextPostIndex(next)
-                    .build();
+                    .responded_at(response.getUpdated_at());
         }
+        // ▲▲▲ Null 체크 끝 ▲▲▲
+
+        return builder.build();
     }
 
     // 견적 답변 등록

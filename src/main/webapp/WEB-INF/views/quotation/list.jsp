@@ -3,8 +3,7 @@
   User: JangwooJoo
   Date: 2025-11-10
   Time: 오후 8:19
-  To change this template use File |
- Settings | File Templates.
+  순수 목록 조회 전용 (액션 버튼 제거)
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -20,7 +19,6 @@
             <li class="separator"><i class="icon-arrow-right"></i></li>
             <li class="nav-item"><a href="${contextPath}/quotation/requests">견적 리스트</a></li>
         </ul>
-
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -28,64 +26,54 @@
                 <div class="card-header">
                     <div class="d-flex align-items-center">
                         <h4 class="card-title">견적신청 목록</h4>
-
-
-                        <c:if test="${sessionScope.loginUser.userType == 'USER'}">
-                            <a href="${contextPath}/qoutation/request/register" class="btn btn-primary btn-round ms-auto">
-                                <i class="fa fa-plus"></i>
-
-                                견적 신청
-                            </a>
-                        </c:if>
                     </div>
-
                 </div>
                 <div class="card-body">
-                    <div class="row g-3 mb-3 align-items-center">
-                        <form id="searchForm" class="input-group">
-
-                            <div class="col-md-5">
-                                <select class="form-select" name="type">
-                                    <option value="T">제목 (q_title)</option>
-
-                                    <option value="C">내용 (q_content)</option>
-                                    <option value="W">작성자 (user_name)</option>
-                                </select>
-                                <input type="text" class="form-control" name="keyword" placeholder="검색어 입력">
+                    <%-- 🚨 [수정] 검색 폼 구조 통일 (col-md-5, col-md-2 그리드 적용) --%>
+                    <div id="searchGroup" class="row g-3 mb-3 align-items-center">
+                        <form id="searchForm" class="col-12 d-flex flex-wrap p-0">
+                            <%-- 1. 타입/키워드 통합 (col-md-5) --%>
+                            <div class="col-md-5 me-2">
+                                <div class="input-group">
+                                    <select class="form-select" name="type" style="flex-grow: 0.3;">
+                                        <option value="U">작성자 ID</option>
+                                        <option value="W">작성자 이름</option>
+                                    </select>
+                                    <input type="text" class="form-control" name="keyword" placeholder="검색어 입력">
+                                </div>
                             </div>
-                            <div class="col-md-2">
-                                <select class="form-select" id="searchAnsweredStatus">
+
+                            <%-- 2. 답변 상태 (col-md-2) --%>
+                            <div class="col-md-2 me-2">
+                                <select class="form-select" id="searchAnsweredStatus" name="qrequest_status">
                                     <option value="">-- 답변 상태 (전체) --</option>
                                     <option value="PENDING">대기중</option>
                                     <option value="ANSWERED">답변완료</option>
                                 </select>
                             </div>
-                            <div class="col-md-1">
-                                <button class="btn btn-outline-secondary" type="button" id="searchBtn">검색</button>
-                            </div>
 
+                            <%-- 3. 검색 버튼 (col-md-1) --%>
+                            <div class="col-md-1">
+                                <button class="btn btn-default" type="button" id="searchBtn">검색</button>
+                            </div>
                         </form>
                     </div>
 
                     <div class="table-responsive">
                         <table class="display table table-striped table-hover">
-
                             <thead>
                             <tr>
-                                <th>견적 ID (q_index)</th>
-                                <th>제목 (q_title)</th>
-                                <th>작성자 (user_name)</th>
-                                <th>작성일 (created_at)</th>
-
-                                <th>답변 상태 (q_response)</th>
+                                <th>견적 ID</th>
+                                <th>작성자 ID</th>
+                                <th>작성자 이름</th>
+                                <th>작성일</th>
+                                <th>답변 상태</th>
                             </tr>
                             </thead>
-                            <tbody
-                                    id="quotationTbody">
+                            <tbody id="quotationTbody">
                             <tr><td colspan="5" class="text-center">데이터를 불러오는 중입니다...</td></tr>
                             </tbody>
                         </table>
-
                     </div>
 
                     <div id="quotationPagination" class="mt-3 d-flex justify-content-center">
@@ -99,162 +87,155 @@
 <%@ include file="../includes/footer.jsp" %>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-    // --- JSTL 변수
-    (세션 정보) ---
+    // --- JSTL 변수 (세션 정보) ---
     const contextPath = "${contextPath}";
-    // UserDTO 참고
-    const loginUserType = "${sessionScope.loginUser.userType}";
-    // 'ADMIN' or 'USER'
+    const isAdmin = ${not empty sessionScope.loginAdminIndex};
 
     // --- [API 경로 설정] ---
-    // [수정] 백틱(``) 대신 큰따옴표("") 사용
     const API = {
-        // QuotationMemberController
-        MEMBER: "${contextPath}/api/quotation",
-        // QuotationAdminController
-        ADMIN: "${contextPath}/api/admin/quotation"
+        MEMBER: contextPath + "/api/quotation",
+        ADMIN: contextPath + "/api/admin/quotation"
     };
-    // [권한 분기] '읽기' (GET) API 경로는 권한에 따라 분기합니다.
-    const READ_API_BASE = loginUserType === 'ADMIN' ? API.ADMIN : API.MEMBER;
-    /**
-     * 목록 데이터 로드 함수
-     * @param {number} page - 요청할 페이지 번호
-     * @param {string} type - 검색 타입
-     * @param {string} keyword - 검색 키워드
-     */
-    async function loadList(page = 1, type = '', keyword = '') {
+    const READ_API_BASE = isAdmin ? API.ADMIN : API.MEMBER;
+
+    function parseLocalDateTime(arr) {
+        if (!arr || arr.length < 6) { return null; }
+        return new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4], arr[5]);
+    }
+
+    function formatDateTime(arr) {
+        const dateObj = parseLocalDateTime(arr);
+        return dateObj ? dateObj.toLocaleString("ko-KR") : "N/A";
+    }
+
+    async function loadList(page = 1, type = '', keyword = '', qrequest_status = '') {
         const tbody = document.getElementById("quotationTbody");
-        // [수정] 백틱(``) 대신 작은따옴표('') 사용
         tbody.innerHTML = '<tr><td colspan="5" class="text-center">데이터를 불러오는 중입니다...</td></tr>';
 
         try {
-            // [API 경로 수정]: 컨트롤러 매핑인 /request 추가
-            // [파라미터 수정]: Criteria + QuotationSearchDTO
-            const params = new URLSearchParams({ page, amount: 10, type, keyword });
-            // [수정] 백틱(``) 대신 문자열 연결(+) 사용
-            const response = await axios.get(READ_API_BASE + "/request", { params });
-            // API 응답: { list: [QuotationDetailDTO, ...], pageDTO: {...} } (가정)
-            const { list, pageDTO } = response.data;
-            tbody.innerHTML = ""; // tbody 초기화
+            // qrequest_status 파라미터를 사용하여 API 호출
+            const params = new URLSearchParams({
+                pageNum: page,
+                amount: 10,
+                type,
+                keyword,
+                qrequest_status // 빈 문자열이라도 포함
+            });// 빈 문자열일 경우 제외됨
+
+            const listContextQuery = params.toString();
+
+            const request = await axios.get(READ_API_BASE + "/request", { params });
+
+            const { list, pageDTO } = request.data;
+
+            tbody.innerHTML = "";
 
             if (!list || list.length === 0) {
-                // [수정] 백틱(``) 대신 작은따옴표('') 사용
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center">견적 신청 내역이 없습니다.</td></tr>';
-                renderPagination(pageDTO, loadList); // 페이징은 렌더링
+                renderPagination(pageDTO, loadList, { type, keyword, qrequest_status });
                 return;
             }
 
-            // [JS 렌더링]: DTO 속성(q_title 등)에 맞춰 렌더링
             list.forEach(item => {
-                // DTO 속성: q_response (EnumStatus)
-                // [수정] 백틱(``) 대신 작은따옴표('') 사용
-                const answeredBadge = item.q_response === 'COMPLETED'
+                // 🚨 [수정] 상태값 반전 오류 수정: ANSWERED 일 때 완료 배지 출력
+                const answeredBadge = item.qrequest_status === 'ANSWERED'
                     ? '<span class="badge bg-primary">답변 완료</span>'
+                    : '<span class="badge bg-warning text-dark">대기중</span>';
 
-                    : '<span class="badge bg-light text-dark">답변 대기</span>';
-
-                // DTO 속성: created_at (LocalDateTime)
-                const regDate = new Date(item.created_at).toLocaleDateString("ko-KR");
+                // DTO 필드: updated_at 사용
+                const regDate = formatDateTime(item.updated_at);
 
                 const tr = document.createElement("tr");
-                tr.style.cursor =
-                    "pointer";
+                tr.style.cursor = "pointer";
                 tr.onclick = () => {
-                    // [경로 수정] OutboundViewController.java 매핑 경로
-                    // [수정] 백틱(``) 대신 문자열 연결(+) 사용 (JSP EL + JS 변수)
-                    location.href = "${contextPath}/quotation/request/" + item.q_index;
+                    // [경로 수정] 상세 페이지 이동 시 쿼리스트링 추가
+                    location.href = contextPath + "/quotation/request/" + item.qrequest_index + '?' + listContextQuery;
                 };
 
-                //
-                [DTO 반영] DTO 속성: q_index, q_title, user_name, created_at, q_response
-                // (JS 변수만 있으므로 백틱 유지)
-                tr.innerHTML = `
-                    <td>${item.q_index}</td>
-                    <td>${item.q_title}</td>
-                    <td>${item.user_name}</td>
-
-         <td>${regDate}</td>
-                    <td>${answeredBadge}</td>
-                `;
+                // 🚨 [수정] DTO 필드명에 맞게 데이터 매핑
+                tr.innerHTML =
+                    '<td>' + item.qrequest_index + '</td>' +
+                    '<td>' + item.user_index + '</td>' +
+                    '<td>' + item.qrequest_name + '</td>' +
+                    '<td>' + regDate + '</td>' +
+                    '<td>' + answeredBadge + '</td>';
                 tbody.appendChild(tr);
             });
 
             // [JS 렌더링]: 페이지네이션 생성
-            renderPagination(pageDTO, loadList);
+            renderPagination(pageDTO, loadList, { type, keyword, qrequest_status });
+
         } catch (error) {
             console.error("List loading failed:", error);
-            // [수정] 백틱(``) 대신 작은따옴표('') 사용
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">목록 로딩에 실패했습니다.</td></tr>';
         }
     }
 
     /**
      * 페이지네이션 렌더링 함수
-     * @param {object} pageDTO - 페이지 정보
-     * @param {function} loadFn - 페이지 클릭 시 호출할 함수 (loadList)
      */
-    function renderPagination(pageDTO, loadFn) {
+    function renderPagination(pageDTO, loadFn, searchParams) {
         const paginationUl = document.getElementById("quotationPagination");
         paginationUl.innerHTML = "";
 
-        if (!pageDTO) return;
+        // 🚨 [수정] cri 속성 체크 추가
+        if (!pageDTO || !pageDTO.cri) return;
 
         let paginationHtml = '<ul class="pagination">';
-        const { criteria, startPage, endPage, prev, next } = pageDTO;
-        const { type, keyword } = criteria;
-        //
+        const { cri, startPage, endPage, prev, next } = pageDTO; // cri로 destructuring
 
         // '이전' 버튼
         if (prev) {
-            // (JS 변수만 있으므로 백틱 유지)
-            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${startPage - 1}">Previous</a></li>`;
+            paginationHtml += '<li class="page-item"><a class="page-link" href="#" data-page="' + (startPage - 1) + '">Previous</a></li>';
         }
 
         // 페이지 번호
         for (let i = startPage; i <= endPage; i++) {
-            // (JS 변수만 있으므로 백틱 유지)
-            paginationHtml += `
-                <li class="page-item ${criteria.pageNum == i ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+            // 🚨 [수정] cri.pageNum 사용
+            const activeClass = (cri.pageNum == i) ? 'active' : '';
 
-      </li>
-            `;
+            paginationHtml += '<li class="page-item ' + activeClass + '">' +
+                '  <a class="page-link" href="#" data-page="' + i + '">' + i + '</a>' +
+                '</li>';
         }
 
         // '다음' 버튼
         if (next) {
-            // (JS 변수만 있으므로 백틱 유지)
-            paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${endPage + 1}">Next</a></li>`;
+            paginationHtml += '<li class="page-item"><a class="page-link" href="#" data-page="' + (endPage + 1) + '">Next</a></li>';
         }
         paginationHtml += '</ul>';
         paginationUl.innerHTML = paginationHtml;
+
         // [연결]: 동적으로 생성된 페이지 번호에 클릭 이벤트 바인딩
         paginationUl.querySelectorAll("a.page-link").forEach(link => {
             link.addEventListener("click", function(e) {
                 e.preventDefault();
                 const pageNum = this.dataset.page;
 
-                // 검색 조건 가져오기
-
-                const form = document.getElementById("searchForm");
-                const currentType = form.type.value;
-                const currentKeyword = form.keyword.value;
-
-                loadFn(pageNum, currentType, currentKeyword); // 검색 조건 유지하며 페이지 이동
+                // [수정] 검색 조건 유지하며 페이지 이동
+                loadFn(pageNum, searchParams.type, searchParams.keyword, searchParams.qrequest_status);
             });
         });
     }
 
-    // 페이지 로드 시 1페이지 데이터 로드
+    // 페이지 로드 시 초기 데이터 로드
     document.addEventListener("DOMContentLoaded", () => {
-        loadList(1);
+        // [수정] 초기 검색 조건 읽기
+        const form = document.getElementById("searchForm");
+        const initialType = form.elements.type.value;
+        const initialKeyword = form.elements.keyword.value;
+        const initialStatus = document.getElementById("searchAnsweredStatus").value;
+
+        loadList(1, initialType, initialKeyword, initialStatus);
     });
+
     // 검색 버튼 이벤트
     document.getElementById("searchBtn").addEventListener("click", () => {
         const form = document.getElementById("searchForm");
-        const type = form.type.value;
-        const keyword = form.keyword.value;
-        loadList(1, type, keyword); // 검색 시 1페이지로
+        const type = form.elements.type.value;
+        const keyword = form.elements.keyword.value;
+        const status = document.getElementById("searchAnsweredStatus").value;
+        loadList(1, type, keyword, status); // 검색 시 1페이지로
     });
 </script>
 <%@ include file="../includes/end.jsp" %>

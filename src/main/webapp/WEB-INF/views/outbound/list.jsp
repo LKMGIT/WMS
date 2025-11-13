@@ -222,7 +222,7 @@
         try {
             // 검색 조건 및 페이징
             const params = new URLSearchParams({
-                page,
+                pageNum: page,
                 amount: 10,
                 ...searchParams // type, keyword, approval_status, dispatch_status 포함
             });

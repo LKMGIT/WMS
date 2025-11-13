@@ -257,16 +257,29 @@
         }
 
         const id = "${warehouse.WIndex}";
+        const wName = document.querySelector("input[name='wName']").value.trim();
+        const wAddress = document.querySelector("input[name='wAddress']").value.trim();
+        const wZipcode = document.querySelector("input[name='wZipcode']").value.trim();
+        const wStatus = document.querySelector("select[name='wStatus']").value;
 
-        const data = {
-            wName: document.querySelector("input[name='wName']").value,
-            wAddress: document.querySelector("input[name='wAddress']").value,
-            wZipcode: document.querySelector("input[name='wZipcode']").value,
-            wStatus: document.querySelector("select[name='wStatus']").value
-        };
+        if (!wName) {
+            alert("창고 이름을 입력해주세요.");
+            document.querySelector("input[name='wName']").focus();
+            return;
+        }
+        if (!wAddress) {
+            alert("주소를 입력해주세요.");
+            return;
+        }
+        if (!wZipcode) {
+            alert("우편번호를 입력해주세요.");
+            return;
+        }
+
+        const data = { wName, wAddress, wZipcode, wStatus };
 
         axios.put(`/api/warehouse/${id}`, data)
-            .then(response => {
+            .then(() => {
                 alert("창고 수정 완료");
                 window.location.href = `/warehouse/${id}`;
             })

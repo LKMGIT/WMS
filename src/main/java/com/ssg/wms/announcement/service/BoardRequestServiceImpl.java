@@ -46,11 +46,11 @@ public class BoardRequestServiceImpl implements BoardRequestService {
     // 관리자 전용 게시글 삭제
     @Override
     public boolean deleteBoardByAdmin(Integer boardIndex, Long adminId) {
+        // [보강] 게시글 존재 여부 확인
         BoardRequestDTO existing = boardRequestMapper.selectBoard(boardIndex);
         if (existing == null) {
             return false;
         }
-
         // 관리자는 권한 체크 없이 삭제 가능
         return boardRequestMapper.deleteBoard(boardIndex) > 0;
     }
@@ -59,6 +59,7 @@ public class BoardRequestServiceImpl implements BoardRequestService {
     // 댓글 관련 메서드 (관리자 전용으로 수정)
     @Override
     public Integer registerComment(BoardCommentDTO commentDTO, Long adminId) {
+        // 사용자 인덱스를 명시적으로 null로 설정하여 관리자 댓글임을 확실히 함
         commentDTO.setUserIndex(null);
         commentDTO.setAdminIndex(adminId);
         boardRequestMapper.insertComment(commentDTO);

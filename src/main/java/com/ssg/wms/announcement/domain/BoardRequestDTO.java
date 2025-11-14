@@ -11,9 +11,7 @@ import lombok.NoArgsConstructor;
  * 문의 게시판 DTO
  */
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class BoardRequestDTO {
 
     private Integer boardIndex;                 // 게시글 번호 (PK)
@@ -24,6 +22,7 @@ public class BoardRequestDTO {
     private String bType;                       // 문의 유형
     private Integer bViews;                     // 조회수
     private Long userIndex;                     // 작성자번호
+    private Long adminIndex;                    // 관리자번호
 
     // 댓글 목록 (조인용)
     private List<BoardCommentDTO> comments;

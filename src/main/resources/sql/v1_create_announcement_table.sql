@@ -1,5 +1,9 @@
--- 1. 공지사항 테이블 (announcement)
-CREATE TABLE IF NOT EXISTS announcement
+
+drop table notice;
+drop table one_to_one_request;
+drop table board_request;
+drop table board_comment;
+CREATE TABLE IF NOT EXISTS notice
 (
     notice_index INT AUTO_INCREMENT PRIMARY KEY COMMENT '공지 번호',
     n_title      VARCHAR(100) NOT NULL COMMENT '공지 제목',
@@ -43,6 +47,7 @@ CREATE TABLE IF NOT EXISTS board_request
     b_type      VARCHAR(50)  NOT NULL COMMENT '문의 유형',
     b_views     INT                   DEFAULT 0 COMMENT '조회수',
     user_index  BIGINT       NOT NULL COMMENT '작성자번호',
+    admin_index BiGINT       NOT NULL COMMENT '관리자 번호',
     INDEX idx_user (user_index),
     INDEX idx_createAt (b_createAt),
     INDEX idx_type (b_type)
@@ -59,7 +64,9 @@ CREATE TABLE IF NOT EXISTS board_comment
     user_index    BIGINT COMMENT '작성자번호 (사용자)',
     admin_index   BIGINT COMMENT '작성자번호 (관리자)',
     INDEX idx_board (board_index),
-    INDEX idx_createAt (c_createAt),
-    FOREIGN KEY (board_index) REFERENCES board_request (board_index) ON DELETE CASCADE
+    INDEX idx_createAt (c_createAt)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='문의 게시판 댓글 테이블';
+
+
+

@@ -1,6 +1,6 @@
 use wms;
 
-
+truncate admin;
 -- 마스터 1명 생성
 INSERT INTO admin
 (admin_name, admin_id, admin_pw, admin_role, admin_phone, admin_status)

@@ -112,7 +112,7 @@ BEGIN
 
     WHILE i <= end_id DO
         SET v_user_index = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(@users, ',', (i % 20) + 1), ',', -1) AS UNSIGNED);
-        SET v_item_index = (i % 3) + 1;
+        SET v_item_index = (i % 25) + 1;
         SET v_wh_index = (i % 4) + 1;
 
 SELECT section_index, section_code INTO v_sec_index_pk, v_sec_code
@@ -166,7 +166,7 @@ BEGIN
 
     WHILE i <= end_id DO
         SET v_user_index = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(@users, ',', (i % 10) + 1), ',', -1) AS UNSIGNED);
-        SET v_item_index = (i % 3) + 1;
+        SET v_item_index = (i % 25) + 1;
         SET v_wh_index = (i % 4) + 1;
 
 SELECT section_index, section_code INTO v_sec_index_pk, v_sec_code
@@ -216,7 +216,7 @@ BEGIN
 
     WHILE i <= end_id DO
         SET v_user_index = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(@users, ',', (i % 25) + 1), ',', -1) AS UNSIGNED);
-        SET v_item_index = (i % 3) + 1;
+        SET v_item_index = (i % 25) + 1;
         SET v_wh_index = (i % 4) + 1;
         SET v_qty = 300;
 

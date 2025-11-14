@@ -100,7 +100,7 @@ public class InboundServiceImpl implements InboundService {
 
 
         // 재고 파트로 데이터 반영
-//        invenService.applyInbound(detailDTO);
+        invenService.applyInbound(detailDTO);
     }
 
     // --- 통계 메서드 (기존과 동일) ---

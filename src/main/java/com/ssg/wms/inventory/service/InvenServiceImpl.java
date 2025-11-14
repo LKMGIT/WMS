@@ -23,15 +23,33 @@ public class InvenServiceImpl implements InvenService {
     private static final Set<String> ITEM_CATEGORIES =
             Set.of("HEALTH","BEAUTY","PERFUME","CARE","FOOD");
 
-    private static void normalizeAndValidate(Criteria cri){
-        if (cri.getCategory() != null && !cri.getCategory().isBlank()) {
-            String up = cri.getCategory().toUpperCase();
-            if (!ITEM_CATEGORIES.contains(up)) {
-                throw new IllegalArgumentException("Invalid category: " + cri.getCategory());
-            }
-            cri.setCategory(up);
+    private static void normalizeAndValidate(Criteria cri) {
+        String cat = cri.getCategory();
+
+        if (cat == null) {
+            return;
         }
+
+        // 앞뒤 공백 제거
+        String trimmed = cat.trim();
+
+        // 공백만 들어온 경우는 "카테고리 없음"으로 간주
+        if (trimmed.isEmpty()) {
+            cri.setCategory(null);
+            return;
+        }
+
+        String up = trimmed.toUpperCase();
+
+        if (!ITEM_CATEGORIES.contains(up)) {
+            // 원래 값도 같이 찍어주면 디버깅할 때 좋음
+            throw new IllegalArgumentException("Invalid category: [" + cat + "]");
+        }
+
+        // 정제된 값으로 세팅
+        cri.setCategory(up);
     }
+
 
     @Override
     public List<InvenItemViewDTO> getInventoryPage(Criteria cri) {

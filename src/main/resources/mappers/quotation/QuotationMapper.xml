@@ -29,7 +29,7 @@
                         AND user_index = #{search.keyword}
                     </when>
                     <when test="search.type == 'W'.toString()">
-                        AND user_name = #{search.keyword}
+                        AND qrequest_name = #{search.keyword}
                     </when>
                 </choose>
             </if>

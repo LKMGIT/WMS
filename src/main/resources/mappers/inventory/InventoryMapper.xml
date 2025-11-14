@@ -93,17 +93,18 @@
         SELECT
         inv.inven_index,
         inv.inven_quantity,
-        (
+        COALESCE((
         SELECT ic.actual_quantity
         FROM inven_count ic
         WHERE ic.inven_index = inv.inven_index
         ORDER BY ic.count_index DESC
         LIMIT 1
-        ) AS actual_quantity,
+        ), inv.inven_quantity) AS actual_quantity,
         NOW()
         FROM inventory inv
         WHERE inv.inven_index = #{invenIndex}
     </insert>
+
 
     <!-- ===== 보조 조회 (스키마에 맞게 수정) ===== -->
 
@@ -123,7 +124,6 @@
         LIMIT 1
     </select>
 
-    <!-- inbound_detail 에서 section_index 조회 (문자열) -->
     <select id="selectSectionByInbound" parameterType="long" resultType="long">
         SELECT d.section_index
         FROM inbound_detail d

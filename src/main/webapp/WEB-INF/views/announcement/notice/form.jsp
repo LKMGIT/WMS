@@ -5,11 +5,14 @@
 
 <style>
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0;
+      transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0);
+    }
   }
 
-  .fade-in-up { animation: fadeInUp 0.6s ease-out; }
+  .fade-in-up { animation: fadeInUp 0.6s ease-out;
+  }
 
   /* 폼 카드 */
   .form-card {
@@ -171,11 +174,11 @@
         <li class="separator"><i class="icon-arrow-right"></i></li>
         <li class="nav-item"><a href="<c:url value='/announcement/notice/list'/>">공지사항</a></li>
         <li class="separator"><i class="icon-arrow-right"></i></li>
+
         <li class="nav-item" id="breadcrumbTitle">등록</li>
       </ul>
     </div>
 
-    <!-- 폼 -->
     <div class="card form-card fade-in-up">
       <div class="card-header">
         <h4><i class="fas fa-file-alt"></i> 공지사항 정보</h4>
@@ -184,7 +187,6 @@
         <form id="noticeForm">
           <input type="hidden" id="noticeIndex" name="noticeIndex">
 
-          <!-- 제목 -->
           <div class="form-group">
             <label class="form-label">
               <i class="fas fa-heading"></i> 제목
@@ -192,23 +194,25 @@
             </label>
             <input type="text" class="form-control" id="nTitle" name="nTitle"
                    placeholder="공지사항 제목을 입력하세요" required>
+
             <div class="form-text">
               <i class="fas fa-info-circle"></i> 명확하고 간결한 제목을 작성해주세요.
             </div>
           </div>
 
-          <!-- 중요도 -->
           <div class="form-group">
             <label class="form-label">
               <i class="fas fa-flag"></i> 중요도
               <span class="required">*</span>
             </label>
+
             <div class="priority-options">
               <label class="priority-option selected" id="priority-0">
                 <input type="radio" name="nPriority" value="0" checked>
                 <div class="priority-icon">📋</div>
                 <div class="priority-label">일반</div>
               </label>
+
               <label class="priority-option" id="priority-1">
                 <input type="radio" name="nPriority" value="1">
                 <div class="priority-icon">⭐</div>
@@ -216,16 +220,17 @@
               </label>
             </div>
             <div class="form-text">
+
               <i class="fas fa-info-circle"></i> 중요 공지는 목록 상단에 표시됩니다.
             </div>
           </div>
 
-          <!-- 내용 -->
           <div class="form-group">
             <label class="form-label">
               <i class="fas fa-align-left"></i> 내용
               <span class="required">*</span>
             </label>
+
             <textarea class="form-control" id="nContent" name="nContent"
                       placeholder="공지사항 내용을 입력하세요" required></textarea>
             <div class="form-text">
@@ -233,12 +238,12 @@
             </div>
           </div>
 
-          <!-- 버튼 -->
           <div class="form-actions">
             <button type="submit" class="btn btn-modern btn-submit">
               <i class="fas fa-save"></i> <span id="submitBtnText">등록하기</span>
             </button>
             <button type="button" class="btn btn-modern btn-cancel" onclick="goBack()">
+
               <i class="fas fa-times"></i> 취소
             </button>
           </div>
@@ -260,6 +265,7 @@
     var $ = function(id) { return document.getElementById(id); };
 
     function initPrioritySelection() {
+
       var options = document.querySelectorAll('.priority-option');
       options.forEach(function(option) {
         option.addEventListener('click', function() {
@@ -274,8 +280,8 @@
     }
 
     function loadNoticeForEdit(noticeIndex) {
-      var url = ctx + '/announcement/notice/' + noticeIndex;
-
+      // [수정] 상세 조회 API 호출 경로: /announcement/notices/{notice_index}
+      var url = ctx + '/announcement/notices/' + noticeIndex;
       fetch(url, {
         method: 'GET',
         headers: { 'Accept': 'application/json' },
@@ -284,12 +290,14 @@
               .then(function(res) {
                 if (res.ok) return res.json();
                 return Promise.reject(new Error('HTTP ' + res.status));
+
               })
               .then(function(data) {
                 fillFormWithData(data);
               })
               .catch(function(err) {
                 console.error('[loadNoticeForEdit] error:', err);
+
                 alert('공지사항 정보를 불러오는 중 오류가 발생했습니다.');
                 goBack();
               });
@@ -300,7 +308,8 @@
       $('nTitle').value = notice.nTitle || notice.n_title || '';
       $('nContent').value = notice.nContent || notice.n_content || '';
 
-      var priority = notice.nPriority || notice.n_priority || 0;
+      var priority = notice.nPriority ||
+              notice.n_priority || 0;
       var radios = document.querySelectorAll('input[name="nPriority"]');
       radios.forEach(function(radio) {
         if (radio.value == priority) {
@@ -310,6 +319,7 @@
             document.querySelectorAll('.priority-option').forEach(function(opt) {
               opt.classList.remove('selected');
             });
+
             parentLabel.classList.add('selected');
           }
         }
@@ -323,7 +333,6 @@
       var nTitle = $('nTitle').value.trim();
       var nContent = $('nContent').value.trim();
       var nPriority = document.querySelector('input[name="nPriority"]:checked').value;
-
       if (!nTitle) {
         alert('제목을 입력하세요.');
         $('nTitle').focus();
@@ -344,10 +353,11 @@
 
       var url, method;
       if (isEditMode && noticeIndex) {
+        // [수정]: PUT 요청 경로: /announcement/notice/{noticeIndex}
         url = ctx + '/announcement/notice/' + noticeIndex;
         method = 'PUT';
-        data.noticeIndex = parseInt(noticeIndex);
       } else {
+        // [수정]: POST 요청 경로: /announcement/notice
         url = ctx + '/announcement/notice';
         method = 'POST';
       }
@@ -361,12 +371,14 @@
         credentials: 'same-origin',
         body: JSON.stringify(data)
       })
-              .then(function(res) { return res.json(); })
+              .then(function(res) { return res.json();
+              })
               .then(function(result) {
                 if (result && result.success) {
                   alert(isEditMode ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.');
                   location.href = ctx + '/announcement/notice/list';
                 } else {
+
                   alert(result.message || '저장에 실패했습니다.');
                 }
               })
@@ -394,6 +406,7 @@
         $('pageTitle').textContent = '공지사항 수정';
         $('breadcrumbTitle').textContent = '수정';
         $('submitBtnText').textContent = '수정하기';
+
         loadNoticeForEdit(noticeIndex);
       }
 

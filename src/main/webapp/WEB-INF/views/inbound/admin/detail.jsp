@@ -91,12 +91,11 @@
     vertical-align: baseline;
   }
 
-  .status-PENDING { background-color: #ffc107; color: #343a40;
-  }
-  .status-APPROVED { background-color: #28a745; color: white; }
-  .status-REJECTED { background-color: #dc3545; color: white;
-  }
-  .status-CANCELED { background-color: #6c757d; color: white; }
+  /* 🔥 [수정] 상태별 색상 명확히 구분 */
+  .status-PENDING { background-color: #ffc107; color: #343a40; } /* 승인 대기 (노랑) */
+  .status-APPROVED { background-color: #28a745; color: white; } /* 승인 완료 (초록) */
+  .status-REJECTED { background-color: #dc3545; color: white; } /* 승인 거부 (빨강) */
+  .status-CANCELED { background-color: #6c757d; color: white; } /* 요청 취소 (회색) */
 
 </style>
 
@@ -117,6 +116,8 @@
       <div class="row">
         <div class="col-md-3">
 
+
+
           <p class="mb-1 text-light"><strong>요청 번호</strong></p>
           <h4 id="inboundIndexDisplay" class="text-white">...</h4>
         </div>
@@ -126,6 +127,8 @@
         </div>
         <div class="col-md-3">
           <p class="mb-1 text-light"><strong>요청 수량</strong></p>
+
+
 
           <h4 id="requestQuantityDisplay" class="text-white">...</h4>
         </div>
@@ -139,6 +142,8 @@
           <p class="mb-1 text-light"><strong>희망 입고일</strong></p>
           <h5 id="plannedReceiveDateDisplay"
 
+
+
               class="text-white">...</h5>
         </div>
         <div class="col-md-3">
@@ -148,6 +153,8 @@
         <div class="col-md-3">
           <p class="mb-1 text-light"><strong>창고 번호</strong></p>
           <h5 id="warehouseIndexDisplay" class="text-white">...</h5>
+
+
 
         </div>
 
@@ -164,6 +171,8 @@
     <div class="card-header bg-white py-3 border-bottom-0">
       <h5 class="mb-0">입고 처리 상세 항목 (단일 처리)</h5>
 
+
+
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -173,6 +182,8 @@
             <th scope="col" style="width: 10%;">상세번호</th>
             <th scope="col" style="width: 20%;">배정 구역</th>
             <th scope="col" style="width: 25%;">실제 입고 수량</th>
+
+
             <th scope="col" style="width: 20%;">처리 일시</th>
             <th scope="col" style="width: 25%;">관리</th>
 
@@ -182,6 +193,8 @@
           <%-- 데이터가 로드될 위치 --%>
           <tr><td colspan="5" class="text-center py-5">상세 내역을 불러오는 중...</td></tr>
           </tbody>
+
+
         </table>
       </div>
     </div>
@@ -189,7 +202,7 @@
 
   <%-- 관리 버튼 섹션 (구역 선택 요소 포함) --%>
   <div id="adminActionSection" class="mt-4 fade-in-up" style="animation-delay: 0.2s;
- display: none;">
+    display: none;">
     <div class="row align-items-center">
       <div class="col-md-4">
         <div class="input-group">
@@ -199,6 +212,8 @@
           </select>
         </div>
       </div>
+
+
       <div class="col-md-8 text-end">
         <button type="button" class="btn btn-danger me-2" onclick="cancelRequest()">
           <i class="fas fa-times-circle me-1"></i> 요청 취소
@@ -215,12 +230,16 @@
   var ctx = '${pageContext.request.contextPath}';
   var currentRequestData = null;
 
-  // 🔥 [신규] 유틸리티 함수: LocalDateTime 배열을 'YYYY-MM-DD HH:mm:ss' 형태로 포맷팅
+  // 🔥 [복원/기존] 유틸리티 함수: LocalDateTime 배열을 'YYYY-MM-DD HH:mm:ss'
+
+  // 형태로 포맷팅 (시간 포함)
   function formatLocalDateTime(dateTimeArray) {
-    if (!Array.isArray(dateTimeArray) || dateTimeArray.length < 5) {
-      return 'N/A'; // 유효하지 않은 데이터는 'N/A'로 처리
+    if (!Array.isArray(dateTimeArray) ||
+            dateTimeArray.length < 5) {
+      return 'N/A';
     }
-    var pad = function(n) { return String(n).padStart(2, '0'); };
+    var pad = function(n) { return String(n).padStart(2, '0');
+    };
     // [년, 월, 일, 시, 분] 배열을 'YYYY-MM-DD HH:mm' 형식으로 조합 (초도 있다면 포함)
     var datePart = dateTimeArray[0] + '-' + pad(dateTimeArray[1]) + '-' + pad(dateTimeArray[2]);
     var timePart = pad(dateTimeArray[3]) + ':' + pad(dateTimeArray[4]);
@@ -229,6 +248,19 @@
       timePart += ':' + pad(dateTimeArray[5]);
     }
     return datePart + ' ' + timePart;
+  }
+
+  // 🔥 [신규] 유틸리티 함수: LocalDateTime 배열을 'YYYY-MM-DD' 형태로 포맷팅 (날짜만)
+  function formatDateOnly(dateTimeArray) {
+    if (!Array.isArray(dateTimeArray) ||
+            dateTimeArray.length < 3) {
+      return 'N/A';
+    }
+    var pad = function(n) { return String(n).padStart(2, '0');
+    };
+    // [년, 월, 일] 배열을 'YYYY-MM-DD' 형식으로 조합 (날짜만)
+    var datePart = dateTimeArray[0] + '-' + pad(dateTimeArray[1]) + '-' + pad(dateTimeArray[2]);
+    return datePart;
   }
 
   // 창고 번호에 따른 구역 목 데이터
@@ -251,6 +283,7 @@
   function
   getStatusBadge(status) {
     if (!status) return 'N/A';
+    // 🔥 [수정] 텍스트를 명확하게 구분
     var statusMap = {
       'PENDING': { text: '승인 대기', class: 'status-PENDING' },
       'APPROVED': { text: '승인 완료', class: 'status-APPROVED' },
@@ -269,11 +302,11 @@
     $('itemIndexDisplay').textContent = data.itemIndex || data.item_index; // DTO 변경 반영
     $('requestQuantityDisplay').textContent = data.inboundRequestQuantity + ' 개';
     $('approvalStatusDisplay').innerHTML = getStatusBadge(data.approvalStatus);
-    $('plannedReceiveDateDisplay').textContent = data.plannedReceiveDate;
 
-    // 🔥 [수정] 요청 일시 (inboundRequestDate) 처리
+    // 🔥 [수정] 희망 입고일 (plannedReceiveDate) 처리: 날짜만 표시 (formatDateOnly 사용)
+    $('plannedReceiveDateDisplay').textContent = formatDateOnly(data.plannedReceiveDate);
+    // 🔥 [기존 유지] 요청 일시 (inboundRequestDate) 처리: 시간까지 표시 (formatLocalDateTime 사용)
     $('inboundRequestDateDisplay').textContent = formatLocalDateTime(data.inboundRequestDate);
-
     $('warehouseIndexDisplay').textContent = data.warehouseIndex || '미지정';
 
     // 구역 선택 드롭다운 업데이트
@@ -295,10 +328,9 @@
 
     if (data.approvalStatus !== 'PENDING') {
       $('adminActionSection').style.display = 'none';
-
-      // 🔥 [수정] 승인 일시 (approveDate) 처리
-      var approveDateDisplay = data.approveDate ? formatLocalDateTime(data.approveDate) : 'N/A';
-
+      // 🔥 [기존 유지] 승인 일시 (approveDate) 처리: 시간까지 표시 (formatLocalDateTime 사용)
+      var approveDateDisplay = data.approveDate ?
+              formatLocalDateTime(data.approveDate) : 'N/A';
       $('approveDateDisplay').textContent = approveDateDisplay;
       $('approveDateSection').style.display = 'block';
     } else {
@@ -317,7 +349,8 @@
       if (approvalStatus === 'PENDING') {
         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-info-circle text-info me-2"></i> 요청 승인 시 상세 처리 항목이 1개 생성됩니다.</td></tr>';
       } else {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-exclamation-triangle text-danger me-2"></i> 상세 내역이 존재하지 않습니다.(오류)</td></tr>';
+        // 🔥 [수정] 상세 내역이 없으면 (예: 취소, 거부) 이 메시지를 표시
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-exclamation-triangle text-danger me-2"></i> 상세 내역이 존재하지 않습니다.</td></tr>';
       }
       return;
     }
@@ -326,12 +359,14 @@
     var rows = details.map(function(detail) {
       var isProcessed = detail.receivedQuantity > 0; // receivedQuantity가 0보다 크면 처리 완료로 간주
 
-      // 🔥 [수정] 처리 일시 (completeDate) 처리
+      // 🔥 [기존 유지] 처리 일시 (completeDate) 처리: 시간까지 표시 (formatLocalDateTime 사용)
       var completeDateDisplay = detail.completeDate ? formatLocalDateTime(detail.completeDate) : '-';
 
       var sectionInput = '';
       var quantityInput = '';
       var actions = '';
+
+
 
       if (approvalStatus === 'APPROVED' &&
 
@@ -342,7 +377,9 @@
         sectionInput = '<span class="data-highlight">' + (detail.sectionIndex || '-') + '</span>';
 
         // 실제 입고 수량 필드
-        quantityInput = '<input type="number" class="form-control form-control-sm" id="qty-' + detail.detailIndex + '" value="' + (detail.receivedQuantity || 0) + '" min="0">';
+        quantityInput = '<input type="number" class="form-control form-control-sm" id="qty-' + detail.detailIndex +
+                '" value="' + (detail.receivedQuantity ||
+                        0) + '" min="0">';
 
         actions =
 
@@ -353,7 +390,7 @@
         quantityInput = '<span class="data-highlight">' + detail.receivedQuantity + ' 개</span>';
         actions = '<button class="btn btn-sm btn-secondary" disabled>처리 완료</button>';
       } else {
-        // PENDING 또는 CANCELED 상태
+        // PENDING 또는 CANCELED, REJECTED 상태
         sectionInput = '-';
         quantityInput = '-';
         actions = '<button class="btn btn-sm btn-secondary" disabled>대기/취소</button>';
@@ -366,6 +403,8 @@
               '<td>' + completeDateDisplay + '</td>' +
 
               '<td>' +
+
+
               actions + '</td>' +
               '</tr>';
     }).join('');
@@ -375,28 +414,25 @@
   // 🔥 상세 처리: sectionIndex를 Long 타입으로 변환하여 전송
   window.processDetail = function(detailIndex, inboundIndex) {
     var quantityElement = $('qty-' + detailIndex);
-
     // 입력값 유효성 검사
     var quantity = quantityElement ? quantityElement.value : null;
-
     if (quantity == "" || isNaN(Number(quantity)) || Number(quantity) <= 0) {
       return alert("올바른 입고 수량을 입력하세요.");
     }
 
     // currentRequestData에서 warehouseIndex와 sectionIndex를 가져와 설정
     if (!currentRequestData || !currentRequestData.warehouseIndex) {
-      return alert("오류: 창고 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
+      return alert(" 창고 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
     }
 
     // 현재 상세 내역에서 sectionIndex를 가져옴 (이미 DB에 저장되어 있음)
     var detailInfo = currentRequestData.details.find(d => d.detailIndex === detailIndex);
     if (!detailInfo || !detailInfo.sectionIndex) {
-      return alert("오류: 배정된 구역 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
+      return alert("배정된 구역 정보를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
     }
 
     var warehouseIndex = currentRequestData.warehouseIndex;
     var sectionIndex = detailInfo.sectionIndex;
-
     var detailData = {
       detailIndex: detailIndex,
       inboundIndex: inboundIndex,
@@ -405,7 +441,6 @@
       receivedQuantity: Number(quantity),
       warehouseIndex: warehouseIndex
     };
-
     var url = ctx + '/inbound/admin/detail/process';
     fetch(url, {
       method: 'PUT',
@@ -417,15 +452,19 @@
               return res.json().then(data => {
                 return Promise.reject(new
 
+
+
                 Error(data.message || '입고 처리 중 알 수 없는 오류 발생'));
               }).catch(() => {
                 return Promise.reject(new Error('HTTP ' + res.status + ' 오류'));
               });
             })
 
+
+
             .then(function(data) {
 
-              alert('입고 처리가 성공적으로 완료되었습니다. (재고 파트로 데이터 전달 완료)');
+              alert('입고 처리가 성공적으로 완료되었습니다.');
               loadInboundDetail(inboundIndex); // 리스트 새로고침
             })
             .catch(function(err) {
@@ -434,12 +473,11 @@
 
             });
   };
-
   // 🔥 요청 승인: cancelReason을 Long 타입에 맞게 처리하여 전송
   window.approveRequest = function() {
     var inboundIndex = currentRequestData.inboundIndex;
     if (!currentRequestData || !inboundIndex) {
-      return alert("오류: 요청 정보가 유효하지 않습니다.");
+      return alert("요청 정보가 유효하지 않습니다.");
     }
 
     // 구역 선택 값 가져오기 로직 복원
@@ -466,14 +504,18 @@
             .then(function(res) {
               if (res.ok) return res.json();
               return res.json().then(data => {
-                return Promise.reject(new Error(data.message
+                return Promise.reject(new
+
+                Error(data.message
 
 
                         || '승인 처리 중 알 수 없는 오류 발생'));
               }).catch(() => {
                 return Promise.reject(new Error('HTTP ' + res.status + ' 오류'));
+
               });
             })
+
 
 
             .then(function(data) {
@@ -482,15 +524,15 @@
             })
             .catch(function(err) {
               console.error('[approveRequest] error:', err);
+
               alert('요청 승인 중 오류 발생: ' + err.message);
 
             });
   };
-
   // 요청 취소 (취소 사유 입력)
   window.cancelRequest = function() {
     if (!currentRequestData || !currentRequestData.inboundIndex) {
-      return alert("오류: 요청 정보가 유효하지 않습니다.");
+      return alert("요청 정보가 유효하지 않습니다.");
     }
 
     var cancelReason = prompt("요청 취소를 진행합니다. 취소 사유를 입력해 주세요:");
@@ -515,6 +557,8 @@
             })
 
 
+
+
             .then(function(data) {
               alert('요청이 성공적으로 취소되었습니다.');
               loadInboundDetail(inboundIndex); // 리스트 새로고침
@@ -524,7 +568,6 @@
               alert('요청 취소 중 오류 발생: ' + err.message);
             });
   };
-
   // 데이터 로드
   function loadInboundDetail(inboundIndex) {
     var url = ctx + '/inbound/admin/request/' + inboundIndex;
@@ -542,6 +585,8 @@
               if (res.ok) return res.json();
               return
 
+
+
               Promise.reject(new Error('HTTP ' + res.status));
             })
             .then(function(data) {
@@ -549,6 +594,8 @@
               if (!data) throw new Error('EMPTY_DATA');
 
               displayRequestOverview(data);
+
+
 
               displayDetailList(data.details, data.approvalStatus);
 

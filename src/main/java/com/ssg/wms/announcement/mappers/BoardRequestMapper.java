@@ -1,10 +1,10 @@
 package com.ssg.wms.announcement.mappers;
 
-
 import com.ssg.wms.announcement.domain.BoardCommentDTO;
 import com.ssg.wms.announcement.domain.BoardRequestDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select; // [추가] 이 import 문이 필요합니다.
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
 @Mapper
 public interface BoardRequestMapper {
 
-    /** 게시글 목록 조회 */
+    /** 게시물 목록 조회 */
     List<BoardRequestDTO> selectBoards(Map<String, Object> params);
 
     /** 게시글 상세 조회 */

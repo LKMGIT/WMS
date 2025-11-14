@@ -466,4 +466,29 @@
         )
     </select>
 
+    <select id="selectTotalStockByLocation" resultType="java.lang.Integer">
+        SELECT
+        IFNULL(SUM(I.inven_quantity), 0)
+        FROM inventory AS I
+        JOIN warehouse AS W ON I.warehouse_index = W.warehouse_index
+        WHERE
+        I.item_index = #{item_index}
+        AND W.warehouse_location = #{location_name}
+        AND I.inven_quantity > 0
+    </select>
+
+    <select id="selectBestStockLocation" resultType="com.ssg.wms.inventory.domain.InvenDTO">
+        SELECT
+        I.inven_quantity AS invenQuantity,
+        I.warehouse_index AS warehouseIndex,
+        I.section_index AS sectionIndex
+        FROM inventory AS I
+        JOIN warehouse AS W ON I.warehouse_index = W.warehouse_index
+        WHERE
+        I.item_index = #{item_index}
+        AND W.warehouse_location = #{location_name}
+        AND I.inven_quantity >= #{quantity} ORDER BY
+        I.inven_quantity DESC LIMIT 1
+    </select>
+
 </mapper>

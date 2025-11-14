@@ -1,6 +1,5 @@
 package com.ssg.wms.announcement.service;
 
-
 import com.ssg.wms.announcement.domain.NoticeDTO;
 import com.ssg.wms.announcement.mappers.NoticeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +35,18 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public boolean updateNotice(NoticeDTO noticeDTO, Long adminId) {
+        // 공지사항 존재 여부 확인
         NoticeDTO existing = noticeMapper.selectNotice(noticeDTO.getNoticeIndex());
         if (existing == null) {
             return false;
         }
-
+        noticeDTO.setAdminIndex(adminId);
         return noticeMapper.updateNotice(noticeDTO) > 0;
     }
 
     @Override
     public boolean deleteNotice(Integer noticeIndex, Long adminId) {
+        // 공지사항 존재 여부 확인
         NoticeDTO existing = noticeMapper.selectNotice(noticeIndex);
         if (existing == null) {
             return false;

@@ -41,22 +41,38 @@ public class OutboundServiceImpl implements OutboundService {
             throw new OutboundValidationException("'" + zip_prefix + "' 우편번호는 배송 불가 지역입니다.");
         }
 
-        // 2. 재고 유효성 검사 ('지역' 재고 확인)
-        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
-                outboundRequestDTO.getUser_index(),
+//        // 2. 재고 유효성 검사 ('지역' 재고 확인)
+//        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
+//                outboundRequestDTO.getUser_index(),
+//                outboundRequestDTO.getItem_index(),
+//                requiredLocation
+//        );
+//
+//        // 재고가 없으면
+//        if (regionalStock == null) {
+//            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
+//        }
+//        // 재고가 부족하면
+//        if (regionalStock.getInvenQuantity() < outboundRequestDTO.getOr_quantity()) {
+//            String errorMsg = String.format(
+//                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
+//                    outboundRequestDTO.getOr_quantity(),
+//                    regionalStock.getInvenQuantity()
+//            );
+//            throw new OutboundValidationException(errorMsg);
+//        }
+
+        int totalStock = outboundMapper.selectTotalStockByLocation(
                 outboundRequestDTO.getItem_index(),
                 requiredLocation
         );
-        // 재고가 없으면
-        if (regionalStock == null) {
-            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
-        }
-        // 재고가 부족하면
-    if (regionalStock.getInvenQuantity() < outboundRequestDTO.getOr_quantity()) {
+
+// 재고가 부족하면
+        if (totalStock < outboundRequestDTO.getOr_quantity()) {
             String errorMsg = String.format(
-                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
+                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 총 재고: %d)",
                     outboundRequestDTO.getOr_quantity(),
-                    regionalStock.getInvenQuantity()
+                    totalStock
             );
             throw new OutboundValidationException(errorMsg);
         }
@@ -114,25 +130,41 @@ public class OutboundServiceImpl implements OutboundService {
             throw new OutboundValidationException("'" + zip_prefix + "' 우편번호는 배송 불가 지역입니다.");
         }
 
-        // 2. 재고 유효성 검사 ('지역' 재고 확인)
-        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
-                outboundRequestDTO.getUser_index(),
+//        // 2. 재고 유효성 검사 ('지역' 재고 확인)
+//        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
+//                outboundRequestDTO.getUser_index(),
+//                outboundRequestDTO.getItem_index(),
+//                requiredLocation
+//        );
+//        // 재고가 없으면
+//        if (regionalStock == null) {
+//            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
+//        }
+//        // 재고가 부족하면
+//        if (regionalStock.getInvenQuantity() < outboundRequestDTO.getOr_quantity()) {
+//            String errorMsg = String.format(
+//                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
+//                    outboundRequestDTO.getOr_quantity(),
+//                    regionalStock.getInvenQuantity()
+//            );
+//            throw new OutboundValidationException(errorMsg);
+//        }
+
+        int totalStock = outboundMapper.selectTotalStockByLocation(
                 outboundRequestDTO.getItem_index(),
                 requiredLocation
         );
-        // 재고가 없으면
-        if (regionalStock == null) {
-            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
-        }
-        // 재고가 부족하면
-        if (regionalStock.getInvenQuantity() < outboundRequestDTO.getOr_quantity()) {
+
+// 재고가 부족하면
+        if (totalStock < outboundRequestDTO.getOr_quantity()) {
             String errorMsg = String.format(
-                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
+                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 총 재고: %d)",
                     outboundRequestDTO.getOr_quantity(),
-                    regionalStock.getInvenQuantity()
+                    totalStock
             );
             throw new OutboundValidationException(errorMsg);
         }
+
         // 출고 요청 정보 수정 실행
         return outboundMapper.updateOutboundRequest(outboundRequestDTO) > 0;
     }
@@ -244,10 +276,16 @@ public class OutboundServiceImpl implements OutboundService {
         //  수취인 우편번호 -> 담당 창고 위치(소재지) 변환
         String zip_prefix = request.getOr_zip_code().substring(0, 2);
         String requiredLocation = getWarehouseLocationFromZip(zip_prefix);
-        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
-                request.getUser_index(),
+//        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
+//                request.getUser_index(),
+//                request.getItem_index(),
+//                requiredLocation
+//        );
+
+        InvenDTO regionalStock = outboundMapper.selectBestStockLocation(
                 request.getItem_index(),
-                requiredLocation
+                requiredLocation,
+                request.getOr_quantity() // 요청 수량을 파라미터로 전달
         );
         log.info(regionalStock);
         if (regionalStock == null || regionalStock.getWarehouseIndex() == null) {
@@ -368,12 +406,18 @@ public class OutboundServiceImpl implements OutboundService {
             DispatchDTO dispatch = outboundMapper.selectDispatch(outboundResponseRegisterDTO.getOr_index());
             String zip_prefix = request.getOr_zip_code().substring(0, 2);
             String requiredLocation = getWarehouseLocationFromZip(zip_prefix);
-            InvenDTO stockLocation = outboundMapper.selectStockByLocation(
-                    request.getUser_index(),
-                    request.getItem_index(),
-                    requiredLocation
-            );
+//            InvenDTO stockLocation = outboundMapper.selectStockByLocation(
+//                    request.getUser_index(),
+//                    request.getItem_index(),
+//                    requiredLocation
+//            );
 
+
+            InvenDTO stockLocation = outboundMapper.selectBestStockLocation(
+                    request.getItem_index(),
+                    requiredLocation,
+                    request.getOr_quantity()
+            );
             // 출고 지시서(ShippingInstruction) 자동 생성
             ShippingInstructionDTO si = ShippingInstructionDTO.builder()
                     .dispatch_index(dispatch.getDispatch_index())

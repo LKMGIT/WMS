@@ -246,7 +246,8 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to { transform: rotate(360deg);
+    }
   }
 
   /* 빈 상태 */
@@ -275,6 +276,7 @@
         <li class="separator"><i class="icon-arrow-right"></i></li>
         <li class="nav-item"><a href="<c:url value='/inbound/admin/list'/>">입고 요청 목록</a></li>
         <li class="separator"><i class="icon-arrow-right"></i></li>
+
         <li class="nav-item">통계</li>
       </ul>
     </div>
@@ -288,6 +290,7 @@
           <div class="summary-label">총 요청 건수</div>
         </div>
       </div>
+
       <div class="col-md-3 mb-3">
         <div class="summary-card pink">
           <i class="fas fa-boxes summary-icon"></i>
@@ -298,6 +301,7 @@
       <div class="col-md-3 mb-3">
         <div class="summary-card blue">
           <i class="fas fa-chart-pie summary-icon"></i>
+
           <div class="summary-value" id="summaryAverage">-</div>
           <div class="summary-label">평균 요청 수량</div>
         </div>
@@ -307,6 +311,7 @@
           <i class="fas fa-check-double summary-icon"></i>
           <div class="summary-value" id="summaryApproved">-</div>
           <div class="summary-label">승인률</div>
+
         </div>
       </div>
     </div>
@@ -319,28 +324,34 @@
             <h4 class="card-title">
               <i class="fas fa-calendar-week"></i> 기간별 현황
             </h4>
+
           </div>
           <div class="card-body">
             <form id="periodForm" class="stats-form">
               <div class="row g-3 align-items-center">
                 <div class="col-md-5">
-                  <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">
+                  <label class="form-label" style="font-weight: 600;
+                    font-size: 0.875rem;">
                     <i class="fas fa-calendar-alt" style="color: #667eea;"></i> 시작일
                   </label>
                   <input type="date" id="fromDate" class="form-control" required>
                 </div>
                 <div class="col-md-5">
-                  <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">
+
+                  <label class="form-label" style="font-weight: 600;
+                    font-size: 0.875rem;">
                     <i class="fas fa-calendar-check" style="color: #667eea;"></i> 종료일
                   </label>
                   <input type="date" id="toDate" class="form-control" required>
                 </div>
                 <div class="col-md-2">
+
                   <button type="submit" class="btn btn-stats w-100 mt-4">
                     <i class="fas fa-search"></i>
                   </button>
                 </div>
               </div>
+
             </form>
 
             <div class="table-responsive">
@@ -348,17 +359,19 @@
                 <thead>
                 <tr>
                   <th><i class="fas fa-calendar"></i> 날짜</th>
-                  <th><i class="fas fa-flag"></i> 상태</th>
+
                   <th><i class="fas fa-hashtag"></i> 건수</th>
                   <th><i class="fas fa-box"></i> 수량</th>
                 </tr>
                 </thead>
                 <tbody id="periodStatsBody">
+
                 <tr>
-                  <td colspan="4" class="loading-state">
+                  <td colspan="3" class="loading-state">
                     <div class="loading-spinner"></div>
                     <p class="mt-3">기간을 선택하고 조회하세요</p>
                   </td>
+
                 </tr>
                 </tbody>
               </table>
@@ -369,6 +382,7 @@
 
       <%-- 월별 현황 --%>
       <div class="col-md-6 mb-4">
+
         <div class="card stats-card slide-in-right">
           <div class="card-header">
             <h4 class="card-title">
@@ -377,25 +391,31 @@
           </div>
           <div class="card-body">
             <form id="monthForm" class="stats-form">
+
               <div class="row g-3 align-items-center">
                 <div class="col-md-4">
-                  <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">
+                  <label class="form-label" style="font-weight: 600;
+                    font-size: 0.875rem;">
                     <i class="fas fa-calendar" style="color: #667eea;"></i> 연도
                   </label>
                   <input type="number" id="year" class="form-control" min="2000" max="2099" required>
                 </div>
+
                 <div class="col-md-4">
-                  <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">
+                  <label class="form-label" style="font-weight: 600;
+                    font-size: 0.875rem;">
                     <i class="fas fa-calendar-day" style="color: #667eea;"></i> 월
                   </label>
                   <input type="number" id="month" class="form-control" min="1" max="12" required>
                 </div>
+
                 <div class="col-md-4">
                   <button type="submit" class="btn btn-stats w-100 mt-4">
                     <i class="fas fa-search"></i> 조회
                   </button>
                 </div>
               </div>
+
             </form>
 
             <div class="table-responsive">
@@ -403,17 +423,20 @@
                 <thead>
                 <tr>
                   <th><i class="fas fa-flag"></i> 상태</th>
+
                   <th><i class="fas fa-hashtag"></i> 건수</th>
                   <th><i class="fas fa-box"></i> 수량</th>
                 </tr>
                 </thead>
                 <tbody id="monthStatsBody">
                 <tr>
+
                   <td colspan="3" class="loading-state">
                     <div class="loading-spinner"></div>
                     <p class="mt-3">연도와 월을 선택하고 조회하세요</p>
                   </td>
                 </tr>
+
                 </tbody>
               </table>
             </div>
@@ -434,12 +457,57 @@
     var ctx = '${pageContext.request.contextPath}';
     var $ = function(id) { return document.getElementById(id); };
     var safeHtml = function(s) {
-      var str = (s != null && s != undefined) ? String(s) : '';
+      var str = (s != null && s != undefined) ?
+              String(s) : '';
       return str.replace(/[&<>"']/g, function(m) {
         var map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
         return map[m];
       });
     };
+
+    // 날짜 배열을 'YYYY.MM.DD' 형식으로 포맷팅하는 함수
+    function formatDateForTable(dateTimeArray) {
+      if (!Array.isArray(dateTimeArray) || dateTimeArray.length < 3) {
+        return '-';
+      }
+      var pad = function(n) { return String(n).padStart(2, '0'); };
+      // [년, 월, 일]을 'YYYY.MM.DD' 형식으로 조합 (마침표 사용)
+      return dateTimeArray[0] + '.' + pad(dateTimeArray[1]) + '.' + pad(dateTimeArray[2]);
+    }
+
+    // 🔥 [신규] 기간별 데이터를 날짜별로 합산하는 함수
+    function aggregatePeriodData(list) {
+      if (!list || list.length === 0) return [];
+
+      var aggregatedMap = new Map();
+
+      list.forEach(function(item) {
+        var dateArray = item.inboundRequestDate || item.inbound_request_date;
+
+        // 날짜 배열을 'YYYY.MM.DD' 형식의 키로 변환 (formatDateForTable 함수 재사용)
+        var dateKey = formatDateForTable(dateArray);
+
+        var count = parseInt(item.detailCount || item.detail_count || 0);
+        var qty = parseInt(item.totalReceivedQuantity || item.total_received_quantity || 0);
+
+        if (aggregatedMap.has(dateKey)) {
+          // 이미 키가 존재하면 건수와 수량 합산
+          var existing = aggregatedMap.get(dateKey);
+          existing.count += count;
+          existing.qty += qty;
+        } else {
+          // 새 키를 생성
+          aggregatedMap.set(dateKey, {
+            date: dateKey,
+            count: count,
+            qty: qty
+          });
+        }
+      });
+
+      // Map의 값(Value)만 추출하여 배열로 반환
+      return Array.from(aggregatedMap.values());
+    }
 
     // 상태 배지
     function getStatusBadge(status) {
@@ -470,7 +538,8 @@
         }
       });
       var avgQty = totalCount > 0 ? Math.round(totalQty / totalCount) : 0;
-      var approvalRate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
+      var approvalRate = totalCount > 0 ?
+              Math.round((approvedCount / totalCount) * 100) : 0;
 
       $('summaryTotal').textContent = totalCount.toLocaleString();
       $('summaryQuantity').textContent = totalQty.toLocaleString();
@@ -489,10 +558,8 @@
         year: $('year').value,
         month: $('month').value
       });
-
-      tbodyPeriod.innerHTML = '<tr><td colspan="4" class="loading-state"><div class="loading-spinner"></div><p class="mt-3">데이터를 불러오는 중...</p></td></tr>';
+      tbodyPeriod.innerHTML = '<tr><td colspan="3" class="loading-state"><div class="loading-spinner"></div><p class="mt-3">데이터를 불러오는 중...</p></td></tr>';
       tbodyMonth.innerHTML = '<tr><td colspan="3" class="loading-state"><div class="loading-spinner"></div><p class="mt-3">데이터를 불러오는 중...</p></td></tr>';
-
       var url = ctx + '/inbound/admin/stats/data?' + params.toString();
 
       fetch(url, {
@@ -502,24 +569,36 @@
       })
               .then(function(res) {
                 if (res.ok) return res.json();
-                return Promise.reject(new Error('HTTP ' + res.status));
+                return Promise.reject(new Error('HTTP ' +
+                        res.status));
               })
               .then(function(data) {
-                displayStatsTable(tbodyPeriod, data.periodList, ['date', 'status', 'count', 'qty']);
-                displayStatsTable(tbodyMonth, data.monthList, ['status', 'count', 'qty']);
-                updateSummary(data.periodList, data.monthList);
+                // 🔥 [수정] 원본 데이터를 저장
+                var periodData = data.periodList || [];
+                var monthData = data.monthList || [];
+
+                // 🔥 [신규] 기간별 데이터는 날짜별로 합산하여 렌더링
+                var aggregatedPeriodData = aggregatePeriodData(periodData);
+
+                // 🔥 [수정] 집계된 데이터를 테이블에 렌더링
+                displayStatsTable(tbodyPeriod, aggregatedPeriodData, ['date', 'count', 'qty'], 3);
+                displayStatsTable(tbodyMonth, monthData, ['status', 'count', 'qty'], 3);
+
+                // 요약 카드는 전체 원본 데이터로 업데이트
+                updateSummary(periodData, monthData);
+
               })
               .catch(function(err) {
                 console.error('[loadStats] error:', err);
-                tbodyPeriod.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fas fa-exclamation-circle"></i><p>데이터를 불러올 수 없습니다</p></td></tr>';
+                tbodyPeriod.innerHTML = '<tr><td colspan="3" class="empty-state"><i class="fas fa-exclamation-circle"></i><p>데이터를 불러올 수 없습니다</p></td></tr>';
                 tbodyMonth.innerHTML = '<tr><td colspan="3" class="empty-state"><i class="fas fa-exclamation-circle"></i><p>데이터를 불러올 수 없습니다</p></td></tr>';
               });
     }
 
     // 통계 테이블 렌더링
-    function displayStatsTable(tbody, list, columns) {
+    function displayStatsTable(tbody, list, columns, colspan) {
       if (!Array.isArray(list) || list.length == 0) {
-        tbody.innerHTML = '<tr><td colspan="' + columns.length + '" class="empty-state"><i class="fas fa-inbox"></i><p>데이터가 없습니다</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="' + colspan + '" class="empty-state"><i class="fas fa-inbox"></i><p>데이터가 없습니다</p></td></tr>';
         return;
       }
 
@@ -527,19 +606,29 @@
         var html = '<tr>';
 
         if (columns.indexOf('date') >= 0) {
-          html += '<td><strong>' + safeHtml(stat.inboundRequestDate || stat.inbound_request_date || '-') + '</strong></td>';
+          // 날짜 포맷팅 함수 사용 (기간별 현황)
+          // 🔥 [수정] aggregatePeriodData에서 이미 포맷된 date 속성을 사용
+          var dateDisplay = stat.date || '-';
+          html += '<td><strong>' + dateDisplay + '</strong></td>';
         }
-        if (columns.indexOf('status') >= 0) {
+
+        if (columns.indexOf('status') >= 0) { // 월별 현황
           html += '<td>' + getStatusBadge(stat.approvalStatus || stat.approval_status) + '</td>';
         }
+
         if (columns.indexOf('count') >= 0) {
-          html += '<td><span class="data-highlight">' + safeHtml(stat.detailCount || stat.detail_count || 0) + ' 건</span></td>';
+          // 🔥 [수정] aggregatePeriodData의 결과는 'count' 속성을 가짐
+          var count = stat.count !== undefined ? stat.count : (stat.detailCount || stat.detail_count || 0);
+          html += '<td><span class="data-highlight">' + safeHtml(count) + ' 건</span></td>';
         }
         if (columns.indexOf('qty') >= 0) {
-          html += '<td><span class="data-highlight">' + safeHtml(stat.totalReceivedQuantity || stat.total_received_quantity || 0) + ' 개</span></td>';
+          // 🔥 [수정] aggregatePeriodData의 결과는 'qty' 속성을 가짐
+          var qty = stat.qty !== undefined ? stat.qty : (stat.totalReceivedQuantity || stat.total_received_quantity || 0);
+          html += '<td><span class="data-highlight">' + safeHtml(qty) + ' 개</span></td>';
         }
 
         html += '</tr>';
+
         return html;
       }).join('');
 
@@ -549,15 +638,16 @@
     // 이벤트 리스너
     document.addEventListener('DOMContentLoaded', function () {
       var now = new Date();
-      var today = now.toISOString().split('T')[0];
+      var today = now.toISOString().split('T')[0]; // YYYY-MM-DD
       var weekAgoDate = new Date(now);
       weekAgoDate.setDate(weekAgoDate.getDate() - 7);
-      var weekAgo = weekAgoDate.toISOString().split('T')[0];
+      var weekAgo = weekAgoDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
       $('fromDate').value = weekAgo;
       $('toDate').value = today;
       $('year').value = new Date().getFullYear();
       $('month').value = new Date().getMonth() + 1;
+
 
       $('periodForm').addEventListener('submit', function(e) {
         e.preventDefault();

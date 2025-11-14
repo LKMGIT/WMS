@@ -115,4 +115,9 @@ public interface OutboundMapper {
             @Param("current_index") Long current_index
     );
 
+    // 2개의 새 메소드 추가
+    Integer selectTotalStockByLocation(@Param("item_index") Long item_index, @Param("location_name") String location_name);
+
+    InvenDTO selectBestStockLocation(@Param("item_index") Long item_index, @Param("location_name") String location_name, @Param("quantity") int quantity);
+
 }

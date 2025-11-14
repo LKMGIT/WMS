@@ -102,6 +102,7 @@ public class InboundServiceImpl implements InboundService {
             throw new RuntimeException("입고 처리(수정) 실패: " + detailDTO.getDetailIndex());
         }
 
+        //23123
 
         // 재고 파트로 데이터 반영
         invenService.applyInbound(detailDTO);

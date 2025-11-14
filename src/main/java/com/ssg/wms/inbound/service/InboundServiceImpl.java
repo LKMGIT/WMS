@@ -47,9 +47,7 @@ public class InboundServiceImpl implements InboundService {
         }
     }
 
-    /**
-     * 입고 요청 승인: 구역 배정 및 단일 상세 내역 생성
-     */
+    /** 입고 요청 승인: 구역 배정 및 단일 상세 내역 생성  */
     @Transactional
     @Override
     public void approveRequest(InboundRequestDTO requestDTO) throws Exception {
@@ -84,9 +82,7 @@ public class InboundServiceImpl implements InboundService {
         inboundMapper.insertInboundDetail(detailDTO); // 단 1회 삽입
     }
 
-    /**
-     * 입고 상세 내역 수정: 재고 반영 로직 활성화 (용량 체크 제거)
-     */
+    /** 입고 상세 내역 수정: 재고 반영 로직 활성화 (용량 체크 제거) */
     @Transactional
     @Override
     public void processInboundDetail(InboundDetailDTO detailDTO) throws Exception {
@@ -102,7 +98,6 @@ public class InboundServiceImpl implements InboundService {
             throw new RuntimeException("입고 처리(수정) 실패: " + detailDTO.getDetailIndex());
         }
 
-        //23123
 
         // 재고 파트로 데이터 반영
 //        invenService.applyInbound(detailDTO);

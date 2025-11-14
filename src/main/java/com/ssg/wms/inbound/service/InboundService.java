@@ -16,14 +16,10 @@ public interface InboundService {
     // ===== 입고 상태(Status) 변경 =====
     void cancelRequest(InboundRequestDTO requestDTO);
 
-    /**
-     * 구역 정보만 받아서 승인 처리
-     */
+    /** 구역 정보만 받아서 승인 처리 */
     void approveRequest(InboundRequestDTO requestDTO) throws Exception;
 
-    /**
-     * 수정
-     */
+    /** 수정 */
     void processInboundDetail(InboundDetailDTO detailDTO) throws Exception;
 
     // ===== 통계 현황 =====

@@ -10,9 +10,8 @@ import lombok.NoArgsConstructor;
  * 공지사항 DTO
  */
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+
 public class NoticeDTO {
 
     private Integer noticeIndex;                // 공지 번호 (PK)

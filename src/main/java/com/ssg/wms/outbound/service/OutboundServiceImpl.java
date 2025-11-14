@@ -2,6 +2,8 @@ package com.ssg.wms.outbound.service;
 
 import com.ssg.wms.global.Enum.EnumStatus;
 import com.ssg.wms.global.domain.Criteria;
+import com.ssg.wms.inventory.domain.InvenDTO;
+import com.ssg.wms.inventory.service.InvenService;
 import com.ssg.wms.outbound.domain.*;
 import com.ssg.wms.outbound.exception.OutboundValidationException;
 import com.ssg.wms.outbound.mappers.OutboundMapper;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -23,56 +26,65 @@ import java.util.stream.Collectors;
 public class OutboundServiceImpl implements OutboundService {
 
     private final OutboundMapper outboundMapper;
+    private final InvenService invenService;
     private static final int VEHICLE_VOLUME_THRESHOLD = 75;
-
-    // 운송장 등록되면 출고 요청 수정/삭제 못하게 예외 던짐
-    private void validateWaybillNotExists(Long or_index) throws OutboundValidationException {
-        int count = outboundMapper.checkWaybillExistsByOrIndex(or_index);
-        if (count > 0) {
-            throw new OutboundValidationException("이미 운송장이 등록된 요청은 수정/삭제할 수 없습니다.");
-        }
-    }
 
     // 출고 요청 등록 (재고 유효성 검사 포함)
     @Override
     @Transactional
-    public boolean registerOutboundRequest(OutboundRequestDTO requestDTO) throws OutboundValidationException {
+    public boolean registerOutboundRequest(OutboundRequestDTO outboundRequestDTO) throws OutboundValidationException {
 
         //  수취인 우편번호 -> 담당 창고 위치(소재지) 변환
-        String zip_prefix = requestDTO.getOr_zip_code().substring(0, 2);
+        String zip_prefix = outboundRequestDTO.getOr_zip_code().substring(0, 2);
         String requiredLocation = getWarehouseLocationFromZip(zip_prefix);
         if (requiredLocation == null) {
             throw new OutboundValidationException("'" + zip_prefix + "' 우편번호는 배송 불가 지역입니다.");
         }
 
-        // 2. 재고 유효성 검사 ('지역' 재고 확인)
-        TestInvenDTO regionalStock = outboundMapper.selectStockByLocation(
-                requestDTO.getUser_index(),
-                requestDTO.getItem_index(),
+//        // 2. 재고 유효성 검사 ('지역' 재고 확인)
+//        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
+//                outboundRequestDTO.getUser_index(),
+//                outboundRequestDTO.getItem_index(),
+//                requiredLocation
+//        );
+//
+//        // 재고가 없으면
+//        if (regionalStock == null) {
+//            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
+//        }
+//        // 재고가 부족하면
+//        if (regionalStock.getInvenQuantity() < outboundRequestDTO.getOr_quantity()) {
+//            String errorMsg = String.format(
+//                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
+//                    outboundRequestDTO.getOr_quantity(),
+//                    regionalStock.getInvenQuantity()
+//            );
+//            throw new OutboundValidationException(errorMsg);
+//        }
+
+        int totalStock = outboundMapper.selectTotalStockByLocation(
+                outboundRequestDTO.getItem_index(),
                 requiredLocation
         );
-        // 재고가 없으면
-        if (regionalStock == null) {
-            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
-        }
-        // 재고가 부족하면
-        if (regionalStock.getInven_quantity() < requestDTO.getOr_quantity()) {
+
+// 재고가 부족하면
+        if (totalStock < outboundRequestDTO.getOr_quantity()) {
             String errorMsg = String.format(
-                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
-                    requestDTO.getOr_quantity(),
-                    regionalStock.getInven_quantity()
+                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 총 재고: %d)",
+                    outboundRequestDTO.getOr_quantity(),
+                    totalStock
             );
             throw new OutboundValidationException(errorMsg);
         }
         // 문제 없으면 출고 요청 등록
-        return outboundMapper.insertOutboundRequest(requestDTO) > 0;
+        return outboundMapper.insertOutboundRequest(outboundRequestDTO) > 0;
     }
 
     // 수취인의 우편번호 앞 2자리를 받아, 담당 창고 위치를 반환
     private String getWarehouseLocationFromZip(String zip_prefix) {
         int zip = Integer.parseInt(zip_prefix);
         if (zip >= 1 && zip <= 9) {
-            return "서울";
+            return "서울특별시";
         } else if (zip >= 10 && zip <= 18) {
             // return "경기";
             return "수도권"; //테스트 위해서
@@ -85,8 +97,8 @@ public class OutboundServiceImpl implements OutboundService {
 
     @Override
     @Transactional
-    public boolean modifyOutboundRequest(OutboundRequestDTO requestDTO) {
-        OutboundRequestDTO originalRequest = outboundMapper.selectOutboundRequest(requestDTO.getOr_index());
+    public boolean modifyOutboundRequest(OutboundRequestDTO outboundRequestDTO) {
+        OutboundRequestDTO originalRequest = outboundMapper.selectOutboundRequest(outboundRequestDTO.getOr_index());
         // 배차가 승인되어 있으면
         if (originalRequest.getOr_dispatch_status() == EnumStatus.APPROVED) {
             // 배차 정보 조회
@@ -106,39 +118,55 @@ public class OutboundServiceImpl implements OutboundService {
             outboundMapper.deleteDispatch(dispatch.getDispatch_index());
 
             // DTO의 배차/승인 상태를 'PENDING'으로 리셋
-            requestDTO.setOr_dispatch_status(EnumStatus.PENDING);
-            requestDTO.setOr_approval(EnumStatus.PENDING);
-            requestDTO.setResponded_at(null);
-            requestDTO.setReject_detail(null);
+            outboundRequestDTO.setOr_dispatch_status(EnumStatus.PENDING);
+            outboundRequestDTO.setOr_approval(EnumStatus.PENDING);
+            outboundRequestDTO.setResponded_at(null);
+            outboundRequestDTO.setReject_detail(null);
         }
         //  수취인 우편번호 -> 담당 창고 위치(소재지) 변환
-        String zip_prefix = requestDTO.getOr_zip_code().substring(0, 2);
+        String zip_prefix = outboundRequestDTO.getOr_zip_code().substring(0, 2);
         String requiredLocation = getWarehouseLocationFromZip(zip_prefix);
         if (requiredLocation == null) {
             throw new OutboundValidationException("'" + zip_prefix + "' 우편번호는 배송 불가 지역입니다.");
         }
 
-        // 2. 재고 유효성 검사 ('지역' 재고 확인)
-        TestInvenDTO regionalStock = outboundMapper.selectStockByLocation(
-                requestDTO.getUser_index(),
-                requestDTO.getItem_index(),
+//        // 2. 재고 유효성 검사 ('지역' 재고 확인)
+//        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
+//                outboundRequestDTO.getUser_index(),
+//                outboundRequestDTO.getItem_index(),
+//                requiredLocation
+//        );
+//        // 재고가 없으면
+//        if (regionalStock == null) {
+//            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
+//        }
+//        // 재고가 부족하면
+//        if (regionalStock.getInvenQuantity() < outboundRequestDTO.getOr_quantity()) {
+//            String errorMsg = String.format(
+//                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
+//                    outboundRequestDTO.getOr_quantity(),
+//                    regionalStock.getInvenQuantity()
+//            );
+//            throw new OutboundValidationException(errorMsg);
+//        }
+
+        int totalStock = outboundMapper.selectTotalStockByLocation(
+                outboundRequestDTO.getItem_index(),
                 requiredLocation
         );
-        // 재고가 없으면
-        if (regionalStock == null) {
-            throw new OutboundValidationException("담당 창고('" + requiredLocation + "')에 해당 아이템의 재고가 없습니다.");
-        }
-        // 재고가 부족하면
-        if (regionalStock.getInven_quantity() < requestDTO.getOr_quantity()) {
+
+// 재고가 부족하면
+        if (totalStock < outboundRequestDTO.getOr_quantity()) {
             String errorMsg = String.format(
-                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 재고: %d)",
-                    requestDTO.getOr_quantity(),
-                    regionalStock.getInven_quantity()
+                    "재고가 부족합니다. (요청 수량: %d, 현재 '" + requiredLocation + "' 창고 총 재고: %d)",
+                    outboundRequestDTO.getOr_quantity(),
+                    totalStock
             );
             throw new OutboundValidationException(errorMsg);
         }
+
         // 출고 요청 정보 수정 실행
-        return outboundMapper.updateOutboundRequest(requestDTO) > 0;
+        return outboundMapper.updateOutboundRequest(outboundRequestDTO) > 0;
     }
 
     @Override
@@ -177,11 +205,13 @@ public class OutboundServiceImpl implements OutboundService {
         OutboundRequestDTO request = outboundMapper.selectOutboundRequest(or_index);
         Long previous = getORPreviousPostIndex(outboundSearchDTO, or_index);
         Long next = getORNextPostIndex(outboundSearchDTO, or_index);
+        String item_name = outboundMapper.selectItemName(request.getItem_index());
 
         return OutboundRequestDetailDTO.builder()
                 .or_index(or_index)
                 .user_index(request.getUser_index())
                 .item_index(request.getItem_index())
+                .item_name(item_name)
                 .or_quantity(request.getOr_quantity())
                 .or_name(request.getOr_name())
                 .or_phone(request.getOr_phone())
@@ -246,12 +276,22 @@ public class OutboundServiceImpl implements OutboundService {
         //  수취인 우편번호 -> 담당 창고 위치(소재지) 변환
         String zip_prefix = request.getOr_zip_code().substring(0, 2);
         String requiredLocation = getWarehouseLocationFromZip(zip_prefix);
-        TestInvenDTO regionalStock = outboundMapper.selectStockByLocation(
-                request.getUser_index(),
+//        InvenDTO regionalStock = outboundMapper.selectStockByLocation(
+//                request.getUser_index(),
+//                request.getItem_index(),
+//                requiredLocation
+//        );
+
+        InvenDTO regionalStock = outboundMapper.selectBestStockLocation(
                 request.getItem_index(),
-                requiredLocation
+                requiredLocation,
+                request.getOr_quantity() // 요청 수량을 파라미터로 전달
         );
-        Long warehouse_index = regionalStock.getWarehouse_index();
+        log.info(regionalStock);
+        if (regionalStock == null || regionalStock.getWarehouseIndex() == null) {
+            throw new OutboundValidationException("해당 지역(" + requiredLocation + ")에 출고 가능한 유효 재고 위치를 찾을 수 없습니다. (재고 부족/소유권/입고상태 문제)");
+        }
+        Long warehouse_index = regionalStock.getWarehouseIndex();
 
         // 출발지/도착지 확정
         String warehouse_address = outboundMapper.selectWarehouseAddress(warehouse_index);
@@ -266,7 +306,8 @@ public class OutboundServiceImpl implements OutboundService {
         } else {
             // 출고 요청의 배차 상태(or_dispatch_status) 'APPROVED'로 변경
             request.setOr_dispatch_status(EnumStatus.APPROVED);
-            outboundMapper.updateOutboundRequest(request);
+            request.setResponded_at(LocalDateTime.now());
+            outboundMapper.updateOutboundResponse(request);
             return true;
         }
     }
@@ -280,7 +321,17 @@ public class OutboundServiceImpl implements OutboundService {
             throw new OutboundValidationException("이미 출고 승인된 배차는 취소할 수 없습니다.");
         }
 
-        return outboundMapper.updateDispatch(dispatchDTO) > 0;
+        boolean result = outboundMapper.updateDispatch(dispatchDTO) > 0;
+
+        if (!result) {
+            return false;
+        } else {
+            // 출고 요청의 배차 상태(or_dispatch_status) 'APPROVED'로 변경
+            request.setOr_dispatch_status(EnumStatus.APPROVED);
+            request.setResponded_at(LocalDateTime.now());
+            outboundMapper.updateOutboundResponse(request);
+            return true;
+        }
     }
 
     // 배차 취소
@@ -299,7 +350,7 @@ public class OutboundServiceImpl implements OutboundService {
             return false;
         } else {
             request.setOr_dispatch_status(EnumStatus.PENDING);
-            outboundMapper.updateOutboundRequest(request);
+            outboundMapper.updateOutboundResponse(request);
             return true;
         }
     }
@@ -355,21 +406,42 @@ public class OutboundServiceImpl implements OutboundService {
             DispatchDTO dispatch = outboundMapper.selectDispatch(outboundResponseRegisterDTO.getOr_index());
             String zip_prefix = request.getOr_zip_code().substring(0, 2);
             String requiredLocation = getWarehouseLocationFromZip(zip_prefix);
-            TestInvenDTO stockLocation = outboundMapper.selectStockByLocation(
-                    request.getUser_index(),
-                    request.getItem_index(),
-                    requiredLocation
-            );
+//            InvenDTO stockLocation = outboundMapper.selectStockByLocation(
+//                    request.getUser_index(),
+//                    request.getItem_index(),
+//                    requiredLocation
+//            );
 
+
+            InvenDTO stockLocation = outboundMapper.selectBestStockLocation(
+                    request.getItem_index(),
+                    requiredLocation,
+                    request.getOr_quantity()
+            );
             // 출고 지시서(ShippingInstruction) 자동 생성
-            ShippingInstructionDTO siDTO = ShippingInstructionDTO.builder()
+            ShippingInstructionDTO si = ShippingInstructionDTO.builder()
                     .dispatch_index(dispatch.getDispatch_index())
                     .admin_index(outboundResponseRegisterDTO.getAdmin_index()) // 승인한 관리자
-                    .warehouse_index(stockLocation.getWarehouse_index())
-                    .section_index(stockLocation.getSection_index())
+                    .warehouse_index(stockLocation.getWarehouseIndex())
+                    .section_index(stockLocation.getSectionIndex())
                     .build();
 
-            outboundMapper.insertShippingInstruction(siDTO);
+            outboundMapper.insertShippingInstruction(si);
+
+            ShippingInstructionDetailDTO sidDTO = ShippingInstructionDetailDTO.builder()
+                    .si_index(si.getSi_index())
+                    .or_index(dispatch.getOr_index())
+                    .warehouse_index(si.getWarehouse_index())
+                    .section_index(si.getSection_index())
+                    .item_index(request.getItem_index())
+                    .user_index(request.getUser_index())
+                    .item_name(outboundMapper.selectItemName(request.getItem_index()))
+                    .or_quantity(request.getOr_quantity())
+                    .si_waybill_status(si.getSi_waybill_status())
+                    .approved_at(si.getApproved_at())
+                    .build();
+
+            invenService.applyOutbound(sidDTO);
         }
         return result;
     }
@@ -394,8 +466,23 @@ public class OutboundServiceImpl implements OutboundService {
     // 출고 지시서 리스트 (페이징 + 검색)
     @Override
     @Transactional
-    public List<ShippingInstructionDTO> getShippingInstructionList(Criteria criteria, OutboundSearchDTO outboundSearchDTO) {
-        return outboundMapper.selectShippingInstructionList(criteria, outboundSearchDTO);
+    public List<ShippingInstructionDetailDTO> getShippingInstructionList(Criteria criteria, OutboundSearchDTO outboundSearchDTO) {
+        List<ShippingInstructionDetailDTO> shippingInstructionDetailDTOList = outboundMapper.selectShippingInstructionList(criteria, outboundSearchDTO).stream().map(shippingInstructionDTO -> {
+            DispatchDTO dispatchDTO = outboundMapper.selectDispatchByIndex(shippingInstructionDTO.getDispatch_index());
+            OutboundRequestDTO outboundRequestDTO = outboundMapper.selectOutboundRequest(dispatchDTO.getOr_index());
+            return ShippingInstructionDetailDTO.builder()
+                    .si_index(shippingInstructionDTO.getSi_index())
+                    .warehouse_index(shippingInstructionDTO.getWarehouse_index())
+                    .section_index(shippingInstructionDTO.getSection_index())
+                    .item_index(outboundRequestDTO.getItem_index())
+                    .item_name(outboundMapper.selectItemName(outboundRequestDTO.getItem_index()))
+                    .user_index(outboundRequestDTO.getUser_index())
+                    .or_quantity(outboundRequestDTO.getOr_quantity())
+                    .si_waybill_status(shippingInstructionDTO.getSi_waybill_status())
+                    .approved_at(shippingInstructionDTO.getApproved_at())
+                    .build();
+        }).collect(Collectors.toList());
+        return shippingInstructionDetailDTOList;
     }
 
     // 출고 지시서 검색된 총 개수
@@ -437,27 +524,27 @@ public class OutboundServiceImpl implements OutboundService {
                 .build();
     }
 
-    @Override
-    @Transactional
-    public boolean removeShippingInstruction(Long si_index) {
-        ShippingInstructionDTO si = outboundMapper.selectShippingInstruction(si_index);
-        if(si.getSi_waybill_status() == EnumStatus.APPROVED) {
-            throw new OutboundValidationException("이미 운송장이 등록된 요청은 삭제할 수 없습니다.");
-        }
-        // 먼저 배차 정보 가져오고 출고지시서 지우기
-        DispatchDTO dispatch = outboundMapper.selectDispatch(si_index);
-        boolean result = outboundMapper.deleteShippingInstruction(si_index) > 0;
-
-        if(result) {
-            //출고요청 정보 가져오고 출고 요청 승인 상태 변경
-            OutboundRequestDTO request = outboundMapper.selectOutboundRequest(dispatch.getOr_index());
-            request.setOr_approval(EnumStatus.PENDING);
-            request.setOr_dispatch_status(EnumStatus.PENDING);
-            removeDispatch(dispatch.getDispatch_index());
-            outboundMapper.updateOutboundRequest(request);
-        }
-        return result;
-    }
+//    @Override
+//    @Transactional
+//    public boolean removeShippingInstruction(Long si_index) {
+//        ShippingInstructionDTO si = outboundMapper.selectShippingInstruction(si_index);
+//        if(si.getSi_waybill_status() == EnumStatus.APPROVED) {
+//            throw new OutboundValidationException("이미 운송장이 등록된 요청은 삭제할 수 없습니다.");
+//        }
+//        // 먼저 배차 정보 가져오고 출고지시서 지우기
+//        DispatchDTO dispatch = outboundMapper.selectDispatch(si_index);
+//        boolean result = outboundMapper.deleteShippingInstruction(si_index) > 0;
+//
+//        if(result) {
+//            //출고요청 정보 가져오고 출고 요청 승인 상태 변경
+//            OutboundRequestDTO request = outboundMapper.selectOutboundRequest(dispatch.getOr_index());
+//            request.setOr_approval(EnumStatus.PENDING);
+//            request.setOr_dispatch_status(EnumStatus.PENDING);
+//            removeDispatch(dispatch.getDispatch_index());
+//            outboundMapper.updateOutboundRequest(request);
+//        }
+//        return result;
+//    }
 
 
     // 운송장 등록 (운송장 번호 생성 및 트랜잭션)

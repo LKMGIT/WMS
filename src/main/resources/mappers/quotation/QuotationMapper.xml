@@ -25,11 +25,11 @@
             <!--            조건별 키워드 검색 조건-->
             <if test="search.keyword != null and search.keyword != ''">
                 <choose>
-                    <when test="search.type == 'QU'.toString()">
+                    <when test="search.type == 'U'.toString()">
                         AND user_index = #{search.keyword}
                     </when>
-                    <when test="search.type == 'QN'.toString()">
-                        AND user_name = #{search.keyword}
+                    <when test="search.type == 'W'.toString()">
+                        AND qrequest_name = #{search.keyword}
                     </when>
                 </choose>
             </if>

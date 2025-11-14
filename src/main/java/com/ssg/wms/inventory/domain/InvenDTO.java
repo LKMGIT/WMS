@@ -6,7 +6,7 @@ import lombok.Data;
 public class InvenDTO {
 
     private Long invenIndex;
-    private Long invenQuantity;
+    private int invenQuantity;
     private java.time.LocalDateTime inboundDate;
     private java.time.LocalDateTime shippingDate;
     private Long sectionIndex;

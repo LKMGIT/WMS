@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssg.wms.dashboard.mappers.DashboardMapper">
+
+    <!-- 총 회원 수 -->
+    <select id="countUsersTotal" resultType="long">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <!-- 특정 '일' 가입 수 -->
+    <select id="countUsersOnDate" parameterType="string" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE DATE(user_createdAt) = #{day}
+    </select>
+
+    <!-- 특정 '일' 입고 건수 -->
+    <select id="countInboundOnDate" parameterType="string" resultType="long">
+        SELECT COUNT(*)
+        FROM inbound_detail
+        WHERE complete_date IS NOT NULL
+        AND DATE(complete_date) = #{day}
+    </select>
+
+    <!-- 특정 '일' 출고 건수 -->
+    <select id="countOutboundOnDate" parameterType="string" resultType="long">
+        SELECT COUNT(*)
+        FROM Waybill
+        WHERE completed_at IS NOT NULL
+        AND DATE(completed_at) = #{day}
+        <!-- 필요 시 상태 조건 -->
+        <!-- AND waybill_status = 'DELIVERED' -->
+    </select>
+
+    <!-- 월간 가입 카운트: [start, end)  ★ 여기서 <, > 를 CDATA로 -->
+    <select id="countUsersBetween" parameterType="map" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE user_createdAt <![CDATA[ >= ]]> #{start}
+        AND user_createdAt <![CDATA[ < ]]>  #{end}
+    </select>
+
+    <!-- 월별 입고 집계: 최근 12개월 (ym, cnt)  ★ 비교연산 모두 CDATA -->
+    <select id="selectInboundMonthly" parameterType="map" resultType="map">
+        SELECT
+        DATE_FORMAT(complete_date, '%Y-%m') AS ym,
+        COUNT(*) AS cnt
+        FROM inbound_detail
+        WHERE complete_date IS NOT NULL
+        AND complete_date <![CDATA[ >= ]]> #{start}
+        AND complete_date <![CDATA[ < ]]>  #{end}
+        GROUP BY DATE_FORMAT(complete_date, '%Y-%m')
+        ORDER BY ym
+    </select>
+
+    <select id="countInboundBetween" parameterType="map" resultType="long">
+        SELECT COUNT(*)  <!-- 수량 합계를 보고 싶다면 SUM(received_quantity) -->
+        FROM inbound_detail
+        WHERE complete_date IS NOT NULL
+        AND complete_date >= #{start}
+        AND complete_date <![CDATA[ < ]]>   #{end}
+    </select>
+
+    <select id="countOutboundBetween" parameterType="map" resultType="long">
+        SELECT COUNT(*)  <!-- 수량 합계를 보고 싶다면 SUM(shipped_quantity) 같은 컬럼으로 변경 -->
+        FROM Waybill
+        WHERE completed_at IS NOT NULL
+        AND completed_at >= #{start}
+        AND completed_at <![CDATA[ < ]]>   #{end}
+        <!-- 필요 시 상태 필터 추가: AND waybill_status='DELIVERED' -->
+    </select>
+
+
+    <!-- 월별 출고 집계: 최근 12개월 (ym, cnt) -->
+    <select id="selectOutboundMonthly" parameterType="map" resultType="map">
+        SELECT
+        DATE_FORMAT(completed_at, '%Y-%m') AS ym,
+        COUNT(*) AS cnt
+        FROM Waybill
+        WHERE completed_at IS NOT NULL
+        AND completed_at <![CDATA[ >= ]]> #{start}
+        AND completed_at <![CDATA[ < ]]>  #{end}
+        GROUP BY DATE_FORMAT(completed_at, '%Y-%m')
+        ORDER BY ym
+    </select>
+
+
+
+</mapper>

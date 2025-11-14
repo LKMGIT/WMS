@@ -49,13 +49,11 @@ public class OutboundMemberController {
      */
     @PostMapping("/request")
     public ResponseEntity<OutboundRequestDTO> registerOutboundRequest(
-            // @SessionAttribute("loginUserId") Long userId,
-            @RequestBody OutboundRequestDTO outboundRequestDTO
+            @RequestBody OutboundRequestDTO outboundRequestDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
-        outboundRequestDTO.setUser_index(userId);
+        outboundRequestDTO.setUser_index(userIndex);
         boolean result = outboundService.registerOutboundRequest(outboundRequestDTO);
 
         if (!result) {
@@ -73,11 +71,9 @@ public class OutboundMemberController {
     @GetMapping("/request/{or_index}")
     public ResponseEntity<OutboundRequestDetailDTO> getOutboundRequestDetail(
             @PathVariable("or_index") Long or_index,
-            // @SessionAttribute("loginUserId") Long userId,
-            @ModelAttribute OutboundSearchDTO outboundSearchDTO
+            @ModelAttribute OutboundSearchDTO outboundSearchDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         OutboundRequestDetailDTO requestDTO = outboundService.getOutboundRequestDetailById(outboundSearchDTO, or_index);
 
@@ -85,8 +81,8 @@ public class OutboundMemberController {
             return ResponseEntity.notFound().build();
         }
 
-        if (!Objects.equals(requestDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to access outbound request {}", userId, or_index);
+        if (!Objects.equals(requestDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to access outbound request {}", userIndex, or_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -99,11 +95,9 @@ public class OutboundMemberController {
     @PutMapping("/request/{or_index}")
     public ResponseEntity<OutboundRequestDTO> modifyOutboundRequest(
             @PathVariable("or_index") Long or_index,
-            // @SessionAttribute("loginUserId") Long userId,
-            @RequestBody OutboundRequestDTO outboundRequestDTO
+            @RequestBody OutboundRequestDTO outboundRequestDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         // 1. GET (검증)
         OutboundRequestDTO originalDTO = outboundService.getOutboundRequestById(or_index);
@@ -112,15 +106,15 @@ public class OutboundMemberController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to modify outbound request {}", userId, or_index);
+        if (!Objects.equals(originalDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to modify outbound request {}", userIndex, or_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         // ▲▲▲ 검증 끝 ▲▲▲
 
         // 3. CUD
         outboundRequestDTO.setOr_index(or_index);
-        outboundRequestDTO.setUser_index(userId);
+        outboundRequestDTO.setUser_index(userIndex);
         boolean result = outboundService.modifyOutboundRequest(outboundRequestDTO);
 
         if (!result) {
@@ -137,11 +131,9 @@ public class OutboundMemberController {
      */
     @PutMapping("/request/{or_index}:delete")
     public ResponseEntity<OutboundRequestDTO> removeOutboundRequest(
-            // @SessionAttribute("loginUserId") Long userId,
-            @PathVariable("or_index") Long or_index
+            @PathVariable("or_index") Long or_index,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         // 1. GET (검증)
         OutboundRequestDTO originalDTO = outboundService.getOutboundRequestById(or_index);
@@ -150,8 +142,8 @@ public class OutboundMemberController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to delete outbound request {}", userId, or_index);
+        if (!Objects.equals(originalDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to delete outbound request {}", userIndex, or_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         // ▲▲▲ 검증 끝 ▲▲▲
@@ -176,7 +168,7 @@ public class OutboundMemberController {
             @ModelAttribute Criteria criteria,
             @ModelAttribute OutboundSearchDTO outboundSearchDTO) {
 
-        List<ShippingInstructionDTO> list = outboundService.getShippingInstructionList(criteria, outboundSearchDTO);
+        List<ShippingInstructionDetailDTO> list = outboundService.getShippingInstructionList(criteria, outboundSearchDTO);
         int total = outboundService.getShippingInstructionTotalCount(outboundSearchDTO);
 
         PageDTO pageDTO = new PageDTO(criteria, total);
@@ -194,11 +186,9 @@ public class OutboundMemberController {
     @GetMapping("/instruction/{si_index}")
     public ResponseEntity<ShippingInstructionDetailDTO> getShippingInstructionDetail(
             @PathVariable("si_index") Long si_index,
-            // @SessionAttribute("loginUserId") Long userId,
-            @ModelAttribute OutboundSearchDTO outboundSearchDTO
+            @ModelAttribute OutboundSearchDTO outboundSearchDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         ShippingInstructionDetailDTO detailDTO = outboundService.getShippingInstructionDetailById(outboundSearchDTO, si_index);
         log.info(detailDTO);
@@ -206,8 +196,8 @@ public class OutboundMemberController {
             return ResponseEntity.notFound().build();
         }
 
-        if (!Objects.equals(detailDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to access SI {}", userId, si_index);
+        if (!Objects.equals(detailDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to access SI {}", userIndex, si_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(detailDTO);
@@ -218,11 +208,9 @@ public class OutboundMemberController {
      */
     @GetMapping("/dispatch/{or_index}")
     public ResponseEntity<DispatchDetailDTO> getDispatchDetail(
-            // @SessionAttribute("loginUserId") Long userId,
-            @PathVariable("or_index") Long or_index
+            @PathVariable("or_index") Long or_index,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         DispatchDetailDTO detailDTO = outboundService.getDispatchById(or_index);
         if (detailDTO == null) {
@@ -237,11 +225,9 @@ public class OutboundMemberController {
      */
     @GetMapping("/waybill/{si_index}")
     public ResponseEntity<WaybillDetailDTO> getWaybillDetail(
-            // @SessionAttribute("loginUserId") Long userId,
-            @PathVariable("si_index") Long si_index
+            @PathVariable("si_index") Long si_index,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 텟스트용 ID
-        Long userId = 1L;
 
         WaybillDetailDTO detailDTO = outboundService.getWaybillDetail(si_index);
         if (detailDTO == null) {

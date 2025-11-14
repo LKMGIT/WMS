@@ -3,216 +3,114 @@ package com.ssg.wms.inbound.service;
 import com.ssg.wms.inbound.domain.InboundDetailDTO;
 import com.ssg.wms.inbound.domain.InboundRequestDTO;
 import com.ssg.wms.inbound.mappers.InboundMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ssg.wms.inventory.service.InvenService; // 재고 파트 연동
+import com.ssg.wms.warehouse.service.WarehouseService; // 창고 관련 서비스
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 입고 관리 서비스 구현 클래스
- */
 @Service
-@Transactional
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Log4j2
 public class InboundServiceImpl implements InboundService {
 
-    @Autowired
-    private InboundMapper inboundMapper;
+    private final InboundMapper inboundMapper;
+    private final InvenService invenService;
+    private final WarehouseService warehouseService;
 
-    // ============================================
-    // 입고 요청 관련 메서드
-    // ============================================
-
-    /**
-     * 입고 요청 등록
-     */
     @Override
-    public Long requestInbound(InboundRequestDTO requestDTO, Long userId) {
-        requestDTO.setUserIndex(userId);
-        inboundMapper.insertRequest(requestDTO);
-        return requestDTO.getInboundIndex();
+    public InboundRequestDTO getRequestById(Long inboundIndex) {
+        return inboundMapper.selectRequestById(inboundIndex);
     }
 
-    /**
-     * 입고 요청 목록 조회
-     */
     @Override
-    public List<InboundRequestDTO> getRequests(String keyword, String status, Long userId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("keyword", keyword);
-        params.put("status", status);
-        params.put("userId", userId);
-        return inboundMapper.selectRequests(params);
+    public List<InboundRequestDTO> getRequestList(Map<String, Object> params) {
+        return inboundMapper.selectAllRequests(params);
     }
 
-    /**
-     * 입고 요청 취소
-     */
     @Override
-    public boolean cancelRequest(Long requestIndex, String cancelReason, Long userId) {
-        // 권한 체크 (본인의 요청인지 확인)
-        InboundRequestDTO request = inboundMapper.selectRequestById(requestIndex);
-        if (request == null || !request.getUserIndex().equals(userId)) {
-            return false;
+    public int getRequestCount(Map<String, Object> params) {
+        return inboundMapper.countRequests(params);
+    }
+
+    @Transactional
+    @Override
+    public void cancelRequest(InboundRequestDTO requestDTO) {
+        int result = inboundMapper.updateCancel(requestDTO);
+        if (result == 0) {
+            throw new RuntimeException("입고 요청 취소 실패: " + requestDTO.getInboundIndex());
+        }
+    }
+
+    /** 입고 요청 승인: 구역 배정 및 단일 상세 내역 생성  */
+    @Transactional
+    @Override
+    public void approveRequest(InboundRequestDTO requestDTO) throws Exception {
+        Long requestIndex = requestDTO.getInboundIndex();
+
+        // 1. 요청 상태를 APPROVED로 변경
+        int requestUpdateResult = inboundMapper.updateApproval(requestIndex);
+        if (requestUpdateResult == 0) {
+            throw new RuntimeException("입고 요청 승인 실패: " + requestIndex + "를 찾을 수 없거나 상태를 변경할 수 없습니다.");
         }
 
-        // 이미 승인되었거나 취소된 요청은 취소 불가
-        if (!"PENDING".equals(request.getApprovalStatus())) {
-            return false;
+        // 2. 창고 번호 및 구역 정보 추출
+        Integer existingWarehouseIndex = requestDTO.getWarehouseIndex(); // 기존 창고 번호
+
+        // DTO에 임시로 실어온 구역 인덱스 (detail.jsp에서 cancelReason 필드에 담아 보냈음)
+        Long selectedSectionIndex = null;
+        try {
+            if (requestDTO.getCancelReason() != null && !requestDTO.getCancelReason().isEmpty()) {
+                selectedSectionIndex = Long.valueOf(requestDTO.getCancelReason());
+            }
+        } catch (NumberFormatException | NullPointerException e) { // 🔥 예외 처리 강화
+            throw new RuntimeException("구역 코드는 Long 타입 숫자여야 합니다: " + e.getMessage());
         }
 
-        InboundRequestDTO dto = new InboundRequestDTO();
-        dto.setInboundIndex(requestIndex);
-        dto.setCancelReason(cancelReason);
+        // 3. inbound_detail 레코드를 단 하나만 생성
+        InboundDetailDTO detailDTO = new InboundDetailDTO();
+        detailDTO.setInboundIndex(requestIndex);
+        detailDTO.setWarehouseIndex(existingWarehouseIndex.longValue());
+        detailDTO.setReceivedQuantity(0L);
+        detailDTO.setSectionIndex(selectedSectionIndex); // 🔥 선택된 구역 인덱스 즉시 반영
 
-        return inboundMapper.updateCancel(dto) > 0;
+        inboundMapper.insertInboundDetail(detailDTO); // 단 1회 삽입
     }
 
-    /**
-     * 입고 요청 수정
-     */
+    /** 입고 상세 내역 수정: 재고 반영 로직 활성화 (용량 체크 제거) */
+    @Transactional
     @Override
-    public boolean updateRequest(InboundRequestDTO requestDTO) {
-        // 승인 대기 상태일 때만 수정 가능
-        InboundRequestDTO existing = inboundMapper.selectRequestById(requestDTO.getInboundIndex());
-        if (existing == null || !"PENDING".equals(existing.getApprovalStatus())) {
-            return false;
+    public void processInboundDetail(InboundDetailDTO detailDTO) throws Exception {
+
+        if (detailDTO.getWarehouseIndex() == null) {
+            throw new RuntimeException("입고 상세 처리 실패: 창고 번호(warehouseIndex)가 누락되었습니다.");
         }
 
-        return inboundMapper.updateRequest(requestDTO) > 0;
+        // 창고 용량 검사 로직 제거
+
+        int result = inboundMapper.updateInboundDetail(detailDTO);
+        if (result == 0) {
+            throw new RuntimeException("입고 처리(수정) 실패: " + detailDTO.getDetailIndex());
+        }
+
+
+        // 재고 파트로 데이터 반영
+        invenService.applyInbound(detailDTO);
     }
 
-    /**
-     * 기간별 입고 현황 조회
-     */
+    // --- 통계 메서드 (기존과 동일) ---
     @Override
-    public List<InboundRequestDTO> getInboundStatusByPeriod(String startDate, String endDate, Long userId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("startDate", startDate);
-        params.put("endDate", endDate);
-        params.put("userId", userId);
+    public List<InboundRequestDTO> getStatsByPeriod(Map<String, Object> params) {
         return inboundMapper.selectInboundStatusByPeriod(params);
     }
 
-    /**
-     * 월별 입고 현황 조회
-     */
     @Override
-    public List<InboundRequestDTO> getInboundStatusByMonth(int year, int month) {
+    public List<InboundRequestDTO> getStatsByMonth(int year, int month) {
         return inboundMapper.selectInboundStatusByMonth(year, month);
-    }
-
-
-    // ============================================
-    // 입고 상세 관련 메서드
-    // ============================================
-
-    /**
-     * 입고 요청 상세 조회 (입고 요청 + 상세 목록)
-     */
-    @Override
-    public InboundRequestDTO getRequestWithDetails(Long requestIndex) {
-        InboundRequestDTO request = inboundMapper.selectRequestById(requestIndex);
-        if (request != null) {
-            List<InboundDetailDTO> details = inboundMapper.selectDetailsByRequestId(requestIndex);
-            request.setDetails(details);
-        }
-        return request;
-    }
-
-    /**
-     * 입고 요청 삭제
-     */
-    @Override
-    public boolean deleteRequest(Long requestIndex) {
-        // 승인 전 요청만 삭제 가능
-        InboundRequestDTO request = inboundMapper.selectRequestById(requestIndex);
-        if (request == null || "APPROVED".equals(request.getApprovalStatus())) {
-            return false;
-        }
-
-        return inboundMapper.deleteRequest(requestIndex) > 0;
-    }
-
-
-    // ============================================
-    // 관리자 전용 메서드
-    // ============================================
-
-    /**
-     * 입고 요청 승인 (관리자)
-     */
-    @Override
-    public boolean approveRequest(Long requestIndex, Long adminId) {
-        InboundRequestDTO request = inboundMapper.selectRequestById(requestIndex);
-        if (request == null || !"PENDING".equals(request.getApprovalStatus())) {
-            return false;
-        }
-
-        return inboundMapper.updateApproval(requestIndex) > 0;
-    }
-
-    /**
-     * 입고 상세 위치 지정 (관리자)
-     */
-    @Override
-    public boolean updateLocation(Integer detailIndex, String location, Long adminId) {
-        InboundDetailDTO detailDTO = new InboundDetailDTO();
-        detailDTO.setDetailIndex(detailIndex);
-        detailDTO.setLocation(location);
-
-        return inboundMapper.updateDetail(detailDTO) > 0;
-    }
-
-    /**
-     * QR 코드 생성 및 지정 (관리자)
-     */
-    @Override
-    public String generateQrCode(Integer detailIndex, Long adminId) {
-        // QR 코드 값 생성 (예: INB-DETAIL-{detailIndex})
-        String qrCode = "INB-DETAIL-" + detailIndex;
-
-        // DB에 저장
-        InboundDetailDTO detailDTO = new InboundDetailDTO();
-        detailDTO.setDetailIndex(detailIndex);
-        detailDTO.setQrCode(qrCode);
-
-        inboundMapper.updateDetail(detailDTO);
-
-        return qrCode;
-    }
-
-    /**
-     * QR 코드로 입고 상세 조회
-     */
-    @Override
-    public InboundDetailDTO getDetailByQr(String qrCode) {
-        return inboundMapper.selectDetailByQr(qrCode);
-    }
-
-    /**
-     * 입고 상세 완료 처리 (관리자)
-     */
-    @Override
-    public boolean completeInbound(Integer detailIndex, Integer receivedQuantity, Long adminId) {
-        InboundDetailDTO detailDTO = new InboundDetailDTO();
-        detailDTO.setDetailIndex(detailIndex);
-        detailDTO.setReceivedQuantity(receivedQuantity);
-
-        return inboundMapper.updateComplete(detailDTO) > 0;
-    }
-
-    /**
-     * 관리자용 입고 요청 목록 조회
-     */
-    @Override
-    public List<InboundRequestDTO> getAdminInboundRequests(String keyword, String status) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("keyword", keyword);
-        params.put("status", status);
-        params.put("userId", null); // 관리자는 모든 요청 조회
-        return inboundMapper.selectRequests(params);
     }
 }

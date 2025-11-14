@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="CTX" value="${pageContext.request.contextPath}"/>
-<c:set var="isLoggedIn" value="${not empty sessionScope.loginAdminId}"/>
+<c:set var="isLoggedIn" value="${not empty sessionScope.loginAdminId}" />
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +12,9 @@
 
     <!-- Favicon -->
     <link rel="icon" href="${CTX}/img/kaiadmin/favicon.ico" type="image/x-icon"/>
+
+    <!-- KaKaoMap api -->
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2879f57d00d7fd3009336abf35aad5e6&libraries=services"></script>
 
     <!-- Fonts and icons -->
     <script src="${CTX}/js/plugin/webfont/webfont.min.js"></script>
@@ -47,9 +50,11 @@
         <div class="sidebar-logo">
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
-                <a href="<c:url value='/admin/dashbaord'/>">
-                    <img src="${CTX}/img/kaiadmin/logo_background.png" alt="navbar brand" class="navbar-brand"
-                         height="20"/>
+                <a href="<c:url value='/admin/dashboard'/>">
+                    <img src="${CTX}/img/kaiadmin/logo_background.png"
+                         alt="navbar brand"
+                         class="navbar-brand"
+                         style="height:50px; width:auto;" />
                 </a>
                 <div class="nav-toggle">
                     <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
@@ -72,7 +77,7 @@
                         <div class="collapse" id="dashboard">
                             <ul class="nav nav-collapse">
                                 <li>
-                                    <a href="<c:url value='/admin/dashbaord'/>">
+                                    <a href="<c:url value='/admin/dashboard'/>">
                                         <span class="sub-item">대시보드 확인</span>
                                     </a>
                                 </li>
@@ -112,12 +117,12 @@
                         </a>
                         <div class="collapse" id="outbound">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">출고 요청 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/outbound/requests'/>">
+                                    <span class="sub-item">출고요청 목록 조회</span>
                                 </a>
                                 </li>
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">출고 지시서 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/outbound/instructions'/>">
+                                    <span class="sub-item">출고 지시서 목록 조회</span>
                                 </a>
                                 </li>
                             </ul>
@@ -132,8 +137,8 @@
                         </a>
                         <div class="collapse" id="quotation">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">견적 신청 목록 조회</span>
+                                <li><a class="nav-link" href="<c:url value='/quotation/requests'/>">
+                                    <span class="sub-item">견적신청 목록 조회</span>
                                 </a>
                                 </li>
                             </ul>
@@ -148,17 +153,15 @@
                         </a>
                         <div class="collapse" id="inbound">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/inbound/admin/list'/>">
-                                    <span class="sub-item">입고 요청 목록 조회</span>
-                                </a>
-                                    <a class="nav-link" href="<c:url value='/inbound/admin/form'/>">
-                                        <span class="sub-item">입고 목록 조회</span>
+                                
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/list'/>">
+                                        <span class="sub-item">입고 요청 목록</span>
                                     </a>
-                                    <a class="nav-link" href="<c:url value='/inbound/admin/period'/>">
-                                        <span class="sub-item">기간별 입고 현황 조회</span>
-                                    </a>
-                                    <a class="nav-link" href="<c:url value='/inbound/admin/month'/>">
-                                        <span class="sub-item">월별 입고 현황 조회</span>
+                                </li>
+                                <li>
+                                    <a class="nav-link" href="<c:url value='/inbound/admin/status'/>">
+                                        <span class="sub-item">입고 통계</span>
                                     </a>
                                 </li>
                             </ul>
@@ -192,57 +195,40 @@
                         </a>
                         <div class="collapse" id="warehouse">
                             <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">창고조회</span>
+                                <li><a class="nav-link" href="<c:url value='/warehouse/list'/>">
+                                    <span class="sub-item">창고 조회</span>
                                 </a>
-                                    <a class="nav-link" href="<c:url value='/admin/user_list'/>">
+                                    <a class="nav-link" href="<c:url value='/warehouse/register'/>">
                                         <span class="sub-item">창고 등록</span>
                                     </a>
                                 </li>
                             </ul>
                         </div>
                     </li>
-
                     <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#map">
+                        <a data-bs-toggle="collapse" href="#announcement">
                             <i class="fas fa-pen-square"></i>
-                            <p>지도</p>
+                            <p>고객센터</p>
                             <span class="caret"></span>
-                        </a>
-                        <div class="collapse" id="map">
-                            <ul class="nav nav-collapse">
-                                <li><a class="nav-link" href="<c:url value='/admin/user_list'/>">
-                                    <span class="sub-item">창고 위치</span>
-                                </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a data-bs-toggle="collapse" href="#announcement"> <i class="fas fa-pen-square"></i>
-                            <p>고객센터</p> <span class="caret"></span>
                         </a>
                         <div class="collapse" id="announcement">
                             <ul class="nav nav-collapse">
-
+                                <!-- <li> 태그를 각 항목별로 분리 -->
                                 <li>
-                                    <a class="nav-link" href="<c:url value='/announcement/notices/list'/>">
+                                    <a class="nav-link" href="<c:url value='/announcement/notice/list'/>">
                                         <span class="sub-item">공지사항</span>
                                     </a>
                                 </li>
-
                                 <li>
                                     <a class="nav-link" href="<c:url value='/announcement/onetoone/list'/>">
-                                        <span class="sub-item">1:1 문의 목록</span>
+                                        <span class="sub-item">1:1 문의</span>
                                     </a>
                                 </li>
-
                                 <li>
                                     <a class="nav-link" href="<c:url value='/announcement/board/list'/>">
                                         <span class="sub-item">문의 게시판</span>
                                     </a>
                                 </li>
-
                             </ul>
                         </div>
                     </li>
@@ -251,7 +237,6 @@
             </div>
         </div>
     </div>
-
     <!-- End Sidebar -->
 
     <div class="main-panel">
@@ -279,11 +264,9 @@
                         <div class="container-fluid">
                             <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                                 <li class="nav-item topbar-user dropdown hidden-caret">
-                                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
-                                       aria-expanded="false">
+                                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                                         <div class="avatar-sm">
-                                            <img src="${CTX}/img/defaultprofile.jpg" alt="..."
-                                                 class="avatar-img rounded-circle"/>
+                                            <img src="${CTX}/img/defaultprofile.jpg" alt="..." class="avatar-img rounded-circle"/>
                                         </div>
                                         <span class="profile-username">
                 <span class="op-7">Hi,</span>
@@ -294,28 +277,25 @@
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-user animated fadeIn">
-                                        <li>
-                                            <div class="user-box">
-                                                <div class="avatar-lg">
-                                                    <img src="${CTX}/img/defaultprofile.jpg" alt="image profile"
-                                                         class="avatar-img rounded"/>
+                                            <li>
+                                                <div class="user-box">
+                                                    <div class="avatar-lg">
+                                                        <img src="${CTX}/img/defaultprofile.jpg" alt="image profile" class="avatar-img rounded"/>
+                                                    </div>
+                                                    <div class="u-text">
+                                                        <h4><c:out value="${sessionScope.loginAdminName != null ? sessionScope.loginAdminName : sessionScope.loginAdminId}"/></h4>
+                                                        <p class="text-muted">
+                                                            <c:out value="${sessionScope.loginAdminEmail != null ? sessionScope.loginAdminEmail : 'hello@example.com'}"/>
+                                                        </p>
+                                                        <a href="${CTX}/admin/myinfo" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                                    </div>
                                                 </div>
-                                                <div class="u-text">
-                                                    <h4><c:out
-                                                            value="${sessionScope.loginAdminName != null ? sessionScope.loginAdminName : sessionScope.loginAdminId}"/></h4>
-                                                    <p class="text-muted">
-                                                        <c:out value="${sessionScope.loginAdminEmail != null ? sessionScope.loginAdminEmail : 'hello@example.com'}"/>
-                                                    </p>
-                                                    <a href="${CTX}/admin/myinfo"
-                                                       class="btn btn-xs btn-secondary btn-sm">View Profile</a>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="${CTX}/admin/myinfo">내 정보 확인</a>
-                                            <a class="dropdown-item" href="${CTX}/login/logout">로그아웃</a>
-                                        </li>
+                                            </li>
+                                            <li>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="${CTX}/admin/myinfo">내 정보 확인</a>
+                                                <a class="dropdown-item" href="${CTX}/login/logout">로그아웃</a>
+                                            </li>
                                     </ul>
                                 </li>
                             </ul>
@@ -339,7 +319,7 @@
                 </c:otherwise>
             </c:choose>
         </div>
-        <!-- End Navbar -->
+            <!-- End Navbar -->
 
         <!-- Content Start -->
         <div class="container">

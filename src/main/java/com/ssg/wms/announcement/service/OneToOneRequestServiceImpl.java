@@ -50,4 +50,11 @@ public class OneToOneRequestServiceImpl implements OneToOneRequestService {
         // 관리자는 답변 여부와 상관없이 삭제 가능
         return oneToOneRequestMapper.deleteRequest(requestIndex) > 0;
     }
+
+    /** 1:1 문의 상세 조회 구현 */
+    @Override
+    public OneToOneRequestDTO getAdminRequest(Integer requestIndex) {
+        // Mapper의 상세 조회 쿼리 호출
+        return oneToOneRequestMapper.selectRequest(requestIndex);
+    }
 }

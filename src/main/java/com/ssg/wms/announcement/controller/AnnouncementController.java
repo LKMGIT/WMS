@@ -1,6 +1,5 @@
 package com.ssg.wms.announcement.controller;
 
-
 import com.ssg.wms.announcement.domain.BoardCommentDTO;
 import com.ssg.wms.announcement.domain.BoardRequestDTO;
 import com.ssg.wms.announcement.domain.NoticeDTO;
@@ -8,7 +7,7 @@ import com.ssg.wms.announcement.domain.OneToOneRequestDTO;
 import com.ssg.wms.announcement.service.BoardRequestService;
 import com.ssg.wms.announcement.service.NoticeService;
 import com.ssg.wms.announcement.service.OneToOneRequestService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,22 +21,42 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/announcement")
+@RequiredArgsConstructor
 public class AnnouncementController {
 
-    @Autowired
-    private NoticeService noticeService;
+    private final NoticeService noticeService;
+    private final OneToOneRequestService oneToOneRequestService;
+    private final BoardRequestService boardRequestService;
 
-    @Autowired
-    private OneToOneRequestService oneToOneRequestService;
+    /**
+     * [최종 수정] 세션에서 "loginAdminIndex" 키를 사용하도록 변경
+     */
+    private Long getSafeAdminId(HttpSession session) {
+        // [수정] "loginAdminId" -> "loginAdminIndex"
+        Object adminIdObj = session.getAttribute("loginAdminIndex");
+        Long adminId = null;
 
-    @Autowired
-    private BoardRequestService boardRequestService;
+        if (adminIdObj instanceof Long) {
+            adminId = (Long) adminIdObj;
+        } else if (adminIdObj instanceof String) {
+            try {
+                // "17" (String) -> 17L (Long) 변환
+                adminId = Long.parseLong((String) adminIdObj);
+            } catch (NumberFormatException e) {
+                adminId = null; // 변환 실패
+            }
+        } else if (adminIdObj instanceof Integer) {
+            // 17 (Integer) -> 17L (Long) 변환
+            adminId = ((Integer) adminIdObj).longValue();
+        }
+        return adminId;
+    }
 
     // ============================================
-    // 공지사항 (Notice) API - R은 공용, CUD는 관리자
+    // 공지사항 (Notice) API
     // ============================================
 
-    /** 공지사항 목록 조회 (공용) */
+    /** 공지사항 목록 조회 (공용) - GET /announcement/notices */
     @GetMapping("/notices")
     @ResponseBody
     public ResponseEntity<List<NoticeDTO>> getNotices(
@@ -47,7 +66,7 @@ public class AnnouncementController {
         return ResponseEntity.ok(notices);
     }
 
-    /** 공지사항 상세 조회 (공용) */
+    /** 공지사항 상세 조회 (공용) - GET /announcement/notices/{notice_index} */
     @GetMapping("/notices/{notice_index}")
     @ResponseBody
     public ResponseEntity<NoticeDTO> getNoticeDetail(
@@ -62,8 +81,8 @@ public class AnnouncementController {
         return ResponseEntity.ok(notice);
     }
 
-    /** 공지사항 등록 (관리자) */
-    @PostMapping("/admin/notices")
+    /** 공지사항 등록 (관리자) - POST /announcement/notice */
+    @PostMapping("/notice")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerNotice(
             @RequestBody NoticeDTO noticeDTO,
@@ -71,20 +90,19 @@ public class AnnouncementController {
 
         Map<String, Object> response = new HashMap<>();
 
+        // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+        Long adminId = getSafeAdminId(session);
+        if (adminId == null) {
+            response.put("success", false);
+            response.put("message", "관리자 권한이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
         try {
-            Long adminId = (Long) session.getAttribute("adminId");
-            if (adminId == null) {
-                response.put("success", false);
-                response.put("message", "관리자 권한이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
             Integer noticeIndex = noticeService.registerNotice(noticeDTO, adminId);
-
             response.put("success", true);
             response.put("message", "공지사항이 등록되었습니다.");
             response.put("noticeIndex", noticeIndex);
-
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -94,23 +112,27 @@ public class AnnouncementController {
         }
     }
 
-    /** 공지사항 수정 (관리자)  */
-    @PutMapping("/admin/notices")
+    /** 공지사항 수정 (관리자) - PUT /announcement/notice/{notice_index} */
+    @PutMapping("/notice/{notice_index}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updateNotice(
+            @PathVariable("notice_index") Integer noticeIndex, // 경로에서 인덱스 받음
             @RequestBody NoticeDTO noticeDTO,
             HttpSession session) {
 
         Map<String, Object> response = new HashMap<>();
 
-        try {
-            Long adminId = (Long) session.getAttribute("adminId");
-            if (adminId == null) {
-                response.put("success", false);
-                response.put("message", "관리자 권한이 필요합니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
+        // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+        Long adminId = getSafeAdminId(session);
+        if (adminId == null) {
+            response.put("success", false);
+            response.put("message", "관리자 권한이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
 
+        noticeDTO.setNoticeIndex(noticeIndex);
+
+        try {
             boolean result = noticeService.updateNotice(noticeDTO, adminId);
 
             if (result) {
@@ -130,8 +152,8 @@ public class AnnouncementController {
         }
     }
 
-    /** 공지사항 삭제 (관리자) */
-    @DeleteMapping("/admin/notices/{notice_index}")
+    /** 공지사항 삭제 (관리자) - DELETE /announcement/notice/{notice_index} */
+    @DeleteMapping("/notice/{notice_index}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteNotice(
             @PathVariable("notice_index") Integer noticeIndex,
@@ -140,7 +162,8 @@ public class AnnouncementController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Long adminId = (Long) session.getAttribute("adminId");
+            // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+            Long adminId = getSafeAdminId(session);
             if (adminId == null) {
                 response.put("success", false);
                 response.put("message", "관리자 권한이 필요합니다.");
@@ -166,18 +189,22 @@ public class AnnouncementController {
         }
     }
 
-    // 1:1 문의 (One-to-One) API - 관리자 전용
+    // ============================================
+    // 1:1 문의 (One-to-One) API
+    // ============================================
 
-    /** 관리자용 1:1 문의 목록 조회 */
-    @GetMapping("/admin/one-to-one/list")
+    /** 관리자용 1:1 문의 목록 조회 - GET /announcement/one-to-one/list */
+    @GetMapping("/one-to-one/list")
     @ResponseBody
     public ResponseEntity<List<OneToOneRequestDTO>> getAdminOneToOneRequests(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
             HttpSession session) {
 
-        Long adminId = (Long) session.getAttribute("adminId");
+        // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+        Long adminId = getSafeAdminId(session);
         if (adminId == null) {
+            // 500 오류 대신 401 (권한 없음)을 명확히 반환
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -185,25 +212,33 @@ public class AnnouncementController {
         return ResponseEntity.ok(requests);
     }
 
-    /** 1:1 문의 답변 등록/수정 (관리자) */
-    @PutMapping("/admin/one-to-one/{request_index}/reply")
+    /** 1:1 문의 답변 등록/수정 (관리자) - PUT /announcement/one-to-one/{request_index}/reply */
+    @PutMapping("/one-to-one/{request_index}/reply")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> replyToOneToOneRequest(
             @PathVariable("request_index") Integer requestIndex,
-            @RequestParam String response,
+            @RequestBody Map<String, String> requestBody,
             HttpSession session) {
 
         Map<String, Object> result = new HashMap<>();
 
         try {
-            Long adminId = (Long) session.getAttribute("adminId");
+            // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+            Long adminId = getSafeAdminId(session);
             if (adminId == null) {
                 result.put("success", false);
                 result.put("message", "관리자 권한이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
             }
 
-            boolean success = oneToOneRequestService.replyToRequest(requestIndex, response, adminId);
+            String responseContent = requestBody.get("response");
+            if (responseContent == null || responseContent.trim().isEmpty()) {
+                result.put("success", false);
+                result.put("message", "답변 내용을 입력해야 합니다.");
+                return ResponseEntity.badRequest().body(result);
+            }
+
+            boolean success = oneToOneRequestService.replyToRequest(requestIndex, responseContent, adminId);
 
             if (success) {
                 result.put("success", true);
@@ -222,8 +257,8 @@ public class AnnouncementController {
         }
     }
 
-    /** 관리자의 1:1 문의 삭제 */
-    @DeleteMapping("/admin/one-to-one/{request_index}")
+    /** 관리자의 1:1 문의 삭제 - DELETE /announcement/one-to-one/{request_index} */
+    @DeleteMapping("/one-to-one/{request_index}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteAdminOneToOneRequest(
             @PathVariable("request_index") Integer requestIndex,
@@ -232,7 +267,8 @@ public class AnnouncementController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Long adminId = (Long) session.getAttribute("adminId");
+            // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+            Long adminId = getSafeAdminId(session);
             if (adminId == null) {
                 response.put("success", false);
                 response.put("message", "관리자 권한이 필요합니다.");
@@ -258,10 +294,11 @@ public class AnnouncementController {
         }
     }
 
-    // 게시판 (Board) API - R은 공용, CUD는 관리자
+    // ============================================
+    // 게시판 (Board) API
+    // ============================================
 
-
-    /** 게시글 목록 조회 (공용) */
+    /** 게시글 목록 조회 (공용) - GET /announcement/board/list */
     @GetMapping("/board")
     @ResponseBody
     public ResponseEntity<List<BoardRequestDTO>> getBoards(
@@ -272,7 +309,7 @@ public class AnnouncementController {
         return ResponseEntity.ok(boards);
     }
 
-    /** 게시글 상세 조회 (조회수 증가 포함) (공용) */
+    /** 게시글 상세 조회 (조회수 증가 포함)  - GET /announcement/board/{board_index} */
     @GetMapping("/board/{board_index}")
     @ResponseBody
     public ResponseEntity<BoardRequestDTO> getBoardDetail(
@@ -287,8 +324,8 @@ public class AnnouncementController {
         return ResponseEntity.ok(board);
     }
 
-    /** 게시글 삭제 (관리자) */
-    @DeleteMapping("/admin/board/{board_index}")
+    /** 게시글 삭제 (관리자) - DELETE /announcement/board/{board_index} */
+    @DeleteMapping("/board/{board_index}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteBoard(
             @PathVariable("board_index") Integer boardIndex,
@@ -297,7 +334,8 @@ public class AnnouncementController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Long adminId = (Long) session.getAttribute("adminId");
+            // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+            Long adminId = getSafeAdminId(session);
             if (adminId == null) {
                 response.put("success", false);
                 response.put("message", "관리자 권한이 필요합니다.");
@@ -324,8 +362,8 @@ public class AnnouncementController {
     }
 
 
-    /** 댓글 등록 (관리자)  */
-    @PostMapping("/admin/board/{board_index}/comments")
+    /** 댓글 등록 (관리자) - POST /announcement/board/{board_index}/comments */
+    @PostMapping("/board/{board_index}/comments")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerComment(
             @PathVariable("board_index") Integer boardIndex,
@@ -335,7 +373,8 @@ public class AnnouncementController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Long adminId = (Long) session.getAttribute("adminId");
+            // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+            Long adminId = getSafeAdminId(session);
 
             if (adminId == null) {
                 response.put("success", false);
@@ -344,7 +383,6 @@ public class AnnouncementController {
             }
 
             commentDTO.setBoardIndex(boardIndex);
-            // adminId만 전달
             Integer commentIndex = boardRequestService.registerComment(commentDTO, adminId);
 
             response.put("success", true);
@@ -360,8 +398,8 @@ public class AnnouncementController {
         }
     }
 
-    /** 댓글 삭제 (관리자) */
-    @DeleteMapping("/admin/board/comments/{comment_index}")
+    /** 댓글 삭제 (관리자) - DELETE /announcement/board/comments/{comment_index} */
+    @DeleteMapping("/board/comments/{comment_index}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteComment(
             @PathVariable("comment_index") Integer commentIndex,
@@ -370,7 +408,8 @@ public class AnnouncementController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Long adminId = (Long) session.getAttribute("adminId");
+            // [수정됨] 안전한 세션 ID 가져오기 (loginAdminIndex 사용)
+            Long adminId = getSafeAdminId(session);
 
             if (adminId == null) {
                 response.put("success", false);
@@ -378,7 +417,6 @@ public class AnnouncementController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
 
-            // adminId만 전달
             boolean result = boardRequestService.deleteComment(commentIndex, adminId);
 
             if (result) {
@@ -398,10 +436,13 @@ public class AnnouncementController {
         }
     }
 
+    // ============================================
+    // View Pages (화면 경로)
+    // ============================================
+
     /** 공지사항 목록 화면 */
-    @GetMapping("/notices/list")
+    @GetMapping("/notice/list")
     public String showNoticeList() {
-        // 경로 수정: notice/list -> announcement/notice/list
         return "announcement/notice/list";
     }
 
@@ -409,41 +450,49 @@ public class AnnouncementController {
     @GetMapping("/notices/detail/{notice_index}")
     public String showNoticeDetail(@PathVariable("notice_index") Integer noticeIndex, Model model) {
         model.addAttribute("noticeIndex", noticeIndex);
-        // 경로 수정: notice/detail -> announcement/notice/detail
         return "announcement/notice/detail";
+    }
+
+    /** 공지사항 등록/수정 화면 */
+    @GetMapping("/notice/form")
+    public String showNoticeForm() {
+        return "announcement/notice/form";
     }
 
     /** 관리자 1:1 문의 관리 화면 */
     @GetMapping("/onetoone/list")
     public String showAdminOneToOne() {
-        // 경로 수정: admin/onetoone/list -> announcement/onetoone/list (이미지 구조에 맞춤)
-        // 주의: 파일 구조 이미지에 'admin' 폴더가 onetoone 위에 없으므로 'admin/' 제거
         return "announcement/onetoone/list";
     }
 
     /** 1:1 문의 상세 화면 */
     @GetMapping("/onetoone/detail/{request_index}")
     public String showOneToOneDetail(@PathVariable("request_index") Integer requestIndex, Model model) {
-        model.addAttribute("requestIndex", requestIndex);
-        // 경로 수정: onetoone/detail -> announcement/onetoone/detail
+        OneToOneRequestDTO request = oneToOneRequestService.getAdminRequest(requestIndex);
+        model.addAttribute("request", request);
         return "announcement/onetoone/detail";
     }
 
-    // 1:1 문의 답변하기
-
     /** 게시판 목록 화면 */
     @GetMapping("/board/list")
-    public String showBoardList() {
-        // 경로 수정: board/list -> announcement/board/list
+    public String showBoardList(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String keyword,
+            Model model) {
+
+        List<BoardRequestDTO> boardList = boardRequestService.getBoards(keyword, type);
+        model.addAttribute("boardList", boardList);
+        model.addAttribute("type", type);
+        model.addAttribute("keyword", keyword);
+
         return "announcement/board/list";
     }
 
     /** 게시판 상세 화면 */
     @GetMapping("/board/detail/{board_index}")
     public String showBoardDetail(@PathVariable("board_index") Integer boardIndex, Model model) {
-        model.addAttribute("boardIndex", boardIndex);
-        // 경로 수정: board/detail -> announcement/board/detail
+        BoardRequestDTO board = boardRequestService.getBoardDetail(boardIndex);
+        model.addAttribute("board", board);
         return "announcement/board/detail";
     }
-
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssg.wms.warehouse.mappers.SectionMapper">
+
+    <resultMap id="SectionMap" type="com.ssg.wms.warehouse.domain.SectionDTO">
+        <id property="sIndex" column="section_index" />
+        <result property="sCode" column="section_code" />
+        <result property="sName" column="section_name" />
+        <result property="sCapacity" column="section_capacity" />
+        <result property="wIndex" column="warehouse_index" />
+    </resultMap>
+
+    <insert id="insertSection" useGeneratedKeys="true" keyProperty="sIndex">
+        insert into section(
+        section_code,
+        section_name,
+        section_capacity,
+        warehouse_index
+        ) values(
+        #{sCode},
+        #{sName},
+        #{sCapacity},
+        #{wIndex}
+        )
+    </insert>
+
+    <select id="calculateSectionRemain" resultType="int">
+        select
+        s.section_capacity - COALESCE(SUM(i.item_volume * inv.inven_quantity), 0) as remain
+        from section s
+        left join inventory inv on s.section_index = inv.section_index
+        left join items i on i.item_index = inv.item_index
+        where s.section_index = #{sIndex}
+        group by s.section_index
+    </select>
+
+    <select id="getSectionsByWarehouse" resultMap="SectionMap">
+        SELECT *
+        FROM section
+        WHERE warehouse_index = #{wIndex}
+    </select>
+</mapper>

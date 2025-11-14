@@ -1,13 +1,14 @@
 <%--
   Created by IntelliJ IDEA.
   User: JangwooJoo
-  Date: 2025-11-10
-  Time: 오후 8:24
-  To change this template use File | Settings | File Templates.
+  Date: 2025-11-11
+  Time: 오후 5:00
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+<%-- [중요] 뷰 컨트롤러가 Model에 "si_index"를 전달해야 함 --%>
+<c:set var="si_index" value="${si_index}" />
 
 <%@ include file="../includes/header.jsp" %>
 
@@ -17,7 +18,7 @@
         <ul class="breadcrumbs mb-3">
             <li class="nav-home"><a href="${contextPath}/"><i class="icon-home"></i></a></li>
             <li class="separator"><i class="icon-arrow-right"></i></li>
-            <li class="nav-item"><a href="${contextPath}/instructions">출고 지시서 목록</a></li>
+            <li class="nav-item"><a id="listBreadcrumb" href="${contextPath}/outbound/instructions">출고 지시서 목록</a></li>
             <li class="separator"><i class="icon-arrow-right"></i></li>
             <li class="nav-item"><a href="#">출고지시서 상세</a></li>
         </ul>
@@ -26,10 +27,30 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">출고지시서 상세 (지시서 번호: <span id="detailSiIndex">...</span>)</div>
+                    <div class="card-title">출고지시서 상세 (지시서 번호:
+                        <span id="detailSiIndex">...</span>)
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>출고 요청 번호 (or_index)</label>
+                                <input type="text" class="form-control" id="detailOrIndex" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>요청자 ID (user_index)</label>
+                                <input type="text" class="form-control" id="detailUserIndex" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>상품 ID (item_index)</label>
+                                <input type="text" class="form-control" id="detailItemIndex" readonly>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>상품명 (item_name)</label>
@@ -43,77 +64,179 @@
                             </div>
                         </div>
                     </div>
+                    <hr>
+                    <h5 class="mb-3">출고 위치 및 상태</h5>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>창고 ID (warehouse_index)</label>
                                 <input type="text" class="form-control" id="detailWarehouseIndex" readonly>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>구역 ID (section_index)</label>
                                 <input type="text" class="form-control" id="detailSectionIndex" readonly>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
+
+                        <%-- 🚨 [핵심 수정] 운송장 상태 필드와 버튼을 포함할 컨테이너 --%>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>운송장 상태</label>
+                                <div class="input-group" id="waybillActionGroup">
+                                    <input type="text" class="form-control" id="detailSiWaybillStatus" readonly>
+                                    <%-- 버튼은 JS가 여기에 동적으로 추가됩니다. --%>
+                                </div>
+                            </div>
+                        </div>
+                        <%-- 🚨 [수정 끝] --%>
+
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>승인일 (approved_at)</label>
                                 <input type="text" class="form-control" id="detailApprovedAt" readonly>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>운송장 상태 (si_waybill_status)</label>
-                                <input type="text" class="form-control" id="detailSiWaybillStatus" readonly>
-                            </div>
-                        </div>
                     </div>
                 </div>
-                <div class="card-action">
-                    <a href="${contextPath}/instructions" class="btn btn-secondary">목록으로</a>
+                <div class="card-action d-flex justify-content-between">
+                    <a href="${contextPath}/outbound/instructions" id="backToListBtn" class="btn btn-secondary">목록으로</a>
+                    <div>
+                        <%-- [신규] 이전/다음 버튼 영역 --%>
+                        <a href="#" id="prevBtn" class="btn btn-outline-primary disabled">
+                            <i class="fa fa-arrow-left"></i> 이전
+                        </a>
+                        <a href="#" id="nextBtn" class="btn btn-outline-primary ms-2 disabled">
+                            다음 <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">운송장 관리</h4>
-                </div>
-                <div id="waybillContainer" class="card-body">
-                    <p>운송장 정보를 불러오는 중입니다...</p>
-                </div>
-            </div>
+            <%-- 🚨 [제거] 하단의 운송장 관리 카드 제거 --%>
+
         </div>
     </div>
 </div>
 
+<%-- 운송장 조회 모달 (WaybillDetailDTO 필드 확장 반영) --%>
 <div class="modal fade" id="waybillModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">운송장 정보 (번호: <span id="modalWaybillId">...</span>)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-center">
-                <div class="form-group">
-                    <label>택배사 (driver_name)</label>
-                    <input type="text" class="form-control" id="modalDriverName" readonly>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>운송 상태</label>
+                            <input type="text" class="form-control" id="modalWaybillStatus" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>등록일</label>
+                            <input type="text" class="form-control" id="modalCreatedAt" readonly>
+                        </div>
+                    </div><div class="col-md-6">
+                    <div class="form-group">
+                        <label>배송 완료일</label>
+                        <input type="text" class="form-control" id="modalCompletedAt" readonly>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>차량 번호 (vehicle_id)</label>
-                    <input type="text" class="form-control" id="modalVehicleId" readonly>
+                <hr>
+                <h5 class="mb-3">배송 정보 (물품)</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>물품 이름</label>
+                            <input type="text" class="form-control" id="modalItemName" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>수량</label>
+                            <input type="text" class="form-control" id="modalItemQuantity" readonly>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>배송 상태 (waybill_status)</label>
-                    <input type="text" class="form-control" id="modalWaybillStatus" readonly>
+                <h5 class="mb-3">배송 정보 (출고지)</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>출고 창고 주소</label>
+                            <input type="text" class="form-control" id="modalWarehouseAddress" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>출고 창고 우편번호</label>
+                            <input type="text" class="form-control" id="modalWarehouseZipCode" readonly>
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mb-3 mt-3">배송 정보 (도착지)</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>도착지 우편번호</label>
+                            <input type="text" class="form-control" id="modalOrZipCode" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label>도착지 주소</label>
+                            <input type="text" class="form-control" id="modalOrStreetAddress" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>도착지 상세 주소</label>
+                            <input type="text" class="form-control" id="modalOrDetailedAddress" readonly>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h5 class="mb-3">운송 차량 정보</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>운전자명 (driver_name)</label>
+                            <input type="text" class="form-control" id="modalDriverName" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>운전자 연락처</label>
+                            <input type="text" class="form-control" id="modalDriverPhone" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>차량 번호 (vehicle_id)</label>
+                            <input type="text" class="form-control" id="modalVehicleId" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>차량 유형</label>
+                            <input type="text" class="form-control" id="modalVehicleType" readonly>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mt-3">
+                <div class="mt-4 text-center">
                     <label>배송 추적 QR 코드</label>
-                    <div id="qrcode" class="mt-2 d-flex justify-content-center">
-                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    <div id="qrcode" class="mt-2 d-flex justify-content-center"></div>
+                    <br>
+                    <br>
+                    <br>
                 </div>
             </div>
             <div class="modal-footer">
@@ -126,151 +249,240 @@
 
 <%@ include file="../includes/footer.jsp" %>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
     // --- JSTL 변수 ---
     const contextPath = "${contextPath}";
-
     // --- JS 전역 변수 ---
-    let currentSiIndex = null; // 지시서 ID (si_index)
+    let currentSiIndex = null;
+    let currentListContext = null; // 쿼리스트링 저장용
 
     // [단순화] ADMIN API 경로만 정의 (ADMIN 전용 페이지)
-    const API_BASE = `${contextPath}/api/admin/outbound`;
+    const API_BASE = "${contextPath}/api/admin/outbound";
 
-    // --- [핵심] 페이지 로드 ---
-    document.addEventListener("DOMContentLoaded", function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        // [경로 수정] URL 쿼리 파라미터가 아닌 경로 변수에서 ID를 가져와야 할 수도 있습니다.
-        // OutboundViewController가 "/instruction/{si_index}" 이므로,
-        // 이 페이지로 넘어오기 전 URL에서 ID를 추출하거나,
-        // 여기서는 JSP가 렌더링될 때 서버로부터 ID를 받아오는 것으로 가정합니다.
-        // 예: const id = "${si_index}"; (컨트롤러가 Model에 si_index를 전달했다면)
+    /**
+     * LocalDateTime 배열을 JavaScript Date 객체로 변환
+     */
+    function parseLocalDateTime(arr) {
+        if (!arr) return null;
 
-        // 일단 URL 쿼리 파라미터(id=...)로 ID를 가져오는 것으로 유지합니다.
-        const id = urlParams.get("id");
+        // 5개면 초(seconds)를 0으로, 6개 이상이면 배열 값 사용
+        const year = arr[0];
+        const month = arr[1] - 1; // 월은 0부터 시작
+        const day = arr[2];
+        const hour = arr[3] || 0;
+        const minute = arr[4] || 0;
+        const second = arr[5] || 0; // 5개일 때 'undefined'가 되므로 0으로 처리
 
-        if (!id) {
-            alert("잘못된 접근입니다. (지시서 ID 없음)");
-            location.href = `${contextPath}/instructions`;
-            return;
+        if (arr.length >= 5) { // 최소 5개(년~분)는 있어야 함
+            return new Date(year, month, day, hour, minute, second);
         }
-        currentSiIndex = id;
-        loadPageData(id);
-    });
+
+        return null; // 5개 미만이면 실패
+    }
+
+    /**
+     * 날짜 포맷팅
+     */
+    function formatDateTime(arr) {
+        const dateObj = parseLocalDateTime(arr);
+        return dateObj ? dateObj.toLocaleString("ko-KR") : "N/A";
+    }
 
     /**
      * 지시서 상세 및 운송장 정보를 병렬로 로드합니다.
      * @param {string} id - 지시서 ID (si_index)
+     * @param {string} listContextQuery - 목록 검색 조건 쿼리스트링
      */
-    async function loadPageData(id) {
+    async function loadPageData(id, listContextQuery) {
         try {
-            // [API 경로 수정] 컨트롤러 경로(/instruction/{id}) 반영
-            const instructionPromise = axios.get(`${API_BASE}/instruction/${id}`);
+            // 🚨 [수정] 쿼리스트링 안정화 (빈 검색 필터 제거)
+            const urlParams = new URLSearchParams(listContextQuery);
+            const safeQuery = new URLSearchParams();
 
-            // [API 경로 수정] 컨트롤러 경로(/waybill/{si_index}) 반영
-            const waybillPromise = axios.get(`${API_BASE}/waybill/${id}`).catch(e => null);
+            // 유효한 값만 유지하여 400 에러를 방지
+            urlParams.forEach((value, key) => {
+                if (value !== null && value !== '') {
+                    safeQuery.set(key, value);
+                }
+            });
+
+            const finalQueryString = safeQuery.toString().length > 0 ? '?' + safeQuery.toString() : '';
+
+
+            // Instruction 상세 정보 로드 (정제된 쿼리스트링 사용)
+            const instructionPromise = axios.get(API_BASE + "/instruction/" + id + finalQueryString);
+
+            // Waybill 정보 로드 (si_index만으로 조회)
+            const waybillPromise = axios.get(API_BASE + "/waybill/" + id).catch(e => null);
 
             const [instructionRes, waybillRes] = await Promise.all([instructionPromise, waybillPromise]);
 
-            // --- 1. 상세 정보 렌더링 (DTO 속성 반영) ---
             const instruction = instructionRes.data; // ShippingInstructionDetailDTO
+
+            // --- 1. 상세 정보 렌더링 (DTO 속성 반영) ---
             document.getElementById("detailSiIndex").textContent = instruction.si_index;
+            document.getElementById("detailOrIndex").value = instruction.or_index;
+            document.getElementById("detailUserIndex").value = instruction.user_index;
+            document.getElementById("detailItemIndex").value = instruction.item_index;
             document.getElementById("detailItemName").value = instruction.item_name;
             document.getElementById("detailOrQuantity").value = instruction.or_quantity;
             document.getElementById("detailWarehouseIndex").value = instruction.warehouse_index;
             document.getElementById("detailSectionIndex").value = instruction.section_index;
-            document.getElementById("detailApprovedAt").value = new Date(instruction.approved_at).toLocaleString("ko-KR");
+            document.getElementById("detailApprovedAt").value = formatDateTime(instruction.approved_at);
+
+            // 🚨 [수정] 운송장 상태 필드에 값을 먼저 할당하고, 버튼은 renderWaybillUI에서 처리
             document.getElementById("detailSiWaybillStatus").value = instruction.si_waybill_status;
 
-            // --- 2. 운송장 UI 렌더링 ---
+            // --- 2. 이전/다음 버튼 렌더링 ---
+            renderPrevNext(instruction.previousPostIndex, instruction.nextPostIndex, finalQueryString);
+
+            // --- 3. 운송장 UI 렌더링 (인라인 버튼 로직 실행) ---
             const waybill = waybillRes ? waybillRes.data : null; // WaybillDetailDTO
-            renderWaybillUI(instruction.si_waybill_status, waybill);
+            renderWaybillUI(instruction.si_waybill_status, waybill, instruction.si_index);
 
         } catch (error) {
             console.error("Page loading failed:", error);
-            alert("데이터 로딩에 실패했습니다.");
-            document.getElementById("waybillContainer").innerHTML = `<p class="text-danger">데이터 로딩 실패</p>`;
+            alert("데이터 로딩에 실패했습니다. (서버 오류 또는 세션 만료 확인 필요)");
+            // 실패 시, 최소한 상태 필드에는 에러 상태를 표시
+            document.getElementById("detailSiWaybillStatus").value = '로딩 실패';
         }
     }
 
     /**
-     * 상태와 운송장 유무에 따라 운송장 UI를 동적 렌더링
-     * @param {string} status - 지시서의 운송장 상태 (si_waybill_status)
-     * @param {object} waybill - 운송장 상세 정보 (있거나 null)
+     * 이전/다음 버튼 렌더링
      */
-    function renderWaybillUI(status, waybill) {
-        const container = document.getElementById("waybillContainer");
+    function renderPrevNext(prevId, nextId, listContextQuery) {
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        const baseURL = contextPath + "/outbound/instruction/";
+
+        if (prevId) {
+            prevBtn.href = baseURL + prevId + listContextQuery;
+            prevBtn.classList.remove("disabled");
+        } else {
+            prevBtn.href = "#";
+            prevBtn.classList.add("disabled");
+        }
+
+        if (nextId) {
+            nextBtn.href = baseURL + nextId + listContextQuery;
+            nextBtn.classList.remove("disabled");
+        } else {
+            nextBtn.href = "#";
+            nextBtn.classList.add("disabled");
+        }
+    }
+
+    /**
+     * 🚨 [핵심 수정] 상태와 운송장 유무에 따라 운송장 UI 버튼을 인라인으로 동적 렌더링
+     */
+    function renderWaybillUI(status, waybill, si_index) {
+        // 🚨 버튼을 삽입할 input-group 요소
+        const container = document.getElementById("waybillActionGroup");
+
+        // 기존 버튼(만약 있다면)을 초기화
+        container.querySelectorAll('.input-group-text').forEach(el => el.remove());
 
         if (waybill) {
-            // [렌더링 1]: 운송장 있음 -> 조회 버튼 렌더링
-            container.innerHTML = `
-                <div class="form-group">
-                    <label>운송장 번호 (waybill_id)</label>
-                    <input type="text" class="form-control" value="${waybill.waybill_id}" readonly>
-                </div>
-                <button type="button" id="showWaybillModalBtn" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#waybillModal">
-                    운송장 조회 (QR)
-                </button>
-            `;
+            // [렌더링 1]: 운송장 있음 -> 조회 버튼 추가
+            const buttonHtml =
+                '<button type="button" id="showWaybillModalBtn" class="btn btn-info input-group-text" data-bs-toggle="modal" data-bs-target="#waybillModal">' +
+                '    상세 조회 (QR)' +
+                '</button>';
+            container.insertAdjacentHTML('beforeend', buttonHtml);
 
-            // [신규] 모달이 열릴 때 구글 차트 API로 QR코드 생성 이벤트 바인딩
+            // 모달 이벤트 바인딩 (기존 로직 유지)
             document.getElementById("showWaybillModalBtn").addEventListener("click", () => {
-                // [DTO 반영] 모달 내부 필드 채우기 (WaybillDetailDTO 기준)
+                // --- 모달 내부 필드 채우기 (WaybillDetailDTO 기준) ---
                 document.getElementById("modalWaybillId").textContent = waybill.waybill_id;
-                document.getElementById("modalDriverName").value = waybill.driver_name;
-                document.getElementById("modalVehicleId").value = waybill.vehicle_id;
                 document.getElementById("modalWaybillStatus").value = waybill.waybill_status;
+                document.getElementById("modalCreatedAt").value = formatDateTime(waybill.created_at);
+                document.getElementById("modalCompletedAt").value = formatDateTime(waybill.completed_at) || 'N/A';
 
-                // QR 코드 생성 (Google Chart API 사용)
+                document.getElementById("modalItemName").value = waybill.item_name;
+                document.getElementById("modalItemQuantity").value = waybill.or_quantity;
+
+                document.getElementById("modalWarehouseAddress").value = waybill.warehouse_address;
+                document.getElementById("modalWarehouseZipCode").value = waybill.warehouse_zip_code;
+                document.getElementById("modalOrZipCode").value = waybill.or_zip_code;
+                document.getElementById("modalOrStreetAddress").value = waybill.or_street_address;
+                document.getElementById("modalOrDetailedAddress").value = waybill.or_detailed_address;
+
+                document.getElementById("modalDriverName").value = waybill.driver_name;
+                document.getElementById("modalDriverPhone").value = waybill.driver_phone;
+                document.getElementById("modalVehicleId").value = waybill.vehicle_id;
+                document.getElementById("modalVehicleType").value = waybill.vehicle_type;
+
+                // QR 코드 생성 (qrcode.js 사용)
                 const qrDiv = document.getElementById("qrcode");
-                qrDiv.innerHTML = ""; // 기존 QR 삭제
+                qrDiv.innerHTML = ""; // 기존 QR 및 캔버스 초기화
 
-                // QR에 담을 URL (운송장 ID 사용)
-                const trackingUrl = `https://track.example.com/${waybill.waybill_id}`; // (실제 배송추적 URL로 변경)
-                const googleQrUrl = `https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(trackingUrl)}&choe=UTF-8`;
-
-                // <img> 태그 생성 및 삽입
-                const qrImg = document.createElement("img");
-                qrImg.src = googleQrUrl;
-                qrImg.alt = "QR Code";
-                qrImg.width = 150;
-                qrImg.height = 150;
-                qrDiv.appendChild(qrImg);
-            });
-
-        } else if (status === 'PENDING') {
-            // [렌더링 2]: 운송장 없음 + 상태가 PENDING -> 등록 폼 렌더링
-            container.innerHTML = `
-                <form id="waybillRegisterForm">
-                    <div class="form-group">
-                        <label>운송장을 등록하시겠습니까?</label>
-                        <p class="text-muted">등록 버튼 클릭 시, 연결된 배차 정보로 운송장이 자동 생성됩니다.</p>
-                    </div>
-                    <button type="button" id="registerWaybillBtn" class="btn btn-primary">운송장 등록</button>
-                </form>
-            `;
-
-            // [AXIOS]: 등록 버튼 이벤트 바인딩 (ADMIN API_BASE 사용)
-            document.getElementById("registerWaybillBtn").addEventListener("click", function() {
-                // [DTO 반영] WaybillDTO는 si_index만 필요
-                const data = {
-                    si_index: currentSiIndex
+// 🚨 [핵심 수정]: 필요한 필드만 포함하는 새로운 객체 생성
+                const essentialWaybillData = {
+                    waybillId: waybill.waybill_id, // 운송장 고유 번호
                 };
 
-                // [API 경로 수정] 컨트롤러 경로(/waybill) 반영
-                axios.post(`${API_BASE}/waybill`, data, {
+                new QRCode("qrcode", { // 🚨 DOM 객체(qrDiv) 대신 ID 문자열("qrcode") 사용
+                    text: essentialWaybillData,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+// qrDiv.style.textAlign = 'center'; // 이미 중앙 정렬되어 있으므로 필요 없습니다.
+            });
+        } else if (status === 'PENDING') {
+            // [렌더링 2]: 운송장 없음 + 상태가 PENDING -> 등록 버튼 추가
+            const buttonHtml =
+                '<button type="button" id="registerWaybillBtn" class="btn btn-primary input-group-text">운송장 등록</button>';
+            container.insertAdjacentHTML('beforeend', buttonHtml);
+
+            // 등록 버튼 이벤트 바인딩
+            document.getElementById("registerWaybillBtn").addEventListener("click", function() {
+                const data = { si_index: si_index }; // currentSiIndex 사용
+
+                axios.post(API_BASE + "/waybill", data, {
                     headers: { 'Content-Type': 'application/json' }
                 })
                     .then(response => {
                         alert("운송장이 등록되었습니다.");
-                        location.reload(); // 페이지 새로고침
+                        location.reload();
                     })
                     .catch(error => alert("등록 실패: " + (error.response?.data?.message || "서버 오류")));
             });
-
-        } else {
-            // [렌더링 3]: 그 외 상태 (이미 완료됨)
-            container.innerHTML = `<p>운송장 처리가 이미 완료되었습니다. (상태: ${status})</p>`;
         }
+        // APPROVED 상태인데 waybill이 null일 수는 없으므로, APPROVED 상태는 버튼을 추가하지 않습니다.
     }
+
+    // --- [핵심] 페이지 로드 ---
+    document.addEventListener("DOMContentLoaded", function() {
+        const id = "${si_index}";
+        // 🚨 [수정] URL의 쿼리스트링 저장 (뒤로가기/이전글/다음글에 사용됨)
+        const listContextQuery = window.location.search;
+        currentListContext = listContextQuery;
+
+        if (!id || id === "0") {
+            alert("잘못된 접근입니다. (지시서 ID 없음)");
+            location.href = "${contextPath}/outbound/instructions";
+            return;
+        }
+        currentSiIndex = id;
+
+        // 🚨 [수정] 목록으로 돌아가기 버튼의 href 속성 설정
+        const backToListBtn = document.getElementById("backToListBtn");
+        if (backToListBtn) {
+            backToListBtn.href = contextPath + "/outbound/instructions" + currentListContext;
+        }
+        const listBreadcrumb = document.getElementById("listBreadcrumb");
+        if (listBreadcrumb) {
+            listBreadcrumb.href = contextPath + "/outbound/instructions" + currentListContext;
+        }
+
+        loadPageData(id, currentListContext);
+    });
 </script>
 <%@ include file="../includes/end.jsp" %>

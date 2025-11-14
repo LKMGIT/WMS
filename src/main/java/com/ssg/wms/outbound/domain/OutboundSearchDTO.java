@@ -14,10 +14,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OutboundSearchDTO {
+    private int page;
+    private int amount;
+
     private LocalDate start_date;
     private LocalDate end_date;
-    private EnumStatus approval_status;
     private EnumStatus dispatch_status;
+    private EnumStatus approval_status;
+    private EnumStatus si_waybill_status;
     private String sort;
     // keyword 2개가 타입과 keyword로 바뀜
     private String type;

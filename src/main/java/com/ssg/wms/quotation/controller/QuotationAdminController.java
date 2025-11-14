@@ -31,7 +31,7 @@ public class QuotationAdminController {
     public Map<String, Object> getQuotationRequests(
             @ModelAttribute Criteria criteria,
             @ModelAttribute QuotationSearchDTO quotationSearchDTO) {
-
+        log.info(criteria.getPageNum());
         List<QuotationRequestDTO> list = quotationService.getQuotationRequestList(criteria, quotationSearchDTO);
         int total = quotationService.getQuotationRequestTotalCount(quotationSearchDTO);
 
@@ -50,11 +50,9 @@ public class QuotationAdminController {
     @GetMapping("/request/{qrequest_index}")
     public ResponseEntity<QuotationDetailDTO> getQuotationRequest(
             @PathVariable("qrequest_index") Long qrequest_index,
-            // @SessionAttribute("loginAdminId") Long adminId
-            @ModelAttribute QuotationSearchDTO quotationSearchDTO
+            @ModelAttribute QuotationSearchDTO quotationSearchDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 Id
-        Long adminId = 1L;
 
         QuotationDetailDTO detailDTO = quotationService.getQuotationRequestDetailById(quotationSearchDTO, qrequest_index);
         if (detailDTO == null) {
@@ -69,14 +67,12 @@ public class QuotationAdminController {
     @PostMapping("/request/{qrequest_index}/response")
     public ResponseEntity<QuotationResponseDTO> registerQuotationResponse(
             @PathVariable("qrequest_index") Long qrequest_index,
-            // @SessionAttribute("loginAdminId") Long adminId
-            @RequestBody QuotationResponseDTO quotationResponseDTO
+            @RequestBody QuotationResponseDTO quotationResponseDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 Id
-        Long adminId = 1L;
 
         quotationResponseDTO.setQrequest_index(qrequest_index);
-        quotationResponseDTO.setAdmin_index(adminId);
+        quotationResponseDTO.setAdmin_index(adminIndex);
 
         boolean result = quotationService.registerQuotationResponse(quotationResponseDTO);
 
@@ -95,14 +91,12 @@ public class QuotationAdminController {
     @PutMapping("/response/{qresponse_index}")
     public ResponseEntity<QuotationResponseDTO> modifyQuotationResponse(
             @PathVariable("qresponse_index") Long qresponse_index,
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @RequestBody QuotationResponseDTO quotationResponseDTO
+            @RequestBody QuotationResponseDTO quotationResponseDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        //테스트용 id
-        Long adminId = 1L;
 
         quotationResponseDTO.setQresponse_index(qresponse_index);
-        quotationResponseDTO.setAdmin_index(adminId); // 서비스단에서 검증용
+        quotationResponseDTO.setAdmin_index(adminIndex); // 서비스단에서 검증용
 
         boolean result = quotationService.modifyQuotationResponse(quotationResponseDTO);
 
@@ -119,11 +113,9 @@ public class QuotationAdminController {
      */
     @PutMapping("/response/{qresponse_index}:delete")
     public ResponseEntity<QuotationResponseDTO> removeQuotationResponse( // 삭제는 boolean Map 반환
-                                                                         // @SessionAttribute("loginAdminId") Long adminId,
-                                                                         @PathVariable("qresponse_index") Long qresponse_index
+                                                                         @PathVariable("qresponse_index") Long qresponse_index,
+                                                                         @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        //테스트용 id
-        Long adminId = 1L;
 
         boolean result = quotationService.removeQuotationResponse(qresponse_index);
         if (!result) {
@@ -156,14 +148,12 @@ public class QuotationAdminController {
     @PostMapping("/comment/{qrequest_index}")
     public ResponseEntity<QuotationCommentDTO> registerQuotationComment(
             @PathVariable("qrequest_index") Long qrequest_index,
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @RequestBody QuotationCommentDTO quotationCommentDTO
+            @RequestBody QuotationCommentDTO quotationCommentDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트 위한
-        Long adminId = 1L;
 
         quotationCommentDTO.setQrequest_index(qrequest_index);
-        quotationCommentDTO.setAdmin_index(adminId);
+        quotationCommentDTO.setAdmin_index(adminIndex);
         quotationCommentDTO.setWriter_type(EnumStatus.ADMIN);
 
         boolean result = quotationService.registerQuotationComment(quotationCommentDTO);
@@ -178,11 +168,9 @@ public class QuotationAdminController {
     public ResponseEntity<QuotationCommentDTO> modifyQuotationComment(
             @PathVariable("qrequest_index") Long qrequest_index,
             @PathVariable("qcomment_index") Long qcomment_index,
-            // @SessionAttribute("loginAdminId") Long adminId
-            @RequestBody QuotationCommentDTO quotationCommentDTO
+            @RequestBody QuotationCommentDTO quotationCommentDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용
-        Long adminId = 1L;
 
         // 1. GET (검증)
         QuotationCommentDTO originalDTO = quotationService.getQuotationCommentById(qcomment_index);
@@ -191,13 +179,13 @@ public class QuotationAdminController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getAdmin_index(), adminId)) {
-            log.warn("Forbidden access attempt: Admin {} tried to delete qcomment {}", adminId, qrequest_index);
+        if (!Objects.equals(originalDTO.getAdmin_index(), adminIndex)) {
+            log.warn("Forbidden access attempt: Admin {} tried to delete qcomment {}", adminIndex, qrequest_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
 
         quotationCommentDTO.setQcomment_index(qcomment_index);
-        quotationCommentDTO.setAdmin_index(adminId); // 서비스단에서 검증용
+        quotationCommentDTO.setAdmin_index(adminIndex); // 서비스단에서 검증용
 
         boolean result = quotationService.modifyQuotationComment(quotationCommentDTO);
 
@@ -211,11 +199,9 @@ public class QuotationAdminController {
     @PutMapping("/comment/{qrequest_index}/{qcomment_index}:delete")
     public ResponseEntity<QuotationCommentDTO> removeQuotationComment(
             @PathVariable("qrequest_index") Long qrequest_index,
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @PathVariable("qcomment_index") Long qcomment_index
+            @PathVariable("qcomment_index") Long qcomment_index,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용
-        Long adminId = 1L;
 
         // 1. GET (검증)
         QuotationCommentDTO originalDTO = quotationService.getQuotationCommentById(qcomment_index);
@@ -224,8 +210,8 @@ public class QuotationAdminController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getAdmin_index(), adminId)) {
-            log.warn("Forbidden access attempt: Admin {} tried to delete qcomment {}", adminId, qcomment_index);
+        if (!Objects.equals(originalDTO.getAdmin_index(), adminIndex)) {
+            log.warn("Forbidden access attempt: Admin {} tried to delete qcomment {}", adminIndex, qcomment_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
 

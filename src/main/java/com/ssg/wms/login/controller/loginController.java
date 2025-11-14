@@ -36,10 +36,17 @@ public class loginController {
             case SUCCESS:
                 // 필요한 세션 정보 세팅
                 AdminDTO admin = adminService.getByAdminId(adminId).get();
+                session.setAttribute("loginAdmin", admin);
+
+                //내가 임의로 추가
+                session.setAttribute("loginAdminIndex", admin.getAdminIndex());
+
                 session.setAttribute("loginAdminId", admin.getAdminId());
                 session.setAttribute("loginAdminName", admin.getAdminName());
                 session.setAttribute("loginAdminStatus", admin.getAdminStatus());
-                return "redirect:/admin/user_list";
+                session.setAttribute("loginAdminRole", admin.getAdminRole());
+
+                return "redirect:/admin/dashboard";
 
             case NOT_FOUND:
                 rttr.addFlashAttribute("loginError", "존재하지 않는 아이디입니다.");

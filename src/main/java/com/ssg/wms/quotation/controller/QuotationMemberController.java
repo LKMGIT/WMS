@@ -54,13 +54,11 @@ public class QuotationMemberController {
      */
     @PostMapping("/request")
     public ResponseEntity<QuotationRequestDTO> registerQuotationRequest(
-            // @SessionAttribute("loginUserId") Long userId,
-            @RequestBody QuotationRequestDTO quotationRequestDTO
+            @RequestBody QuotationRequestDTO quotationRequestDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
-        quotationRequestDTO.setUser_index(userId);
+        quotationRequestDTO.setUser_index(userIndex);
         boolean result = quotationService.registerQuotationRequest(quotationRequestDTO);
 
         if (!result) {
@@ -77,11 +75,9 @@ public class QuotationMemberController {
     @GetMapping("/request/{qrequest_index}")
     public ResponseEntity<QuotationDetailDTO> getQuotationRequest(
             @PathVariable("qrequest_index") Long qrequest_index,
-            // @SessionAttribute("loginUserId") Long userId,
-            @ModelAttribute QuotationSearchDTO quotationSearchDTO
+            @ModelAttribute QuotationSearchDTO quotationSearchDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         QuotationDetailDTO detailDTO = quotationService.getQuotationRequestDetailById(quotationSearchDTO, qrequest_index);
 
@@ -90,8 +86,8 @@ public class QuotationMemberController {
         }
 
         // ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(detailDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to access quotation {}", userId, qrequest_index);
+        if (!Objects.equals(detailDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to access quotation {}", userIndex, qrequest_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
 
@@ -104,11 +100,9 @@ public class QuotationMemberController {
     @PutMapping("/request/{qrequest_index}")
     public ResponseEntity<QuotationRequestDTO> modifyQuotationRequest(
             @PathVariable("qrequest_index") Long qrequest_index,
-            // @SessionAttribute("loginUserId") Long userId,
-            @RequestBody QuotationRequestDTO quotationRequestDTO
+            @RequestBody QuotationRequestDTO quotationRequestDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         // 1. GET (검증)
         QuotationRequestDTO originalDTO = quotationService.getQuotationRequestById(qrequest_index);
@@ -117,14 +111,14 @@ public class QuotationMemberController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to modify quotation {}", userId, qrequest_index);
+        if (!Objects.equals(originalDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to modify quotation {}", userIndex, qrequest_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
 
         // 3. CUD
         quotationRequestDTO.setQrequest_index(qrequest_index);
-        quotationRequestDTO.setUser_index(userId);
+        quotationRequestDTO.setUser_index(userIndex);
         boolean result = quotationService.modifyQuotationRequest(quotationRequestDTO);
 
         if (!result) {
@@ -143,11 +137,9 @@ public class QuotationMemberController {
      */
     @PutMapping("/request/{qrequest_index}:delete")
     public ResponseEntity<QuotationRequestDTO> removeQuotationRequest(
-            // @SessionAttribute("loginUserId") Long userId,
-            @PathVariable("qrequest_index") Long qrequest_index
+            @PathVariable("qrequest_index") Long qrequest_index,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        // 테스트용 ID
-        Long userId = 1L;
 
         // 1. GET (검증)
         QuotationRequestDTO originalDTO = quotationService.getQuotationRequestById(qrequest_index);
@@ -156,8 +148,8 @@ public class QuotationMemberController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to delete quotation {}", userId, qrequest_index);
+        if (!Objects.equals(originalDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to delete quotation {}", userIndex, qrequest_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
         // ▲▲▲ 검증 끝 ▲▲▲
@@ -204,14 +196,12 @@ public class QuotationMemberController {
     @PostMapping("/comment/{qrequest_index}")
     public ResponseEntity<QuotationCommentDTO> registerQuotationComment(
             @PathVariable("qrequest_index") Long qrequest_index,
-            // @SessionAttribute("loginUserId") Long userId,
-            @RequestBody QuotationCommentDTO quotationCommentDTO
+            @RequestBody QuotationCommentDTO quotationCommentDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        //테스트용 ID
-        Long userId = 1L;
 
         quotationCommentDTO.setQrequest_index(qrequest_index);
-        quotationCommentDTO.setUser_index(userId);
+        quotationCommentDTO.setUser_index(userIndex);
         quotationCommentDTO.setWriter_type(EnumStatus.USER);
 
         boolean result = quotationService.registerQuotationComment(quotationCommentDTO);
@@ -229,11 +219,9 @@ public class QuotationMemberController {
     public ResponseEntity<QuotationCommentDTO> modifyQuotationComment(
             @PathVariable("qrequest_index") Long qrequest_index,
             @PathVariable("qcomment_index") Long qcomment_index,
-            // @SessionAttribute("loginUserId") Long userId,
-            @RequestBody QuotationCommentDTO quotationCommentDTO
+            @RequestBody QuotationCommentDTO quotationCommentDTO,
+            @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        //테스트용 ID
-        Long userId = 1L;
 
         // 1. GET (검증)
         QuotationCommentDTO originalDTO = quotationService.getQuotationCommentById(qcomment_index);
@@ -242,13 +230,13 @@ public class QuotationMemberController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to delete quotation {}", userId, qrequest_index);
+        if (!Objects.equals(originalDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to delete quotation {}", userIndex, qrequest_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
 
         quotationCommentDTO.setQcomment_index(qcomment_index);
-        quotationCommentDTO.setUser_index(userId);
+        quotationCommentDTO.setUser_index(userIndex);
 
         boolean result = quotationService.modifyQuotationComment(quotationCommentDTO);
 
@@ -264,12 +252,10 @@ public class QuotationMemberController {
      */
     @PutMapping("/comment/{qrequest_index}/{qcomment_index}:delete")
     public ResponseEntity<QuotationCommentDTO> removeQuotationComment( // 삭제는 boolean Map 반환
-                                                                       // @SessionAttribute("loginUserId") Long userId,
                                                                         @PathVariable("qrequest_index") Long qrequest_index,
-                                                                        @PathVariable("qcomment_index") Long qcomment_index
+                                                                        @PathVariable("qcomment_index") Long qcomment_index,
+                                                                       @SessionAttribute("loginUserIndex") Long userIndex
     ) {
-        //테스트용 ID
-        Long userId = 1L;
 
         // 1. GET (검증)
         QuotationCommentDTO originalDTO = quotationService.getQuotationCommentById(qcomment_index);
@@ -278,8 +264,8 @@ public class QuotationMemberController {
         }
 
         // 2. ▼▼▼ 본인 글 검증 ▼▼▼
-        if (!Objects.equals(originalDTO.getUser_index(), userId)) {
-            log.warn("Forbidden access attempt: User {} tried to delete qcomment {}", userId, qcomment_index);
+        if (!Objects.equals(originalDTO.getUser_index(), userIndex)) {
+            log.warn("Forbidden access attempt: User {} tried to delete qcomment {}", userIndex, qcomment_index);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
         }
 

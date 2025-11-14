@@ -2,6 +2,119 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssg.wms.warehouse.mappers">
+<mapper namespace="com.ssg.wms.warehouse.mappers.WarehouseMapper">
+    <resultMap id="WarehouseMap" type="com.ssg.wms.warehouse.domain.WarehouseDTO">
+        <id property="wIndex" column="warehouse_index"/>
+        <result property="wCode" column="warehouse_code"/>
+        <result property="wName" column="warehouse_name"/>
+        <result property="wSize" column="warehouse_size"/>
+        <result property="wCreatedAt" column="warehouse_createdAt"/>
+        <result property="wUpdatedAt" column="warehouse_updatedAt"/>
+        <result property="wLocation" column="warehouse_location"/>
+        <result property="wAddress" column="warehouse_address"/>
+        <result property="wZipcode" column="warehouse_zipcode"/>
+        <result property="wStatus" column="warehouse_status"/>
+    </resultMap>
 
+    <insert id="insertWarehouse" useGeneratedKeys="true" keyProperty="wIndex">
+        insert into warehouse(
+        warehouse_code,
+        warehouse_name,
+        warehouse_size,
+        warehouse_location,
+        warehouse_address,
+        warehouse_zipcode
+        ) values(
+        #{wCode},
+        #{wName},
+        #{wSize},
+        #{wLocation},
+        #{wAddress},
+        #{wZipcode}
+        )
+    </insert>
+
+    <select id="findWarehouse" resultMap="WarehouseMap">
+        select *
+        from warehouse
+        where warehouse_index = #{wIndex} and warehouse_status != 'CLOSED'
+        order by warehouse_index
+    </select>
+
+
+    <select id="getList" resultMap="WarehouseMap">
+        select *
+        from warehouse
+        <where>
+        warehouse_status != 'CLOSED'
+            <if test="typeStr != null and typeStr == 'code'">
+                and warehouse_code like concat('%', #{keyword}, '%')
+            </if>
+            <if test="typeStr != null and typeStr == 'name'">
+                and warehouse_name like concat('%', #{keyword}, '%')
+            </if>
+            <if test="typeStr != null and typeStr == 'location'">
+                and warehouse_location like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+        order by warehouse_index desc
+        limit #{skip}, #{amount}
+    </select>
+
+
+
+    <select id="getTotal" parameterType="com.ssg.wms.global.domain.Criteria" resultType="int">
+        select count(*)
+        from warehouse
+        <where>
+            warehouse_status != 'CLOSED'
+            <if test="typeStr != null and typeStr != '' and typeStr == 'name'">
+                and warehouse_name like concat('%', #{keyword}, '%')
+            </if>
+            <if test="typeStr != null and typeStr != '' and typeStr == 'code'">
+                and warehouse_code like concat('%', #{keyword}, '%')
+            </if>
+            <if test="typeStr != null and typeStr != '' and typeStr == 'location'">
+                and warehouse_location like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
+
+
+    <update id="updateWarehouse">
+        update warehouse set
+        warehouse_name = #{wName},
+        warehouse_location = #{wLocation},
+        warehouse_address = #{wAddress},
+        warehouse_zipcode = #{wZipcode},
+        warehouse_status = #{wStatus}
+        where warehouse_index = #{wIndex}
+    </update>
+
+    <update id="deactiveWarehouse">
+        update warehouse
+        set warehouse_status = 'CLOSED'
+        where warehouse_index = #{wIndex}
+    </update>
+
+    <select id="getNextCode" resultType="int">
+        select coalesce(max(warehouse_index), 0) + 1
+        from warehouse
+    </select>
+
+    <select id="isDuplicate" resultType="int">
+        SELECT COUNT(*)
+        FROM warehouse
+        WHERE warehouse_name = #{wName}
+        OR warehouse_address = #{wAddress}
+    </select>
+
+    <select id="getUsedCapacity" resultType="int">
+        SELECT
+        COALESCE(SUM(i.item_volume * inv.inven_quantity), 0)
+        FROM warehouse w
+        LEFT JOIN inventory inv ON w.warehouse_index = inv.warehouse_index
+        LEFT JOIN items i ON inv.item_index = i.item_index
+        WHERE w.warehouse_index = #{wIndex}
+    </select>
 </mapper>

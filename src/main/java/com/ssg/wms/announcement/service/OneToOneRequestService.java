@@ -15,4 +15,7 @@ public interface OneToOneRequestService {
 
     /** 관리자의 1:1 문의 삭제 */
     boolean deleteAdminRequest(Integer requestIndex, Long adminId);
+
+    /** [추가] 1:1 문의 상세 조회 (관리자) */
+    OneToOneRequestDTO getAdminRequest(Integer requestIndex);
 }

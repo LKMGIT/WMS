@@ -44,11 +44,9 @@ public class OutboundAdminController {
     @GetMapping("/request/{or_index}")
     public ResponseEntity<OutboundRequestDetailDTO> getOutboundRequestDetail(
             @PathVariable("or_index") Long or_index,
-            @ModelAttribute OutboundSearchDTO outboundSearchDTO // (추가) 목록의 검색 조건
-            // ,@SessionAttribute("loginUserId") Long userId
+            @ModelAttribute OutboundSearchDTO outboundSearchDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        Long adminId = 1L;
-
         // (수정) Service 호출 시 searchDTO를 넘겨줌
         OutboundRequestDetailDTO requestDTO = outboundService.getOutboundRequestDetailById(outboundSearchDTO, or_index);
 
@@ -64,14 +62,12 @@ public class OutboundAdminController {
     @PutMapping("/request/{or_index}/reject")
     public ResponseEntity<OutboundRequestDTO> rejectOutboundRequest(
             @PathVariable("or_index") Long or_index,
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @RequestBody OutboundResponseRegisterDTO responseRegisterDTO
+            @RequestBody OutboundResponseRegisterDTO responseRegisterDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         responseRegisterDTO.setOr_index(or_index);
-        responseRegisterDTO.setAdmin_index(adminId);
+        responseRegisterDTO.setAdmin_index(adminIndex);
 
         boolean result = outboundService.rejectOutboundRequest(responseRegisterDTO);
         if(!result) {
@@ -88,14 +84,12 @@ public class OutboundAdminController {
     @PutMapping("/request/{or_index}/approval")
     public ResponseEntity<OutboundRequestDTO> approveOutboundRequest(
             @PathVariable("or_index") Long or_index,
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @RequestBody OutboundResponseRegisterDTO responseRegisterDTO
+            @RequestBody OutboundResponseRegisterDTO responseRegisterDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         responseRegisterDTO.setOr_index(or_index);
-        responseRegisterDTO.setAdmin_index(adminId);
+        responseRegisterDTO.setAdmin_index(adminIndex);
 
         boolean result = outboundService.approveOutboundRequest(responseRegisterDTO);
         if(!result) {
@@ -116,7 +110,7 @@ public class OutboundAdminController {
             @ModelAttribute Criteria criteria,
             @ModelAttribute OutboundSearchDTO outboundSearchDTO) {
 
-        List<ShippingInstructionDTO> list = outboundService.getShippingInstructionList(criteria, outboundSearchDTO);
+        List<ShippingInstructionDetailDTO> list = outboundService.getShippingInstructionList(criteria, outboundSearchDTO);
         int total = outboundService.getShippingInstructionTotalCount(outboundSearchDTO);
         PageDTO pageDTO = new PageDTO(criteria, total);
 
@@ -130,11 +124,9 @@ public class OutboundAdminController {
     @GetMapping("/instruction/{si_index}")
     public ResponseEntity<ShippingInstructionDetailDTO> getShippingInstructionDetail(
             @PathVariable("si_index") Long si_index,
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @ModelAttribute OutboundSearchDTO outboundSearchDTO
+            @ModelAttribute OutboundSearchDTO outboundSearchDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         ShippingInstructionDetailDTO detailDTO = outboundService.getShippingInstructionDetailById(outboundSearchDTO, si_index);
         if (detailDTO == null) {
@@ -147,24 +139,24 @@ public class OutboundAdminController {
      * 출고지시서 삭제 (관리자) - PUT (Soft Delete)
      * (삭제는 ReplyController.delete()의 boolean Map 반환)
      */
-    @PutMapping("/instruction/{si_index}:delete")
-    public ResponseEntity<ShippingInstructionDTO> removeShippingInstruction(
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @PathVariable("si_index") Long si_index
-    ) {
-        // 테스트용 ID
-        Long adminId = 1L;
-
-        boolean result = outboundService.removeShippingInstruction(si_index);
-
-        if (!result) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-        // 4. GET (BoardController 패턴)
-        ShippingInstructionDTO deletedDTO = outboundService.getShippingInstructionById(si_index);
-        return ResponseEntity.ok(deletedDTO);
-    }
+//    @PutMapping("/instruction/{si_index}:delete")
+//    public ResponseEntity<ShippingInstructionDTO> removeShippingInstruction(
+//            // @SessionAttribute("loginAdminId") Long adminId,
+//            @PathVariable("si_index") Long si_index
+//    ) {
+//        // 테스트용 ID
+//        Long adminId = 1L;
+//
+//        boolean result = outboundService.removeShippingInstruction(si_index);
+//
+//        if (!result) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//
+//        // 4. GET (BoardController 패턴)
+//        ShippingInstructionDTO deletedDTO = outboundService.getShippingInstructionById(si_index);
+//        return ResponseEntity.ok(deletedDTO);
+//    }
 
     // === 배차 관리 (관리자) ===
 
@@ -174,11 +166,9 @@ public class OutboundAdminController {
      */
     @GetMapping("/dispatch/available/{or_index}")
     public ResponseEntity<List<AvailableDispatchDTO>> getAvailableDispatch(
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @PathVariable("or_index") Long or_index
+            @PathVariable("or_index") Long or_index,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         List<AvailableDispatchDTO> list = outboundService.getAvailableDispatch(or_index);
         return ResponseEntity.ok(list);
@@ -191,11 +181,9 @@ public class OutboundAdminController {
      */
     @PostMapping("/dispatch")
     public ResponseEntity<DispatchDTO> registerDispatch(
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @RequestBody DispatchDTO dispatchDTO
+            @RequestBody DispatchDTO dispatchDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         boolean result = outboundService.registerDispatch(dispatchDTO);
 
@@ -211,11 +199,9 @@ public class OutboundAdminController {
      */
     @GetMapping("/dispatch/{or_index}")
     public ResponseEntity<DispatchDetailDTO> getDispatchDetail(
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @PathVariable("or_index") Long or_index
+            @PathVariable("or_index") Long or_index,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         DispatchDetailDTO detailDTO = outboundService.getDispatchById(or_index);
         if (detailDTO == null) {
@@ -230,11 +216,9 @@ public class OutboundAdminController {
     @PutMapping("/dispatch/{dispatch_index}")
     public ResponseEntity<DispatchDTO> modifyDispatch(
             @PathVariable("dispatch_index") Long dispatch_index,
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @RequestBody DispatchDTO dispatchDTO
+            @RequestBody DispatchDTO dispatchDTO,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         dispatchDTO.setDispatch_index(dispatch_index);
         boolean result = outboundService.modifyDispatch(dispatchDTO);
@@ -253,11 +237,9 @@ public class OutboundAdminController {
      */
     @PutMapping("/dispatch/{dispatch_index}:delete")
     public ResponseEntity<DispatchDTO> removeDispatch(
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @PathVariable("dispatch_index") Long dispatch_index
+            @PathVariable("dispatch_index") Long dispatch_index,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         boolean result = outboundService.removeDispatch(dispatch_index);
         if (!result) {
@@ -277,11 +259,9 @@ public class OutboundAdminController {
      */
     @PostMapping("/waybill")
     public ResponseEntity<WaybillDetailDTO> registerWaybill(
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @RequestBody WaybillDTO waybillDTO // DTO로 받음
+            @RequestBody WaybillDTO waybillDTO, // DTO로 받음
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         boolean result = outboundService.registerWaybill(waybillDTO.getSi_index());
 
@@ -299,11 +279,9 @@ public class OutboundAdminController {
      */
     @GetMapping("/waybill/{si_index}")
     public ResponseEntity<WaybillDetailDTO> getWaybillDetail(
-            // @SessionAttribute("loginAdminId") Long adminId,
-            @PathVariable("si_index") Long si_index
+            @PathVariable("si_index") Long si_index,
+            @SessionAttribute("loginAdminIndex") Long adminIndex
     ) {
-        // 테스트용 ID
-        Long adminId = 1L;
 
         WaybillDetailDTO detailDTO = outboundService.getWaybillDetail(si_index);
         if (detailDTO == null) {
